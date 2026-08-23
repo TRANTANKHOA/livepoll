@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isDocCreator(pollData) {
+      return isAuthenticated() && (request.auth.uid == pollData.creatorId || pollData.creatorId == null);
+    }
+
+    // Rules for 'polls' collection
+    match /polls/{pollId} {
+      // Anyone can read polls (for sharing codes & public access)
+      allow read: if true;
+      
+      // Creating or updating a poll: allow creation with valid structure
+      allow create: if request.resource.data.code is string 
+                    && request.resource.data.title is string;
+                    
+      // Only author or open poll updates (e.g. closing poll)
+      allow update: if isDocCreator(resource.data) || !resource.data.isClosed;
+      
+      // Deleting a poll requires authenticated creator
+      allow delete: if isDocCreator(resource.data);
+
+      // Subcollection 'votes'
+      match /votes/{voteId} {
+        // Anyone can view poll results / live tallies
+        allow read: if true;
+        
+        // Voting allowed if poll is open
+        allow create, update: if request.resource.data.pollId == pollId
+                              && request.resource.data.optionId is string;
+                              
+        // Voter or poll creator can delete vote
+        allow delete: if isAuthenticated() && (request.auth.uid == resource.data.voterId);
+      }
+    }
+  }
+}

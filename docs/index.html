@@ -1058,10 +1058,11 @@
         <li><a href="#demo">Live Demo</a></li>
         <li><a href="#templates">Templates</a></li>
         <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#production">🚀 Production</a></li>
       </ul>
       <div>
-        <a href="#architecture" class="header-cta-btn">
-          ⭐ Architecture
+        <a href="#production" class="header-cta-btn">
+          📦 Deploy Guide
         </a>
       </div>
     </div>
@@ -1651,6 +1652,79 @@
           <p>17/17 Unit & JVM Tests Passed</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Production Deployment & Manual Setup Guide -->
+  <section class="section" id="production">
+    <div class="section-header">
+      <div class="section-subtitle">Release Engineering & Operations</div>
+      <h2 class="section-title">Production Deployment & Manual Setup</h2>
+      <p style="color: var(--on-surface-variant);">Complete end-to-end instructions, manual console setup, and automation scripts for deploying PulsePoll to Google Play Store and Firebase.</p>
+    </div>
+
+    <!-- Production Setup Grid -->
+    <div class="grid-3" style="margin-bottom: 2rem;">
+      <!-- Step 1: Firebase Console -->
+      <div class="feature-card">
+        <div class="feature-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">🔥</div>
+        <h3>1. Firebase & Auth Setup</h3>
+        <p>1. Create a Firebase project on the <b>Spark Free Tier</b> ($0/mo).<br>
+        2. Register package <code>com.aistudio.pollpulse.qxrvlz</code>.<br>
+        3. Enable <b>Google Sign-In</b> & <b>Cloud Firestore</b>.<br>
+        4. Place <code>google-services.json</code> into <code>/app</code>.</p>
+      </div>
+
+      <!-- Step 2: SHA-1 & Keystore -->
+      <div class="feature-card">
+        <div class="feature-icon-box" style="background: rgba(79, 70, 229, 0.15); color: var(--primary);">🔐</div>
+        <h3>2. Release Keystore & SHA-1</h3>
+        <p>1. Run <code>bash scripts/generate-release-keystore.sh</code>.<br>
+        2. Copy SHA-1 & SHA-256 certificate fingerprints.<br>
+        3. Add fingerprints in Firebase Console ➔ Project Settings.<br>
+        4. Configure signing in <code>gradle.properties</code>.</p>
+      </div>
+
+      <!-- Step 3: Google Play Bundle -->
+      <div class="feature-card">
+        <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">📦</div>
+        <h3>3. Play Store Rollout (.AAB)</h3>
+        <p>1. Run <code>bash scripts/build-release.sh</code>.<br>
+        2. Locate bundle at <code>app-release.aab</code>.<br>
+        3. Upload to Google Play Console Internal Testing track.<br>
+        4. Promote to Closed Beta and Production!</p>
+      </div>
+    </div>
+
+    <!-- Production Commands Code Snippet Box -->
+    <div style="background: #0F172A; border-radius: var(--radius-lg); padding: 1.5rem; color: #F8FAFC; box-shadow: var(--shadow-md);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #EF4444;"></span>
+          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #F59E0B;"></span>
+          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #10B981;"></span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94A3B8; margin-left: 0.5rem;">production-release-commands.sh</span>
+        </div>
+        <span style="font-size: 0.75rem; color: #38BDF8; font-weight: 700;">BASH SCRIPTS</span>
+      </div>
+
+      <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6; overflow-x: auto; color: #E2E8F0;"><code><span style="color: #64748B;"># 1. Generate 2048-bit Release Keystore & extract SHA-1/SHA-256 for Firebase</span>
+<span style="color: #38BDF8;">bash</span> scripts/generate-release-keystore.sh
+
+<span style="color: #64748B;"># 2. Deploy Firestore Security Rules</span>
+<span style="color: #38BDF8;">bash</span> scripts/deploy-firestore-rules.sh
+
+<span style="color: #64748B;"># 3. Build Google Play Bundle (.aab) and standalone signed Release APK</span>
+<span style="color: #38BDF8;">bash</span> scripts/build-release.sh
+
+<span style="color: #64748B;"># Output: app/build/outputs/bundle/release/app-release.aab</span></code></pre>
+    </div>
+
+    <!-- Link to full markdown guide -->
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant);">
+        📖 Full manual step-by-step checklist available in <code style="background: var(--surface-variant); padding: 0.2rem 0.4rem; border-radius: 4px;">PRODUCTION_DEPLOYMENT.md</code>
+      </p>
     </div>
   </section>
 
