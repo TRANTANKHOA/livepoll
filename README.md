@@ -118,22 +118,31 @@ com.example/
 
 ## 🚀 Getting Started & Building
 
-### Prerequisites
-* Android Studio Ladybug / Koala or newer
-* JDK 17 or higher
-* Android SDK (API Level 26+)
+### 🍏 Local Development on macOS (Apple Silicon & Intel)
+For a complete 1-command setup on macOS, run:
+```bash
+chmod +x scripts/*.sh gradlew
+./scripts/setup-mac.sh
+```
+> 📖 See [`LOCAL_SETUP_MAC.md`](LOCAL_SETUP_MAC.md) for full macOS setup instructions, emulator configurations, and troubleshooting.
 
-### Build & Run via Command Line
+### Quick Helper Scripts
+* **Run Test Suite**: `./scripts/run-tests.sh`
+* **Build Debug APK**: `./scripts/build-apk.sh`
+* **Install & Launch on Device**: `./scripts/run-app.sh`
+* **Clean & Rebuild**: `./scripts/clean-build.sh`
+
+### Manual Build via Command Line
 ```bash
 # Clone the repository
 git clone https://github.com/your-username/pulsepoll-android.git
 cd pulsepoll-android
 
 # Run unit tests
-gradle :app:testDebugUnitTest
+./gradlew :app:testDebugUnitTest
 
 # Assemble debug APK
-gradle :app:assembleDebug
+./gradlew assembleDebug
 ```
 
 The generated APK will be available in `app/build/outputs/apk/debug/app-debug.apk`.
