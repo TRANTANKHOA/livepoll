@@ -112,11 +112,6 @@ class PollViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun switchUser(id: String, name: String) {
-        currentVoterId.value = id
-        currentVoterName.value = name
-    }
-
     fun getPollDetails(pollId: String): Flow<PollWithDetails?> {
         return repository.getPollWithDetails(pollId, currentVoterId.value)
     }
