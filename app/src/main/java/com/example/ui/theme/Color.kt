@@ -2,72 +2,72 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Geometric Balance Theme Palette (M3 Lavender & Obsidian Purple)
-val PrimaryLight = Color(0xFF6750A4)
+// Modern Light & Vibrant Palette (Electric Indigo, Sky Cyan, Soft Coral, Crisp Surfaces)
+val PrimaryLight = Color(0xFF4F46E5)              // Vibrant Indigo 600
 val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFEADDFF)
-val OnPrimaryContainerLight = Color(0xFF21005D)
+val PrimaryContainerLight = Color(0xFFEEF2FF)     // Indigo 50
+val OnPrimaryContainerLight = Color(0xFF3730A3)   // Indigo 800
 
-val PrimaryDark = Color(0xFFD0BCFF)
-val OnPrimaryDark = Color(0xFF381E72)
-val PrimaryContainerDark = Color(0xFF4F378B)
-val OnPrimaryContainerDark = Color(0xFFEADDFF)
+val PrimaryDark = Color(0xFF818CF8)               // Indigo 400
+val OnPrimaryDark = Color(0xFF1E1B4B)
+val PrimaryContainerDark = Color(0xFF312E81)
+val OnPrimaryContainerDark = Color(0xFFE0E7FF)
 
-// Secondary Tones
-val SecondaryLight = Color(0xFF625B71)
+// Secondary Tones (Modern Cyan / Teal Sky)
+val SecondaryLight = Color(0xFF0284C7)            // Sky 600
 val OnSecondaryLight = Color(0xFFFFFFFF)
-val SecondaryContainerLight = Color(0xFFE8DEF8)
-val OnSecondaryContainerLight = Color(0xFF1D192B)
+val SecondaryContainerLight = Color(0xFFE0F2FE)   // Sky 50
+val OnSecondaryContainerLight = Color(0xFF075985) // Sky 800
 
-val SecondaryDark = Color(0xFFCCC2DC)
-val OnSecondaryDark = Color(0xFF332D41)
-val SecondaryContainerDark = Color(0xFF4A4458)
-val OnSecondaryContainerDark = Color(0xFFE8DEF8)
+val SecondaryDark = Color(0xFF38BDF8)             // Sky 400
+val OnSecondaryDark = Color(0xFF082F49)
+val SecondaryContainerDark = Color(0xFF0369A1)
+val OnSecondaryContainerDark = Color(0xFFE0F2FE)
 
-// Tertiary Rose / Wine
-val TertiaryLight = Color(0xFF7D5260)
+// Tertiary Tones (Vibrant Coral / Warm Sunset)
+val TertiaryLight = Color(0xFFEA580C)             // Orange 600
 val OnTertiaryLight = Color(0xFFFFFFFF)
-val TertiaryContainerLight = Color(0xFFFFD8E4)
-val OnTertiaryContainerLight = Color(0xFF31111D)
+val TertiaryContainerLight = Color(0xFFFFEDD5)    // Orange 50
+val OnTertiaryContainerLight = Color(0xFF9A3412)  // Orange 800
 
-val TertiaryDark = Color(0xFFEFB8C8)
-val OnTertiaryDark = Color(0xFF492532)
-val TertiaryContainerDark = Color(0xFF633B48)
-val OnTertiaryContainerDark = Color(0xFFFFD8E4)
+val TertiaryDark = Color(0xFFFB923C)              // Orange 400
+val OnTertiaryDark = Color(0xFF431407)
+val TertiaryContainerDark = Color(0xFF9A3412)
+val OnTertiaryContainerDark = Color(0xFFFFEDD5)
 
-// Geometric Background & Surfaces
-val BackgroundLight = Color(0xFFFEF7FF)
-val OnBackgroundLight = Color(0xFF1D1B20)
-val SurfaceLight = Color(0xFFFFFFFF)
-val OnSurfaceLight = Color(0xFF1D1B20)
-val SurfaceVariantLight = Color(0xFFF3EDF7)
-val OnSurfaceVariantLight = Color(0xFF49454F)
-val OutlineLight = Color(0xFFCAC4D0)
-val OutlineVariantLight = Color(0xFFE7E0EC)
+// Crisp Light Background & Surface Palette
+val BackgroundLight = Color(0xFFF8FAFC)           // Slate 50 (Very clean, bright, open)
+val OnBackgroundLight = Color(0xFF0F172A)          // Slate 900 (High contrast readability)
+val SurfaceLight = Color(0xFFFFFFFF)              // Pure White Cards
+val OnSurfaceLight = Color(0xFF0F172A)             // Slate 900
+val SurfaceVariantLight = Color(0xFFF1F5F9)       // Slate 100
+val OnSurfaceVariantLight = Color(0xFF475569)      // Slate 600
+val OutlineLight = Color(0xFFE2E8F0)              // Slate 200 (Soft elegant border)
+val OutlineVariantLight = Color(0xFFF1F5F9)       // Slate 100
 
-val BackgroundDark = Color(0xFF141218)
-val SurfaceDark = Color(0xFF141218)
-val OnBackgroundDark = Color(0xFFE6E0E9)
-val OnSurfaceDark = Color(0xFFE6E0E9)
-val SurfaceVariantDark = Color(0xFF49454F)
-val OnSurfaceVariantDark = Color(0xFFCAC4D0)
-val OutlineDark = Color(0xFF938F99)
-val OutlineVariantDark = Color(0xFF49454F)
+// Dark fallback scheme
+val BackgroundDark = Color(0xFF0F172A)
+val SurfaceDark = Color(0xFF1E293B)
+val OnBackgroundDark = Color(0xFFF8FAFC)
+val OnSurfaceDark = Color(0xFFF8FAFC)
+val SurfaceVariantDark = Color(0xFF334155)
+val OnSurfaceVariantDark = Color(0xFF94A3B8)
+val OutlineDark = Color(0xFF475569)
+val OutlineVariantDark = Color(0xFF334155)
 
-// Category & Status Colors
-val StatusActive = Color(0xFF2E7D32)
-val StatusEndingSoon = Color(0xFFD97706)
-val StatusClosed = Color(0xFF79747E)
+// Category & Status Colors (Bright, friendly, modern)
+val StatusActive = Color(0xFF10B981)              // Emerald 500
+val StatusEndingSoon = Color(0xFFF59E0B)          // Amber 500
+val StatusClosed = Color(0xFF94A3B8)              // Slate 400
 
-val CategorySoccer = Color(0xFF6750A4)
-val CategoryDrinks = Color(0xFF7D5260)
-val CategoryFood = Color(0xFF9C4146)
-val CategoryDecision = Color(0xFF5B6B94)
-val CategoryEvent = Color(0xFF6750A4)
-val CategoryFeedback = Color(0xFF506869)
+val CategorySoccer = Color(0xFF4F46E5)            // Indigo
+val CategoryDrinks = Color(0xFF0284C7)            // Sky
+val CategoryFood = Color(0xFFF97316)              // Warm Orange
+val CategoryDecision = Color(0xFF8B5CF6)          // Purple
+val CategoryEvent = Color(0xFFEC4899)             // Pink
+val CategoryFeedback = Color(0xFF14B8A6)          // Teal
 
-val GeometricBarFill = Color(0xFFD0BCFF)
-val GeometricBarFillDark = Color(0xFF4F378B)
-val GeometricAccent = Color(0xFF21005D)
-val TopWinnerGold = Color(0xFFB45309)
-
+val GeometricBarFill = Color(0xFFC7D2FE)          // Indigo 200
+val GeometricBarFillDark = Color(0xFF3730A3)
+val GeometricAccent = Color(0xFF4338CA)
+val TopWinnerGold = Color(0xFFD97706)             // Amber 600
