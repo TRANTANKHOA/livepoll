@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         NotificationHelper.createNotificationChannels(this)
+        com.example.util.SecurityDefenseHelper.initDeviceAttestation(this)
 
         val pollIdFromIntent = intent?.getStringExtra("EXTRA_POLL_ID")
 

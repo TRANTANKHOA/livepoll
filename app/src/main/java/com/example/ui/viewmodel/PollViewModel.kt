@@ -395,10 +395,26 @@ class PollViewModel(
         }
     }
 
-    fun findPollByCode(code: String, onResult: (PollEntity?) -> Unit) {
+    fun findPollByCode(code: String, onResult: (PollEntity?, String?) -> Unit) {
+        val sanitized = com.example.util.SecurityDefenseHelper.sanitizePollCode(code)
+        if (sanitized.length < 6) {
+            onResult(null, "Please enter a valid 6-character code")
+            return
+        }
+
+        val rateCheck = com.example.util.SecurityDefenseHelper.checkRateLimit("code_lookup")
+        if (rateCheck is com.example.util.RateLimitResult.Throttled) {
+            onResult(null, "Rate limit exceeded. Please wait ${rateCheck.retryAfterSeconds}s before trying again.")
+            return
+        }
+
         viewModelScope.launch {
-            val poll = repository.getPollByCode(code)
-            onResult(poll)
+            val poll = repository.getPollByCode(sanitized)
+            if (poll != null) {
+                onResult(poll, null)
+            } else {
+                onResult(null, "No poll found matching code '$sanitized'")
+            }
         }
     }
 

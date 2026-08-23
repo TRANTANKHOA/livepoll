@@ -143,9 +143,10 @@ class PollRepository(
         // Clear previous votes by this user for this poll
         voteDao.clearUserVotesForPoll(pollId, voterId)
 
+        // Compound idempotency key: ${pollId}_${voterId}_${optId} ensures exactly-once semantics
         val newVotes = selectedOptionIds.map { optId ->
             VoteEntity(
-                id = UUID.randomUUID().toString(),
+                id = com.example.util.SecurityDefenseHelper.createIdempotentVoteKey(pollId, voterId, optId),
                 pollId = pollId,
                 optionId = optId,
                 voterId = voterId,

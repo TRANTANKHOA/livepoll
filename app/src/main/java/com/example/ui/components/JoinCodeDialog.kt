@@ -108,13 +108,13 @@ fun JoinCodeDialog(
                         return@Button
                     }
                     isSearching = true
-                    viewModel.findPollByCode(code) { poll ->
+                    viewModel.findPollByCode(code) { poll, err ->
                         isSearching = false
                         if (poll != null) {
                             onPollFound(poll.id)
                             onDismiss()
                         } else {
-                            errorMessage = "No active poll found with code '$code'. Check the spelling and try again."
+                            errorMessage = err ?: "No active poll found with code '$code'. Check the spelling and try again."
                         }
                     }
                 },
