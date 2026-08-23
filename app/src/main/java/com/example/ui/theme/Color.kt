@@ -13,7 +13,7 @@ val OnPrimaryDark = Color(0xFF1E1B4B)
 val PrimaryContainerDark = Color(0xFF312E81)
 val OnPrimaryContainerDark = Color(0xFFE0E7FF)
 
-// Secondary Tones (Modern Cyan / Teal Sky)
+// Secondary Tones (Modern Cyan / Sky)
 val SecondaryLight = Color(0xFF0284C7)            // Sky 600
 val OnSecondaryLight = Color(0xFFFFFFFF)
 val SecondaryContainerLight = Color(0xFFE0F2FE)   // Sky 50
@@ -35,15 +35,22 @@ val OnTertiaryDark = Color(0xFF431407)
 val TertiaryContainerDark = Color(0xFF9A3412)
 val OnTertiaryContainerDark = Color(0xFFFFEDD5)
 
-// Crisp Light Background & Surface Palette
-val BackgroundLight = Color(0xFFF8FAFC)           // Slate 50 (Very clean, bright, open)
-val OnBackgroundLight = Color(0xFF0F172A)          // Slate 900 (High contrast readability)
-val SurfaceLight = Color(0xFFFFFFFF)              // Pure White Cards
+// Crisp Light Background & Material 3 Surface Hierarchy
+val BackgroundLight = Color(0xFFF8FAFC)           // Slate 50
+val OnBackgroundLight = Color(0xFF0F172A)          // Slate 900
+val SurfaceLight = Color(0xFFFFFFFF)              // Pure White
 val OnSurfaceLight = Color(0xFF0F172A)             // Slate 900
 val SurfaceVariantLight = Color(0xFFF1F5F9)       // Slate 100
 val OnSurfaceVariantLight = Color(0xFF475569)      // Slate 600
-val OutlineLight = Color(0xFFE2E8F0)              // Slate 200 (Soft elegant border)
+val OutlineLight = Color(0xFFE2E8F0)              // Slate 200
 val OutlineVariantLight = Color(0xFFF1F5F9)       // Slate 100
+
+// Material 3 Surface Containers (Light)
+val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
+val SurfaceContainerLowLight = Color(0xFFF8FAFC)
+val SurfaceContainerLight = Color(0xFFF1F5F9)
+val SurfaceContainerHighLight = Color(0xFFE2E8F0)
+val SurfaceContainerHighestLight = Color(0xFFCBD5E1)
 
 // Dark fallback scheme
 val BackgroundDark = Color(0xFF0F172A)
@@ -54,6 +61,24 @@ val SurfaceVariantDark = Color(0xFF334155)
 val OnSurfaceVariantDark = Color(0xFF94A3B8)
 val OutlineDark = Color(0xFF475569)
 val OutlineVariantDark = Color(0xFF334155)
+
+// Material 3 Surface Containers (Dark)
+val SurfaceContainerLowestDark = Color(0xFF0F172A)
+val SurfaceContainerLowDark = Color(0xFF1E293B)
+val SurfaceContainerDark = Color(0xFF334155)
+val SurfaceContainerHighDark = Color(0xFF475569)
+val SurfaceContainerHighestDark = Color(0xFF64748B)
+
+// Error Tokens
+val ErrorLight = Color(0xFFDC2626)
+val OnErrorLight = Color(0xFFFFFFFF)
+val ErrorContainerLight = Color(0xFFFEE2E2)
+val OnErrorContainerLight = Color(0xFF991B1B)
+
+val ErrorDark = Color(0xFFF87171)
+val OnErrorDark = Color(0xFF450A0A)
+val ErrorContainerDark = Color(0xFF7F1D1D)
+val OnErrorContainerDark = Color(0xFFFEE2E2)
 
 // Category & Status Colors (Bright, friendly, modern)
 val StatusActive = Color(0xFF10B981)              // Emerald 500

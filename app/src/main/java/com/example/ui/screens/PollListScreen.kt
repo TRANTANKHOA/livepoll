@@ -43,6 +43,8 @@ import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -50,17 +52,23 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -77,6 +85,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -120,6 +129,8 @@ fun PollListScreen(
     val activeFilter by viewModel.activeFilter.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var showUserSwitcher by remember { mutableStateOf(false) }
     var showAuthDialog by remember { mutableStateOf(false) }
@@ -183,6 +194,8 @@ fun PollListScreen(
     }
 
     Scaffold(
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                 TopAppBar(
@@ -194,7 +207,7 @@ fun PollListScreen(
                             Box(
                                 modifier = Modifier
                                     .size(34.dp)
-                                    .clip(RoundedCornerShape(10.dp))
+                                    .clip(MaterialTheme.shapes.small)
                                     .background(
                                         Brush.linearGradient(
                                             listOf(PrimaryLight, SecondaryLight)
@@ -212,7 +225,7 @@ fun PollListScreen(
                                 )
                                 Text(
                                     text = "Social Polls & Real-Time Voting",
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -261,7 +274,7 @@ fun PollListScreen(
                         // Profile / Social SSO Avatar Pill
                         Surface(
                             onClick = { showUserSwitcher = true },
-                            shape = RoundedCornerShape(20.dp),
+                            shape = MaterialTheme.shapes.extraLarge,
                             color = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier
                                 .padding(horizontal = 4.dp)
@@ -335,8 +348,10 @@ fun PollListScreen(
                             }
                         }
                     },
+                    scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
                 )
 
@@ -374,10 +389,10 @@ fun PollListScreen(
                                 }
                             },
                             singleLine = true,
-                            shape = RoundedCornerShape(14.dp),
+                            shape = MaterialTheme.shapes.medium,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -388,29 +403,27 @@ fun PollListScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = { onCreatePollClick(null) },
+                icon = { Icon(imageVector = Icons.Default.Add, contentDescription = null) },
+                text = { Text("New Poll", fontWeight = FontWeight.Bold) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 3.dp,
+                    pressedElevation = 6.dp
+                ),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier.testTag("create_poll_fab")
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                    Text("New Poll", fontWeight = FontWeight.Bold)
-                }
-            }
+            )
         }
     ) { innerPadding ->
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(bottom = 90.dp, top = 6.dp, start = 16.dp, end = 16.dp),
+            contentPadding = PaddingValues(bottom = 96.dp, top = 8.dp, start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // 1. Compact Action Bar (Summary Pill & Quick Action Buttons)
@@ -426,86 +439,64 @@ fun PollListScreen(
                     val now = System.currentTimeMillis()
                     val activeCount = allPolls.count { !it.isClosed && (it.deadlineTimestamp == null || now <= it.deadlineTimestamp) }
 
-                    Surface(
+                    AssistChip(
                         onClick = { showInsightsExpanded = !showInsightsExpanded },
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (showInsightsExpanded) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, if (showInsightsExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
-                        modifier = Modifier.testTag("insights_toggle_pill")
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(text = "⚡", fontSize = 12.sp)
+                        label = {
                             Text(
                                 text = "$activeCount Active • ${allPolls.size} Polls",
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                fontWeight = FontWeight.SemiBold
                             )
+                        },
+                        leadingIcon = {
+                            Text(text = "⚡", fontSize = 12.sp)
+                        },
+                        trailingIcon = {
                             Icon(
                                 imageVector = if (showInsightsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                modifier = Modifier.size(14.dp)
                             )
-                        }
-                    }
+                        },
+                        shape = MaterialTheme.shapes.medium,
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = if (showInsightsExpanded) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
+                        ),
+                        modifier = Modifier.testTag("insights_toggle_pill")
+                    )
 
                     // Quick Action Pills
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         // Templates Pill
-                        Surface(
+                        AssistChip(
                             onClick = { showTemplatesSheet = true },
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            label = { Text("Templates", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
+                            leadingIcon = { Text(text = "🚀", fontSize = 12.sp) },
+                            shape = MaterialTheme.shapes.medium,
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
                             modifier = Modifier.testTag("quick_templates_button")
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(text = "🚀", fontSize = 12.sp)
-                                Text(
-                                    text = "Templates",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+                        )
 
                         // Join Code Pill
-                        Surface(
+                        AssistChip(
                             onClick = { showJoinDialog = true },
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                            modifier = Modifier.testTag("quick_join_code_button")
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
+                            label = { Text("Join", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
+                            leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.QrCode,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(13.dp)
                                 )
-                                Text(
-                                    text = "Join",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+                            },
+                            shape = MaterialTheme.shapes.medium,
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            modifier = Modifier.testTag("quick_join_code_button")
+                        )
                     }
                 }
             }
@@ -549,7 +540,7 @@ fun PollListScreen(
                             selected = activeFilter == key,
                             onClick = { viewModel.activeFilter.value = key },
                             label = { Text(label, fontSize = 11.sp, fontWeight = if (activeFilter == key) FontWeight.Bold else FontWeight.Normal) },
-                            shape = RoundedCornerShape(16.dp),
+                            shape = MaterialTheme.shapes.large,
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -600,11 +591,11 @@ private fun StatsOverviewHeader(
     val activeCount = allPolls.count { !it.isClosed && (it.deadlineTimestamp == null || now <= it.deadlineTimestamp) }
     val deadlinesCount = allPolls.count { !it.isClosed && it.deadlineTimestamp != null && now <= it.deadlineTimestamp && (it.deadlineTimestamp - now) <= 12 * 3600 * 1000L }
 
-    Card(
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -717,12 +708,12 @@ private fun EmptyPollState(
     onCreateClick: () -> Unit,
     onOpenTemplates: () -> Unit
 ) {
-    Card(
+    OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -752,13 +743,13 @@ private fun EmptyPollState(
             ) {
                 Button(
                     onClick = onOpenTemplates,
-                    shape = RoundedCornerShape(10.dp)
+                    shape = MaterialTheme.shapes.small
                 ) {
                     Text("🚀 Use Template", fontSize = 12.sp)
                 }
-                androidx.compose.material3.OutlinedButton(
+                FilledTonalButton(
                     onClick = onCreateClick,
-                    shape = RoundedCornerShape(10.dp)
+                    shape = MaterialTheme.shapes.small
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
