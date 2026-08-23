@@ -47,6 +47,53 @@ class PollViewModel(
         authPreferences.saveUser(user)
     }
 
+    val isCloudAvailable = MutableStateFlow(repository.firestoreService.isCloudAvailable())
+    val cloudSyncStatus = MutableStateFlow<String>("🟢 Ready")
+
+    private var activeCloudListener: com.google.firebase.firestore.ListenerRegistration? = null
+
+    fun attachPollCloudListener(pollId: String) {
+        activeCloudListener?.remove()
+        activeCloudListener = repository.attachLiveCloudSync(pollId, viewModelScope)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        activeCloudListener?.remove()
+    }
+
+    fun signInWithGoogle(context: Context, onComplete: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            cloudSyncStatus.value = "🔄 Signing in with Google..."
+            val result = com.example.util.GoogleAuthHelper.signInWithGoogle(context)
+            result.onSuccess { user ->
+                setCurrentUser(user)
+                cloudSyncStatus.value = "🟢 Signed in as ${user.name}"
+                onComplete(true, "Signed in successfully as ${user.name}")
+            }.onFailure { error ->
+                cloudSyncStatus.value = "⚠️ Sign-in skipped"
+                val message = error.message ?: "Google Sign-In was cancelled or unavailable on this device"
+                onComplete(false, message)
+            }
+        }
+    }
+
+    fun logoutUser(context: Context) {
+        com.example.util.GoogleAuthHelper.signOut(context)
+        val guestUser = UserAccount(
+            id = "guest_" + UUID.randomUUID().toString().take(6),
+            name = "Guest User",
+            email = null,
+            avatarEmoji = "👤",
+            provider = AuthProvider.GUEST,
+            isVerified = false,
+            linkedProviders = listOf(AuthProvider.GUEST),
+            loggedInTimestamp = System.currentTimeMillis()
+        )
+        setCurrentUser(guestUser)
+        cloudSyncStatus.value = "👤 Guest Mode"
+    }
+
     fun switchUser(id: String, name: String, avatarEmoji: String = "😎") {
         currentVoterId.value = id
         currentVoterName.value = name

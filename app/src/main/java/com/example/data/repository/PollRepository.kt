@@ -13,8 +13,13 @@ import com.example.data.local.entity.PollOptionEntity
 import com.example.data.local.entity.VoteEntity
 import com.example.data.model.PollWithDetails
 import com.example.util.NotificationHelper
+import com.example.data.remote.FirestoreService
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 class PollRepository(
@@ -22,7 +27,8 @@ class PollRepository(
     private val pollOptionDao: PollOptionDao,
     private val voteDao: VoteDao,
     private val notificationDao: NotificationDao,
-    private val groupDao: GroupDao
+    private val groupDao: GroupDao,
+    val firestoreService: FirestoreService = FirestoreService()
 ) {
     val allPolls: Flow<List<PollEntity>> = pollDao.getAllPolls()
     val allNotifications: Flow<List<NotificationEntity>> = notificationDao.getAllNotifications()
@@ -31,7 +37,28 @@ class PollRepository(
     val userJoinedGroups: Flow<List<GroupEntity>> = groupDao.getUserJoinedGroups()
 
     suspend fun getPollByCode(code: String): PollEntity? {
-        return pollDao.getPollByCode(code.trim().uppercase())
+        val uppercaseCode = code.trim().uppercase()
+        val localPoll = pollDao.getPollByCode(uppercaseCode)
+        if (localPoll != null) {
+            return localPoll
+        }
+
+        // Check Cloud Firestore for poll created on other devices
+        val cloudPollData = firestoreService.findPollByCode(uppercaseCode)
+        if (cloudPollData != null) {
+            val (pollEntity, options) = cloudPollData
+            pollDao.insertPoll(pollEntity)
+            pollOptionDao.insertOptions(options)
+
+            // Also fetch cloud votes
+            val cloudVotes = firestoreService.fetchCloudVotes(pollEntity.id)
+            if (cloudVotes.isNotEmpty()) {
+                voteDao.insertVotes(cloudVotes)
+            }
+            return pollEntity
+        }
+
+        return null
     }
 
     suspend fun getGroupById(groupId: String): GroupEntity? {
@@ -64,9 +91,25 @@ class PollRepository(
         }
     }
 
+    /**
+     * Attaches live cloud snapshot sync to keep votes updated in real-time across devices.
+     */
+    fun attachLiveCloudSync(pollId: String, scope: CoroutineScope): ListenerRegistration? {
+        return firestoreService.attachLiveVotesListener(pollId) { cloudVotes ->
+            scope.launch(Dispatchers.IO) {
+                if (cloudVotes.isNotEmpty()) {
+                    voteDao.insertVotes(cloudVotes)
+                }
+            }
+        }
+    }
+
     suspend fun createPoll(poll: PollEntity, options: List<PollOptionEntity>) {
         pollDao.insertPoll(poll)
         pollOptionDao.insertOptions(options)
+
+        // Sync to Cloud Firestore in the background
+        firestoreService.publishPollToCloud(poll, options)
 
         // Insert in notification feed
         val notifTitle = if (!poll.groupName.isNullOrBlank()) {
@@ -115,6 +158,11 @@ class PollRepository(
             )
         }
         voteDao.insertVotes(newVotes)
+
+        // Sync votes to Cloud Firestore
+        for (vote in newVotes) {
+            firestoreService.recordVoteToCloud(vote)
+        }
     }
 
     suspend fun addOptionToPoll(option: PollOptionEntity) {

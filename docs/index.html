@@ -738,6 +738,257 @@
       color: var(--on-surface-variant);
     }
 
+    /* Architecture Data Flow Diagram Styles */
+    .arch-diagram-wrapper {
+      background: #FFFFFF;
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      margin-top: 1.5rem;
+      position: relative;
+    }
+
+    .arch-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--outline);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .arch-tab-btn {
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--surface-variant);
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline);
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .arch-tab-btn:hover {
+      background: #E2E8F0;
+      color: var(--on-surface);
+    }
+
+    .arch-tab-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .flow-pipeline-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .arch-node-card {
+      background: #F8FAFC;
+      border: 1.5px solid var(--outline);
+      border-radius: var(--radius-md);
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+
+    .arch-node-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .arch-node-card.user-layer {
+      border-top: 4px solid #0284C7;
+    }
+
+    .arch-node-card.front-layer {
+      border-top: 4px solid #4F46E5;
+    }
+
+    .arch-node-card.back-layer {
+      border-top: 4px solid #9333EA;
+    }
+
+    .arch-node-card.db-layer {
+      border-top: 4px solid #10B981;
+    }
+
+    .arch-node-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .arch-node-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      border: 1px solid var(--outline);
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .arch-layer-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      display: block;
+    }
+
+    .arch-node-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--on-surface);
+      line-height: 1.2;
+    }
+
+    .arch-node-body {
+      flex: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    .arch-spec-list {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--on-surface-variant);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .arch-spec-list code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #E2E8F0;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: #0F172A;
+      font-weight: 600;
+    }
+
+    .arch-node-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-full);
+      background: #FFFFFF;
+      border: 1px solid var(--outline);
+      text-align: center;
+      color: var(--on-surface-variant);
+    }
+
+    /* Flow Arrows */
+    .flow-arrow-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      position: relative;
+    }
+
+    .flow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: pulseDot 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0% { transform: scale(0.8); opacity: 0.4; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0.4; }
+    }
+
+    .flow-arrow-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .flow-arrow-icon {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* Flow Summary Explainer Box */
+    .flow-summary-box {
+      background: #EEF2FF;
+      border: 1.5px solid rgba(79, 70, 229, 0.25);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+    }
+
+    .flow-summary-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--on-primary-container);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .flow-summary-desc {
+      font-size: 0.85rem;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .flow-summary-desc b {
+      color: var(--on-primary-container);
+    }
+
+    .flow-summary-desc code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #E0E7FF;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #3730A3;
+    }
+
+    /* Responsive adjustments for architecture pipeline */
+    @media (max-width: 960px) {
+      .flow-pipeline-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .flow-arrow-indicator {
+        flex-direction: row;
+        padding: 0.25rem 0;
+      }
+      .flow-arrow-icon {
+        transform: rotate(90deg);
+      }
+    }
+
     /* Footer */
     footer {
       background: #FFFFFF;
@@ -1164,20 +1415,216 @@
     </div>
   </section>
 
-  <!-- Technical Architecture -->
+  <!-- Technical Architecture & Data Flow Diagram -->
   <section class="section" id="architecture">
     <div class="section-header">
-      <div class="section-subtitle">Technical Stack</div>
-      <h2 class="section-title">Built with Modern Android Standards</h2>
-      <p style="color: var(--on-surface-variant);">Clean MVVM architecture using Jetpack Compose, Kotlin Coroutines, and Room SQLite persistence.</p>
+      <div class="section-subtitle">System Architecture & Multi-Cloud Backend</div>
+      <h2 class="section-title">End-to-End Hybrid Cloud & Local Pipeline</h2>
+      <p style="color: var(--on-surface-variant);">Detailed flow showing how user actions travel through Jetpack Compose frontend, ViewModel coroutines, repository domain layer, Room SQLite cache, and Cloud Firestore live sync.</p>
     </div>
 
-    <div class="tech-grid">
+    <!-- Interactive Data Flow Diagram Container -->
+    <div class="arch-diagram-wrapper">
+      <div class="arch-tabs">
+        <button class="arch-tab-btn active" id="tabWriteFlow" onclick="switchArchTab('write')">
+          ⚡ 1. Write Flow (Vote / RSVP Sync)
+        </button>
+        <button class="arch-tab-btn" id="tabReadFlow" onclick="switchArchTab('read')">
+          🔄 2. Hybrid Read Flow (Cache + Firestore)
+        </button>
+        <button class="arch-tab-btn" id="tabFullStack" onclick="switchArchTab('full')">
+          🏛️ 3. Full Layer Hierarchy
+        </button>
+      </div>
+
+      <!-- Diagram View Container -->
+      <div class="arch-canvas" id="archCanvas">
+        <!-- 4 Step Pipeline Grid -->
+        <div class="flow-pipeline-grid">
+          
+          <!-- Layer 1: User Action -->
+          <div class="arch-node-card user-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">👤</div>
+              <div>
+                <span class="arch-layer-tag">1. Client / User</span>
+                <h4 class="arch-node-title">User Interaction</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>👆 Tap Option / Cast Vote</li>
+                <li>🎟️ Toggle RSVP (+Guests)</li>
+                <li>🔑 Input 6-Char Join Code</li>
+                <li>🌐 Google SSO / Multi-Auth</li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Touch Events & Gesture Input</div>
+          </div>
+
+          <!-- Flow Arrow 1 -->
+          <div class="flow-arrow-indicator">
+            <div class="flow-dot"></div>
+            <span class="flow-arrow-label">Events</span>
+            <div class="flow-arrow-icon">➔</div>
+          </div>
+
+          <!-- Layer 2: Frontend Jetpack Compose -->
+          <div class="arch-node-card front-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🎨</div>
+              <div>
+                <span class="arch-layer-tag">2. Frontend View</span>
+                <h4 class="arch-node-title">Jetpack Compose M3</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>🖼️ <code>VotingScreen.kt</code></li>
+                <li>✨ Dynamic Material 3 Theming</li>
+                <li>🎯 Type-safe Compose Navigation</li>
+                <li>⚡ Instant Recomposition</li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Declarative UI Layer</div>
+          </div>
+
+          <!-- Flow Arrow 2 -->
+          <div class="flow-arrow-indicator">
+            <div class="flow-dot"></div>
+            <span class="flow-arrow-label">StateFlow</span>
+            <div class="flow-arrow-icon">➔</div>
+          </div>
+
+          <!-- Layer 3: Backend / Logic / ViewModel -->
+          <div class="arch-node-card back-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">⚙️</div>
+              <div>
+                <span class="arch-layer-tag">3. Logic & Controller</span>
+                <h4 class="arch-node-title">ViewModel & Repo</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>🧠 <code>PollViewModel.kt</code> (Coroutines)</li>
+                <li>📊 Quorum & Leaderboard Math</li>
+                <li>🛡️ <code>PollRepository.kt</code></li>
+                <li>🔑 <code>GoogleAuthHelper.kt</code></li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Kotlin Coroutines Dispatchers.IO</div>
+          </div>
+
+          <!-- Flow Arrow 3 -->
+          <div class="flow-arrow-indicator">
+            <div class="flow-dot"></div>
+            <span class="flow-arrow-label">Dual-Sync</span>
+            <div class="flow-arrow-icon">➔</div>
+          </div>
+
+          <!-- Layer 4: Persistent Storage & Cloud Firestore -->
+          <div class="arch-node-card db-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">☁️</div>
+              <div>
+                <span class="arch-layer-tag">4. Cloud + Local DB</span>
+                <h4 class="arch-node-title">Firestore & Room</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>🔥 <code>FirestoreService.kt</code> (Cloud)</li>
+                <li>📦 <code>PulsePollDatabase.kt</code> (Room)</li>
+                <li>📑 <code>PollDao.kt</code> (ACID SQLite)</li>
+                <li>⚡ SnapshotListener Live Sync</li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Cloud Firestore + Native SQLite WAL</div>
+          </div>
+
+        </div>
+
+        <!-- Dynamic Flow Details Explainer Box -->
+        <div class="flow-summary-box" id="flowSummaryBox">
+          <div class="flow-summary-title" id="flowSummaryTitle">
+            ⚡ Write Path (Atomic Local Vote + Cloud Firestore Sync)
+          </div>
+          <p class="flow-summary-desc" id="flowSummaryDesc">
+            1. User taps an option in <b>Compose UI</b> ➔ 2. Trigger invokes <code>viewModel.castVote(optionId)</code> on <code>viewModelScope</code> ➔ 3. <b>PollRepository</b> executes an ACID <code>@Transaction</code> via <b>Room DAO</b> with 0ms latency ➔ 4. Background Coroutine syncs vote document to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. Cloud <b>SnapshotListener</b> broadcasts updates to all active devices in real-time.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supported Authentication Matrix & Cloud Architecture Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2.5rem;">
+      <!-- Auth Support Card -->
+      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.75rem;">🔑</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">Authentication Architecture</h3>
+            <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Jetpack Credential Manager + Firebase Auth</span>
+          </div>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>🌐</span>
+            <div><strong style="color: var(--on-surface);">Google Sign-In:</strong> Native Android Credential Manager + ID Token verification into Firebase Auth.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>👤</span>
+            <div><strong style="color: var(--on-surface);">Guest Mode:</strong> Instant unique session (<code>guest_xxxxxx</code>) for zero-friction voting without permissions.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>👥</span>
+            <div><strong style="color: var(--on-surface);">Social SSO Personas:</strong> Built-in Facebook & Apple test identities for quorum simulations.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>✉️</span>
+            <div><strong style="color: var(--on-surface);">Custom Profiles:</strong> Fast organization/team custom handle generation with avatar badges.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Cloud Infrastructure & Cost Card -->
+      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.75rem;">☁️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">Cloud Firestore & Cost Model</h3>
+            <span style="font-size: 0.8rem; color: var(--secondary); font-weight: 600;">Free Spark Tier ($0.00 / month)</span>
+          </div>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>⚡</span>
+            <div><strong style="color: var(--on-surface);">Hybrid Cache:</strong> Zero read cost for local user actions; reads hit Room SQLite cache first.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>📊</span>
+            <div><strong style="color: var(--on-surface);">Generous Spark Allowance:</strong> 50,000 document reads/day & 20,000 writes/day free.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>📡</span>
+            <div><strong style="color: var(--on-surface);">Live WebSocket Sync:</strong> Realtime Snapshot listeners keep all participants in sync.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>🔒</span>
+            <div><strong style="color: var(--on-surface);">Security Rules:</strong> Firestore document access gated by user authentication tokens.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Technical Specs Summary Grid -->
+    <div class="tech-grid" style="margin-top: 2rem;">
       <div class="tech-pill">
         <div class="tech-pill-icon">🎨</div>
         <div class="tech-pill-text">
           <h4>Jetpack Compose M3</h4>
-          <p>Declarative Material 3 UI</p>
+          <p>Declarative Material 3 UI & Transitions</p>
         </div>
       </div>
 
@@ -1185,7 +1632,7 @@
         <div class="tech-pill-icon">💾</div>
         <div class="tech-pill-text">
           <h4>Room SQLite DB</h4>
-          <p>Reactive SQLite DAO Queries</p>
+          <p>Reactive SQLite DAO Queries & Cascade FKs</p>
         </div>
       </div>
 
@@ -1486,6 +1933,30 @@
     function closeSheetOnOverlay(event, sheetId) {
       if (event.target.id === sheetId) {
         closeSheet(sheetId);
+      }
+    }
+
+    // Architecture Diagram Tab Switcher
+    function switchArchTab(mode) {
+      document.querySelectorAll('.arch-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const titleEl = document.getElementById('flowSummaryTitle');
+      const descEl = document.getElementById('flowSummaryDesc');
+
+      if (mode === 'write') {
+        document.getElementById('tabWriteFlow').classList.add('active');
+        titleEl.innerHTML = '⚡ 1. Write Flow (Atomic Vote Insertion & Consensus Recalculation)';
+        descEl.innerHTML = '1. <b>User</b> taps option ➔ 2. <b>Compose UI</b> dispatches <code>viewModel.castVote(optionId)</code> ➔ 3. <b>ViewModel</b> launches Coroutine on <code>Dispatchers.IO</code> calling <code>repository.recordVote()</code> ➔ 4. <b>Room DAO</b> executes an ACID <code>@Transaction</code> in <b>SQLite</b> ➔ 5. SQLite WAL commit triggers Room Invalidation Tracker to notify observers.';
+        showToast('⚡ Showing Write Flow Pipeline (User ➔ UI ➔ VM ➔ DB)');
+      } else if (mode === 'read') {
+        document.getElementById('tabReadFlow').classList.add('active');
+        titleEl.innerHTML = '🔄 2. Reactive Read Flow (SQLite Live Flow & State Recomposition)';
+        descEl.innerHTML = '1. <b>Room SQLite</b> detects data change via Invalidation Tracker ➔ 2. <b>PollDao</b> emits updated <code>Flow&lt;PollWithDetails&gt;</code> ➔ 3. <b>Repository</b> maps entities to Domain models ➔ 4. <b>ViewModel</b> collects into <code>StateFlow&lt;PollDetailUiState&gt;</code> ➔ 5. <b>Jetpack Compose</b> triggers targeted recomposition to animate progress bars with <b>0ms lag</b>.';
+        showToast('🔄 Showing Reactive Read Stream (DB ➔ Flow ➔ State ➔ UI)');
+      } else {
+        document.getElementById('tabFullStack').classList.add('active');
+        titleEl.innerHTML = '🏛️ 3. Full 4-Tier Android Clean MVVM Architecture';
+        descEl.innerHTML = '<b>Tier 1: Client/User</b> (Gesture, Touch, SSO Identity) ➔ <b>Tier 2: Frontend View</b> (Material 3 Composables, Navigation Compose) ➔ <b>Tier 3: Controller/Domain</b> (ViewModel, Kotlin Coroutines, Quorum Leaderboard Engine) ➔ <b>Tier 4: Persistence</b> (Room SQLite, Cascade FKs, WAL Indexing, Encrypted Preferences).';
+        showToast('🏛️ Showing Complete Full-Stack Layer Hierarchy');
       }
     }
 

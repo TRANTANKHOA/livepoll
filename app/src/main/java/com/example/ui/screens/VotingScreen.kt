@@ -90,6 +90,11 @@ fun VotingScreen(
     val pollDetails by viewModel.getPollDetails(pollId).collectAsState(initial = null)
     val currentUser by viewModel.currentUser.collectAsState()
     val currentVoterName by viewModel.currentVoterName.collectAsState()
+    val cloudStatus by viewModel.cloudSyncStatus.collectAsState()
+
+    androidx.compose.runtime.LaunchedEffect(pollId) {
+        viewModel.attachPollCloudListener(pollId)
+    }
 
     var showUserSwitcher by remember { mutableStateOf(false) }
     var showAuthDialog by remember { mutableStateOf(false) }
