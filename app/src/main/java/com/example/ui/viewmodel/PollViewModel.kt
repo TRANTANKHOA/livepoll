@@ -78,8 +78,36 @@ class PollViewModel(
         }
     }
 
+    fun signInWithFacebook(
+        context: Context,
+        accessToken: String? = null,
+        fallbackName: String? = null,
+        fallbackEmail: String? = null,
+        onComplete: (Boolean, String) -> Unit
+    ) {
+        viewModelScope.launch {
+            cloudSyncStatus.value = "🔄 Connecting with Facebook..."
+            val result = com.example.util.FacebookAuthHelper.signInWithFacebook(
+                context = context,
+                accessTokenString = accessToken,
+                fallbackName = fallbackName,
+                fallbackEmail = fallbackEmail
+            )
+            result.onSuccess { user ->
+                setCurrentUser(user)
+                cloudSyncStatus.value = "🟢 Connected as ${user.name}"
+                onComplete(true, "Connected successfully as ${user.name} (Facebook)")
+            }.onFailure { error ->
+                cloudSyncStatus.value = "⚠️ Facebook connection failed"
+                val message = error.message ?: "Could not complete Facebook sign-in"
+                onComplete(false, message)
+            }
+        }
+    }
+
     fun logoutUser(context: Context) {
         com.example.util.GoogleAuthHelper.signOut(context)
+        com.example.util.FacebookAuthHelper.signOut(context)
         val guestUser = UserAccount(
             id = "guest_" + UUID.randomUUID().toString().take(6),
             name = "Guest User",
