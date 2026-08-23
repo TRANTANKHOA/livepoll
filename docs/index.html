@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PulsePoll - Real-Time Social Polling & Event Consensus for Android</title>
   <meta name="description" content="A modern Material Design 3 Android app for organizing group events, making decisions, RSVP headcounts, and real-time voting consensus." />
+  <meta name="theme-color" content="#4F46E5" />
   
-  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   
   <style>
     :root {
@@ -31,17 +32,13 @@
       --on-surface: #0F172A;
       --on-surface-variant: #475569;
       --outline: #E2E8F0;
-      
-      --status-active: #10B981;
-      --status-ending: #F59E0B;
-      --status-closed: #94A3B8;
 
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
       --radius-sm: 8px;
       --radius-md: 14px;
-      --radius-lg: 20px;
+      --radius-lg: 22px;
       --radius-full: 9999px;
     }
 
@@ -49,6 +46,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html {
@@ -59,60 +57,65 @@
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--on-surface);
-      line-height: 1.6;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    /* Navigation Bar */
+    /* Top Navigation Bar */
     header {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--outline);
+      width: 100%;
     }
 
     .nav-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 1rem 1.5rem;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 1rem;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
       text-decoration: none;
       color: var(--on-surface);
+      flex-shrink: 0;
     }
 
     .brand-icon {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       color: white;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
     }
 
     .brand-title {
       font-weight: 800;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       letter-spacing: -0.02em;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.25rem;
       list-style: none;
     }
 
@@ -120,26 +123,54 @@
       text-decoration: none;
       color: var(--on-surface-variant);
       font-weight: 600;
-      font-size: 0.95rem;
-      transition: color 0.2s;
+      font-size: 0.9rem;
+      transition: color 0.15s;
     }
 
     .nav-links a:hover {
       color: var(--primary);
     }
 
-    @media (max-width: 768px) {
+    .header-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .header-cta-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Mobile Nav Rules */
+    @media (max-width: 820px) {
       .nav-links {
         display: none;
       }
+      .nav-container {
+        padding: 0.65rem 1rem;
+      }
+      .header-cta-btn {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+      }
     }
 
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.35rem;
+      padding: 0.85rem 1.4rem;
       font-size: 0.95rem;
       font-weight: 700;
       border-radius: var(--radius-md);
@@ -148,6 +179,8 @@
       cursor: pointer;
       border: none;
       font-family: inherit;
+      min-height: 48px;
+      user-select: none;
     }
 
     .btn-primary {
@@ -156,10 +189,9 @@
       box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
     }
 
-    .btn-primary:hover, .btn-primary:active {
+    .btn-primary:active {
+      transform: scale(0.98);
       background: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
     }
 
     .btn-tonal {
@@ -168,50 +200,36 @@
       border: 1px solid var(--outline);
     }
 
-    .btn-tonal:hover, .btn-tonal:active {
+    .btn-tonal:active {
+      transform: scale(0.98);
       background: #E2E8F0;
-      transform: translateY(-2px);
     }
 
     /* Hero Section */
     .hero-section {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 3.5rem 1.5rem 2rem;
+      padding: 2.5rem 1.25rem 2rem;
       display: grid;
       grid-template-columns: 1.1fr 0.9fr;
-      gap: 3rem;
+      gap: 2.5rem;
       align-items: center;
-    }
-
-    @media (max-width: 960px) {
-      .hero-section {
-        grid-template-columns: 1fr;
-        padding: 2rem 1.25rem;
-        text-align: center;
-      }
-      .hero-cta {
-        justify-content: center;
-      }
-      .badge-row {
-        justify-content: center;
-      }
     }
 
     .badge-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
     }
 
     .pill-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.35rem 0.85rem;
+      gap: 0.3rem;
+      padding: 0.3rem 0.75rem;
       border-radius: var(--radius-full);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       background: var(--primary-container);
       color: var(--on-primary-container);
@@ -219,11 +237,11 @@
     }
 
     .hero-title {
-      font-size: 2.75rem;
+      font-size: clamp(2rem, 5.5vw, 3rem);
       font-weight: 800;
-      line-height: 1.18;
+      line-height: 1.15;
       letter-spacing: -0.03em;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
       color: #0F172A;
     }
 
@@ -234,38 +252,59 @@
     }
 
     .hero-desc {
-      font-size: 1.15rem;
+      font-size: clamp(0.95rem, 2.5vw, 1.12rem);
       color: var(--on-surface-variant);
-      margin-bottom: 2rem;
-      line-height: 1.65;
+      margin-bottom: 1.75rem;
+      line-height: 1.6;
     }
 
     .hero-cta {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
     }
 
-    /* Phone Mockup Showcase */
+    @media (max-width: 900px) {
+      .hero-section {
+        grid-template-columns: 1fr;
+        padding: 1.75rem 1rem 1.5rem;
+        text-align: center;
+      }
+      .badge-row {
+        justify-content: center;
+      }
+      .hero-cta {
+        justify-content: center;
+        flex-direction: column;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      .hero-cta .btn {
+        width: 100%;
+      }
+    }
+
+    /* Phone Mockup Frame */
     .mockup-container {
       display: flex;
       justify-content: center;
-      position: relative;
+      width: 100%;
+      padding: 0.5rem 0;
     }
 
     .phone-frame {
       width: 100%;
       max-width: 380px;
       background: #FFFFFF;
-      border-radius: 40px;
-      border: 8px solid #0F172A;
-      box-shadow: var(--shadow-xl), 0 25px 50px -12px rgba(79, 70, 229, 0.25);
+      border-radius: 36px;
+      border: 6px solid #0F172A;
+      box-shadow: var(--shadow-xl), 0 15px 35px -10px rgba(79, 70, 229, 0.25);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 740px;
       position: relative;
-      transition: box-shadow 0.3s;
+      transition: all 0.3s;
     }
 
     .phone-frame.highlight-pulse {
@@ -274,12 +313,12 @@
 
     @keyframes pulseGlow {
       0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
-      70% { box-shadow: 0 0 0 20px rgba(79, 70, 229, 0); }
+      70% { box-shadow: 0 0 0 18px rgba(79, 70, 229, 0); }
       100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
     }
 
     .phone-notch {
-      height: 24px;
+      height: 20px;
       background: #0F172A;
       display: flex;
       justify-content: center;
@@ -287,30 +326,30 @@
     }
 
     .phone-camera {
-      width: 80px;
-      height: 12px;
+      width: 60px;
+      height: 8px;
       background: #000;
-      border-radius: 0 0 10px 10px;
+      border-radius: 0 0 8px 8px;
     }
 
     .phone-screen {
       flex: 1;
       background: var(--bg);
-      overflow-y: auto;
-      padding: 1rem;
+      padding: 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.65rem;
       position: relative;
+      min-height: 540px;
     }
 
-    /* In-Phone App UI */
+    /* Inside App UI */
     .app-topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #FFF;
-      padding: 0.6rem 0.8rem;
+      padding: 0.55rem 0.75rem;
       border-radius: 12px;
       border: 1px solid var(--outline);
     }
@@ -318,116 +357,106 @@
     .app-topbar-left {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .app-brand-logo {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       background: var(--primary);
-      border-radius: 8px;
+      border-radius: 7px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: bold;
     }
 
     .app-title-text {
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
     .user-pill {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
       background: var(--primary-container);
       color: var(--on-primary-container);
-      padding: 0.35rem 0.7rem;
+      padding: 0.3rem 0.6rem;
       border-radius: var(--radius-full);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       cursor: pointer;
       border: 1px solid rgba(79, 70, 229, 0.2);
-      transition: all 0.2s;
     }
 
-    .user-pill:hover {
-      background: #E0E7FF;
-      transform: scale(1.03);
-    }
-
-    /* Interactive Poll Card Inside Mockup */
+    /* Interactive Poll Card */
     .mock-card {
       background: #FFFFFF;
-      border-radius: var(--radius-lg);
-      padding: 1rem;
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
       border: 1px solid var(--outline);
       box-shadow: var(--shadow-sm);
-      transition: all 0.2s;
+      text-align: left;
     }
 
     .mock-card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
+      gap: 0.5rem;
     }
 
     .mock-category-icon {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       background: var(--primary-container);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
+      flex-shrink: 0;
     }
 
     .mock-poll-title {
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       color: var(--on-surface);
-      line-height: 1.3;
+      line-height: 1.25;
     }
 
     .mock-deadline-badge {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      padding: 0.25rem 0.55rem;
+      padding: 0.2rem 0.5rem;
       border-radius: var(--radius-full);
       background: var(--tertiary-container);
       color: var(--tertiary);
-      display: flex;
-      align-items: center;
-      gap: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    /* Interactive Options List */
+    /* Options List */
     .mock-options-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
+      gap: 0.45rem;
+      margin-bottom: 0.65rem;
     }
 
     .mock-option-item {
       position: relative;
       background: var(--surface-variant);
-      border-radius: 12px;
-      padding: 0.65rem 0.75rem;
+      border-radius: 10px;
+      padding: 0.6rem 0.7rem;
       border: 1.5px solid transparent;
       cursor: pointer;
       overflow: hidden;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .mock-option-item:hover {
-      border-color: rgba(79, 70, 229, 0.3);
-      transform: translateX(2px);
+      transition: all 0.15s;
     }
 
     .mock-option-item.selected {
@@ -441,8 +470,8 @@
       top: 0;
       bottom: 0;
       background: rgba(79, 70, 229, 0.15);
-      border-radius: 10px;
-      transition: width 0.4s ease;
+      border-radius: 8px;
+      transition: width 0.35s ease;
       z-index: 1;
     }
 
@@ -456,37 +485,38 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
+      gap: 0.5rem;
     }
 
-    /* RSVP Headcount Section */
+    /* RSVP Section */
     .mock-headcount-box {
       background: var(--surface-variant);
-      border-radius: 12px;
-      padding: 0.65rem 0.75rem;
-      margin-bottom: 0.75rem;
+      border-radius: 10px;
+      padding: 0.55rem 0.65rem;
+      margin-bottom: 0.65rem;
     }
 
     .mock-headcount-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
-      margin-bottom: 0.4rem;
+      font-size: 0.72rem;
+      margin-bottom: 0.35rem;
     }
 
     .rsvp-btn-group {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.3rem;
     }
 
     .rsvp-mini-btn {
       flex: 1;
       text-align: center;
-      padding: 0.4rem 0.25rem;
-      font-size: 0.72rem;
+      padding: 0.35rem 0.2rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #FFF;
       border: 1px solid var(--outline);
       cursor: pointer;
@@ -501,22 +531,22 @@
 
     .mock-actions-row {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
 
-    /* In-App Interactive Modal Overlay */
+    /* In-Mockup Modal Overlay */
     .mock-sheet-overlay {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(2px);
       z-index: 50;
       display: none;
       align-items: flex-end;
-      padding: 0.5rem;
+      padding: 0.4rem;
     }
 
     .mock-sheet-overlay.active {
@@ -526,11 +556,11 @@
     .mock-sheet {
       background: #FFF;
       width: 100%;
-      border-radius: 20px;
-      padding: 1.25rem;
+      border-radius: 16px;
+      padding: 1rem;
       box-shadow: var(--shadow-xl);
-      animation: slideUp 0.25s ease-out;
-      max-height: 85%;
+      animation: slideUp 0.2s ease-out;
+      max-height: 88%;
       overflow-y: auto;
     }
 
@@ -541,8 +571,8 @@
 
     .sheet-title {
       font-weight: 800;
-      font-size: 1rem;
-      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.6rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -562,112 +592,107 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.6rem 0.8rem;
-      border-radius: 10px;
+      padding: 0.55rem 0.7rem;
+      border-radius: 8px;
       border: 1px solid var(--outline);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
       cursor: pointer;
-      transition: background 0.15s;
     }
 
-    .user-select-item:hover {
+    .user-select-item:active {
       background: var(--primary-container);
     }
 
-    /* Section Highlights */
+    /* Sections */
     .section {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 4.5rem 1.5rem;
+      padding: 3.5rem 1.25rem;
     }
 
     .section-header {
       text-align: center;
       max-width: 700px;
-      margin: 0 auto 3rem;
+      margin: 0 auto 2.5rem;
     }
 
     .section-subtitle {
       color: var(--primary);
       font-weight: 800;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
 
     .section-title {
-      font-size: 2.25rem;
+      font-size: clamp(1.65rem, 4vw, 2.25rem);
       font-weight: 800;
       letter-spacing: -0.02em;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       color: var(--on-surface);
     }
 
     .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
     }
 
     .feature-card {
       background: #FFFFFF;
       border: 1px solid var(--outline);
       border-radius: var(--radius-lg);
-      padding: 1.75rem;
+      padding: 1.5rem;
       box-shadow: var(--shadow-sm);
-      transition: all 0.25s ease;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-      border-color: rgba(79, 70, 229, 0.3);
     }
 
     .feature-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       background: var(--primary-container);
       color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 1.25rem;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
     }
 
     .feature-card h3 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       color: var(--on-surface);
     }
 
     .feature-card p {
       color: var(--on-surface-variant);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
     }
 
-    /* Template Catalog */
+    /* Template Table with Horizontal Scroll */
     .template-table-container {
       background: #FFFFFF;
       border-radius: var(--radius-lg);
       border: 1px solid var(--outline);
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: var(--shadow-sm);
     }
 
     table {
       width: 100%;
+      min-width: 600px;
       border-collapse: collapse;
       text-align: left;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
     th, td {
-      padding: 1rem 1.5rem;
+      padding: 0.85rem 1.25rem;
       border-bottom: 1px solid var(--outline);
     }
 
@@ -681,12 +706,11 @@
       font-weight: 600;
     }
 
-    /* Code and Tech Stack Box */
+    /* Tech Stack Grid */
     .tech-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1rem;
-      margin-top: 2rem;
     }
 
     .tech-pill {
@@ -701,16 +725,16 @@
     }
 
     .tech-pill-icon {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     .tech-pill-text h4 {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
     }
 
     .tech-pill-text p {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--on-surface-variant);
     }
 
@@ -718,17 +742,18 @@
     footer {
       background: #FFFFFF;
       border-top: 1px solid var(--outline);
-      padding: 3rem 1.5rem;
+      padding: 2.5rem 1.25rem;
       text-align: center;
       color: var(--on-surface-variant);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .footer-links {
       display: flex;
       justify-content: center;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
       list-style: none;
     }
 
@@ -738,41 +763,39 @@
       font-weight: 600;
     }
 
-    .footer-links a:hover {
-      color: var(--primary);
-    }
-
-    /* Interactive Simulation Message Toast */
+    /* Toast */
     .toast {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
       background: #0F172A;
       color: #FFF;
-      padding: 0.85rem 1.35rem;
+      padding: 0.75rem 1.25rem;
       border-radius: var(--radius-md);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       box-shadow: var(--shadow-xl);
-      transform: translateY(100px);
       opacity: 0;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      max-width: 90vw;
+      gap: 0.5rem;
+      width: max-content;
+      max-width: 92vw;
+      text-align: center;
     }
 
     .toast.show {
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- Top Header Navigation -->
   <header>
     <div class="nav-container">
       <a href="#" class="brand">
@@ -786,8 +809,8 @@
         <li><a href="#architecture">Architecture</a></li>
       </ul>
       <div>
-        <a href="#architecture" class="btn btn-primary">
-          ⭐ Architecture & Code
+        <a href="#architecture" class="header-cta-btn">
+          ⭐ Architecture
         </a>
       </div>
     </div>
@@ -798,7 +821,7 @@
     <div>
       <div class="badge-row">
         <div class="pill-badge">🚀 Jetpack Compose M3</div>
-        <div class="pill-badge">💾 Room SQLite Persistence</div>
+        <div class="pill-badge">💾 Room SQLite</div>
         <div class="pill-badge">⚡ Real-Time Consensus</div>
       </div>
       <h1 class="hero-title">Group Decisions & RSVPs, <span>Without The Chaos</span></h1>
@@ -827,25 +850,25 @@
               <div class="app-brand-logo">⚡</div>
               <div>
                 <div class="app-title-text">PulsePoll</div>
-                <div style="font-size: 0.65rem; color: var(--on-surface-variant);" id="headerSubtext">Active Consensus</div>
+                <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Active Consensus</div>
               </div>
             </div>
             <div class="user-pill" id="userPill" onclick="openUserSwitcherModal()" title="Tap to switch user profile">
               <span id="userAvatar">🧑‍💻</span>
               <span id="userName">Alex (Google)</span>
-              <span style="font-size: 0.65rem;">▼</span>
+              <span style="font-size: 0.6rem;">▼</span>
             </div>
           </div>
 
           <!-- Quick Action Bar -->
-          <div style="display: flex; gap: 0.4rem; justify-content: space-between;">
-            <button onclick="toggleActiveFilter()" style="font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: #3730A3; padding: 0.4rem 0.6rem; border-radius: 10px; border: 1px solid rgba(79, 70, 229, 0.2); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-              ⚡ <span id="statsLabel">3 Active • 4 Polls</span>
+          <div style="display: flex; gap: 0.35rem; justify-content: space-between;">
+            <button onclick="toggleActiveFilter()" style="font-size: 0.72rem; font-weight: 700; background: #EEF2FF; color: #3730A3; padding: 0.35rem 0.55rem; border-radius: 8px; border: 1px solid rgba(79, 70, 229, 0.2); cursor: pointer;">
+              ⚡ <span id="statsLabel">3 Active Polls</span>
             </button>
-            <button onclick="openTemplatesModal()" style="font-size: 0.75rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.4rem 0.6rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <button onclick="openTemplatesModal()" style="font-size: 0.72rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.35rem 0.55rem; border-radius: 8px; cursor: pointer;">
               🚀 Templates
             </button>
-            <button onclick="openJoinCodeModal()" style="font-size: 0.75rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.4rem 0.6rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <button onclick="openJoinCodeModal()" style="font-size: 0.72rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.35rem 0.55rem; border-radius: 8px; cursor: pointer;">
               🔑 Join
             </button>
           </div>
@@ -853,50 +876,25 @@
           <!-- Featured Interactive Poll Card -->
           <div class="mock-card" id="mainPollCard">
             <div class="mock-card-header">
-              <div style="display: flex; gap: 0.6rem; align-items: center;">
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <div class="mock-category-icon" id="pollCategoryIcon">⚽</div>
                 <div>
                   <div class="mock-poll-title" id="pollTitle">5v5 Soccer Pitch Booking</div>
-                  <div style="font-size: 0.7rem; color: var(--on-surface-variant);">By <span id="pollCreator">Alex</span> • Code: <b id="pollCode">SOC5V5</b></div>
+                  <div style="font-size: 0.68rem; color: var(--on-surface-variant);">By <span id="pollCreator">Alex</span> • Code: <b id="pollCode">SOC5V5</b></div>
                 </div>
               </div>
               <div class="mock-deadline-badge" id="pollDeadline">⏰ 4h left</div>
             </div>
 
             <!-- Stats Bar -->
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; padding: 0.35rem 0.5rem; background: var(--surface-variant); border-radius: 8px; margin-bottom: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; padding: 0.3rem 0.45rem; background: var(--surface-variant); border-radius: 6px; margin-bottom: 0.5rem;">
               <span id="voteCountBadge">🗳️ 9 Votes • 👥 7 Voters</span>
               <span id="rsvpCountBadge" style="color: var(--primary); font-weight: 700;">✓ 11 Attending</span>
             </div>
 
             <!-- Options with real-time feedback -->
             <div class="mock-options-group" id="optionsContainer">
-              <!-- Option 1 -->
-              <div class="mock-option-item selected" id="opt1" onclick="castVote(0)">
-                <div class="mock-option-bar" id="bar0" style="width: 65%;"></div>
-                <div class="mock-option-content">
-                  <span id="optText0">Thursday 7:00 PM (Downtown Arena)</span>
-                  <span id="pct0">65% (6)</span>
-                </div>
-              </div>
-
-              <!-- Option 2 -->
-              <div class="mock-option-item" id="opt2" onclick="castVote(1)">
-                <div class="mock-option-bar" id="bar1" style="width: 25%;"></div>
-                <div class="mock-option-content">
-                  <span id="optText1">Friday 6:00 PM (Westside Pitch)</span>
-                  <span id="pct1">25% (2)</span>
-                </div>
-              </div>
-
-              <!-- Option 3 -->
-              <div class="mock-option-item" id="opt3" onclick="castVote(2)">
-                <div class="mock-option-bar" id="bar2" style="width: 10%;"></div>
-                <div class="mock-option-content">
-                  <span id="optText2">Saturday 9:00 AM (Central Field)</span>
-                  <span id="pct2">10% (1)</span>
-                </div>
-              </div>
+              <!-- Dynamically populated by renderPoll() -->
             </div>
 
             <!-- RSVP Headcount Box -->
@@ -914,82 +912,72 @@
 
             <!-- Bottom Actions -->
             <div class="mock-actions-row">
-              <button class="btn btn-primary" style="flex: 1.2; padding: 0.5rem 0.4rem; font-size: 0.75rem;" onclick="confirmVoteAction()">
+              <button class="btn btn-primary" style="flex: 1.2; padding: 0.45rem 0.3rem; font-size: 0.72rem; min-height: 38px;" onclick="confirmVoteAction()">
                 ✓ Cast Vote
               </button>
-              <button class="btn btn-tonal" style="flex: 1; padding: 0.5rem 0.4rem; font-size: 0.75rem;" onclick="openResultsModal()">
+              <button class="btn btn-tonal" style="flex: 1; padding: 0.45rem 0.3rem; font-size: 0.72rem; min-height: 38px;" onclick="openResultsModal()">
                 📊 Results
               </button>
-              <button class="btn btn-tonal" style="flex: 1; padding: 0.5rem 0.4rem; font-size: 0.75rem;" onclick="copyShareText()">
+              <button class="btn btn-tonal" style="flex: 1; padding: 0.45rem 0.3rem; font-size: 0.72rem; min-height: 38px;" onclick="copyShareText()">
                 📤 Share
               </button>
             </div>
           </div>
 
-          <!-- Second Card Preview (Clickable to switch active poll) -->
-          <div class="mock-card" id="secondPollCard" style="cursor: pointer; transition: all 0.2s;" onclick="switchActivePoll(1)">
-            <div style="display: flex; gap: 0.6rem; align-items: center; justify-content: space-between;">
-              <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <!-- Second Card Preview -->
+          <div class="mock-card" id="secondPollCard" style="cursor: pointer;" onclick="switchActivePoll(1)">
+            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <div class="mock-category-icon" id="secondIcon" style="background: #E0F2FE;">🍻</div>
                 <div>
-                  <div style="font-weight: 700; font-size: 0.85rem;" id="secondTitle">Friday Drinks & Rooftop</div>
-                  <div style="font-size: 0.7rem; color: var(--on-surface-variant);" id="secondSubtitle">Code: <b>DRK777</b> • 8 Votes • Tap to view</div>
+                  <div style="font-weight: 700; font-size: 0.8rem;" id="secondTitle">Friday Drinks & Rooftop</div>
+                  <div style="font-size: 0.66rem; color: var(--on-surface-variant);" id="secondSubtitle">Code: <b>DRK777</b> • Tap to switch</div>
                 </div>
               </div>
-              <span style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">Switch ➜</span>
+              <span style="font-size: 0.72rem; color: var(--primary); font-weight: 700;">Switch ➜</span>
             </div>
           </div>
 
-          <!-- In-Mockup Modal Sheet Overlays -->
+          <!-- Modals inside simulator -->
           <!-- 1. User Switcher Sheet -->
           <div class="mock-sheet-overlay" id="userSwitcherSheet" onclick="closeSheetOnOverlay(event, 'userSwitcherSheet')">
             <div class="mock-sheet">
               <div class="sheet-title">
-                <span>Switch Simulated Identity</span>
+                <span>Switch Simulated User</span>
                 <button class="sheet-close-btn" onclick="closeSheet('userSwitcherSheet')">✕</button>
               </div>
-              <p style="font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 0.75rem;">
+              <p style="font-size: 0.72rem; color: var(--on-surface-variant); margin-bottom: 0.6rem;">
                 Test multi-user quorum consensus & live score recalculations:
               </p>
               <div class="user-select-item" onclick="selectUser(0)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">🧑‍💻</span>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.1rem;">🧑‍💻</span>
                   <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">Alex</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Google SSO • Creator</div>
+                    <div style="font-weight: 700; font-size: 0.8rem;">Alex</div>
+                    <div style="font-size: 0.62rem; color: var(--on-surface-variant);">Google SSO • Creator</div>
                   </div>
                 </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.72rem;">Select</span>
               </div>
               <div class="user-select-item" onclick="selectUser(1)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">👩‍🎨</span>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.1rem;">👩‍🎨</span>
                   <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">Sarah Connor</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Facebook SSO • Voter</div>
+                    <div style="font-weight: 700; font-size: 0.8rem;">Sarah Connor</div>
+                    <div style="font-size: 0.62rem; color: var(--on-surface-variant);">Facebook SSO • Voter</div>
                   </div>
                 </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.72rem;">Select</span>
               </div>
               <div class="user-select-item" onclick="selectUser(2)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">👨‍💼</span>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.1rem;">👨‍💼</span>
                   <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">Marcus Aurelius</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Apple SSO • Voter</div>
+                    <div style="font-weight: 700; font-size: 0.8rem;">Marcus Aurelius</div>
+                    <div style="font-size: 0.62rem; color: var(--on-surface-variant);">Apple SSO • Voter</div>
                   </div>
                 </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
-              </div>
-              <div class="user-select-item" onclick="selectUser(3)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">👩‍🚀</span>
-                  <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">Emma Stone</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Guest Voter</div>
-                  </div>
-                </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.72rem;">Select</span>
               </div>
             </div>
           </div>
@@ -1001,38 +989,35 @@
                 <span>1-Tap Ready Templates</span>
                 <button class="sheet-close-btn" onclick="closeSheet('templatesSheet')">✕</button>
               </div>
-              <p style="font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 0.75rem;">
-                Select a template to instantly load into the live simulator:
-              </p>
               <div class="user-select-item" onclick="loadTemplate(0)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">⚽</span>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.1rem;">⚽</span>
                   <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">5v5 Soccer Pitch</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">3 Options • RSVP +Guests</div>
+                    <div style="font-weight: 700; font-size: 0.8rem;">5v5 Soccer Pitch</div>
+                    <div style="font-size: 0.62rem; color: var(--on-surface-variant);">3 Options • RSVP +Guests</div>
                   </div>
                 </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Load</span>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.72rem;">Load</span>
               </div>
               <div class="user-select-item" onclick="loadTemplate(1)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">🍻</span>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.1rem;">🍻</span>
                   <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">Friday Drinks & Rooftop</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">3 Venues • RSVP Headcount</div>
+                    <div style="font-weight: 700; font-size: 0.8rem;">Friday Drinks & Rooftop</div>
+                    <div style="font-size: 0.62rem; color: var(--on-surface-variant);">3 Venues • RSVP Headcount</div>
                   </div>
                 </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Load</span>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.72rem;">Load</span>
               </div>
               <div class="user-select-item" onclick="loadTemplate(2)">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.2rem;">🍕</span>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.1rem;">🍕</span>
                   <div>
-                    <div style="font-weight: 700; font-size: 0.85rem;">Team Lunch Decider</div>
-                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Mexican vs Italian vs Ramen</div>
+                    <div style="font-weight: 700; font-size: 0.8rem;">Team Lunch Decider</div>
+                    <div style="font-size: 0.62rem; color: var(--on-surface-variant);">Mexican vs Italian vs Ramen</div>
                   </div>
                 </div>
-                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Load</span>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.72rem;">Load</span>
               </div>
             </div>
           </div>
@@ -1044,31 +1029,31 @@
                 <span>🔑 Enter 6-Char Join Code</span>
                 <button class="sheet-close-btn" onclick="closeSheet('joinSheet')">✕</button>
               </div>
-              <div style="margin: 0.75rem 0;">
-                <input type="text" id="joinCodeInput" maxlength="6" placeholder="e.g. SOC5V5, DRK777" style="width: 100%; text-align: center; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; padding: 0.6rem; border: 2px solid var(--primary); border-radius: 10px; outline: none;" value="SOC5V5" />
+              <div style="margin: 0.6rem 0;">
+                <input type="text" id="joinCodeInput" maxlength="6" placeholder="e.g. SOC5V5" style="width: 100%; text-align: center; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 800; padding: 0.5rem; border: 2px solid var(--primary); border-radius: 8px; outline: none;" value="SOC5V5" />
               </div>
-              <button class="btn btn-primary" style="width: 100%; padding: 0.6rem;" onclick="submitJoinCode()">
+              <button class="btn btn-primary" style="width: 100%; padding: 0.5rem; min-height: 42px;" onclick="submitJoinCode()">
                 Join Poll
               </button>
             </div>
           </div>
 
-          <!-- 4. Results & Analytics Sheet -->
+          <!-- 4. Results Sheet -->
           <div class="mock-sheet-overlay" id="resultsSheet" onclick="closeSheetOnOverlay(event, 'resultsSheet')">
             <div class="mock-sheet">
               <div class="sheet-title">
                 <span>📊 Consensus Breakdown</span>
                 <button class="sheet-close-btn" onclick="closeSheet('resultsSheet')">✕</button>
               </div>
-              <div style="background: var(--surface-variant); padding: 0.75rem; border-radius: 12px; margin-bottom: 0.75rem;">
-                <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary);">🏆 Leading Choice:</div>
-                <div style="font-weight: 800; font-size: 0.9rem;" id="resultsLeader">Thursday 7:00 PM (Downtown)</div>
-                <div style="font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 4px;" id="resultsLeaderStats">65% of Total Votes • Quorum Reached (7/5)</div>
+              <div style="background: var(--surface-variant); padding: 0.65rem; border-radius: 10px; margin-bottom: 0.65rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">🏆 Leading Choice:</div>
+                <div style="font-weight: 800; font-size: 0.85rem;" id="resultsLeader">Thursday 7:00 PM</div>
+                <div style="font-size: 0.65rem; color: var(--on-surface-variant); margin-top: 3px;" id="resultsLeaderStats">65% of Total Votes • Quorum Reached</div>
               </div>
-              <button class="btn btn-primary" style="width: 100%; padding: 0.5rem; font-size: 0.8rem; margin-bottom: 0.4rem;" onclick="downloadCsvMock()">
+              <button class="btn btn-primary" style="width: 100%; padding: 0.45rem; font-size: 0.75rem; margin-bottom: 0.35rem; min-height: 38px;" onclick="downloadCsvMock()">
                 💾 Export CSV Report
               </button>
-              <button class="btn btn-tonal" style="width: 100%; padding: 0.5rem; font-size: 0.8rem;" onclick="closeSheet('resultsSheet')">
+              <button class="btn btn-tonal" style="width: 100%; padding: 0.45rem; font-size: 0.75rem; min-height: 38px;" onclick="closeSheet('resultsSheet')">
                 Close
               </button>
             </div>
@@ -1297,13 +1282,11 @@
     // Simulated Users List
     const users = [
       { name: "Alex (Google)", avatar: "🧑‍💻", provider: "Google" },
-      { name: "Sarah Connor (FB)", avatar: "👩‍🎨", provider: "Facebook" },
-      { name: "Marcus Aurelius (Apple)", avatar: "👨‍💼", provider: "Apple" },
-      { name: "Emma Stone (Guest)", avatar: "👩‍🚀", provider: "Guest" }
+      { name: "Sarah (FB)", avatar: "👩‍🎨", provider: "Facebook" },
+      { name: "Marcus (Apple)", avatar: "👨‍💼", provider: "Apple" }
     ];
     let currentUserIdx = 0;
 
-    // Render Current Poll
     function renderPoll() {
       const poll = pollCatalog[currentPollIdx];
       document.getElementById('pollCategoryIcon').textContent = poll.categoryIcon;
@@ -1313,7 +1296,7 @@
       document.getElementById('pollDeadline').textContent = poll.deadline;
 
       const totalVotes = poll.options.reduce((acc, cur) => acc + cur.votes, 0);
-      document.getElementById('voteCountBadge').textContent = `🗳️ ${totalVotes} Votes • 👥 ${totalVotes - 1 > 0 ? totalVotes - 1 : 1} Voters`;
+      document.getElementById('voteCountBadge').textContent = `🗳️ ${totalVotes} Votes • 👥 ${totalVotes > 1 ? totalVotes - 1 : 1} Voters`;
       document.getElementById('rsvpCountBadge').textContent = `✓ ${poll.totalAttending} Attending`;
 
       const optionsContainer = document.getElementById('optionsContainer');
@@ -1330,8 +1313,8 @@
         optDiv.innerHTML = `
           <div class="mock-option-bar" style="width: ${pct}%;"></div>
           <div class="mock-option-content">
-            <span>${opt.text}</span>
-            <span>${pct}% (${opt.votes})</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${opt.text}</span>
+            <span style="flex-shrink: 0; font-weight: 700;">${pct}% (${opt.votes})</span>
           </div>
         `;
         optionsContainer.appendChild(optDiv);
@@ -1342,35 +1325,30 @@
       const altPoll = pollCatalog[altIdx];
       document.getElementById('secondIcon').textContent = altPoll.categoryIcon;
       document.getElementById('secondTitle').textContent = altPoll.title;
-      const altTotal = altPoll.options.reduce((acc, cur) => acc + cur.votes, 0);
-      document.getElementById('secondSubtitle').innerHTML = `Code: <b>${altPoll.code}</b> • ${altTotal} Votes • Tap to switch`;
+      document.getElementById('secondSubtitle').innerHTML = `Code: <b>${altPoll.code}</b> • Tap to switch`;
     }
 
-    // Interactive Demo Hero Button Click Handler
     function triggerHeroInteractiveDemo() {
       const demoElement = document.getElementById('demo');
       demoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Add visual pulse glow to mockup
       const phoneFrame = document.getElementById('phoneFrame');
       phoneFrame.classList.remove('highlight-pulse');
-      void phoneFrame.offsetWidth; // force reflow
+      void phoneFrame.offsetWidth;
       phoneFrame.classList.add('highlight-pulse');
 
-      // Trigger automatic vote increment on Option 1
       setTimeout(() => {
         castVote(0);
         showToast('⚡ Interactive Demo Activated! Vote counted & Room SQLite updated.');
-      }, 500);
+      }, 400);
     }
 
-    // Hero SSO Modal Trigger
     function triggerHeroSsoModal() {
       const demoElement = document.getElementById('demo');
       demoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => {
         openUserSwitcherModal();
-      }, 400);
+      }, 350);
     }
 
     function castVote(optionIndex) {
@@ -1378,7 +1356,7 @@
       poll.selectedOptionIdx = optionIndex;
       poll.options[optionIndex].votes += 1;
       renderPoll();
-      showToast(`🗳️ Vote recorded for: "${poll.options[optionIndex].text.split('(')[0]}"!`);
+      showToast(`🗳️ Vote recorded for "${poll.options[optionIndex].text.split('(')[0]}"`);
     }
 
     function setRsvp(type) {
@@ -1399,13 +1377,13 @@
         document.getElementById('currentHeadcountText').textContent = 'Maybe / Tentative';
       }
       renderPoll();
-      showToast(`🎟️ RSVP status updated: ${type.toUpperCase()}`);
+      showToast(`🎟️ RSVP status: ${type.toUpperCase()}`);
     }
 
     function confirmVoteAction() {
       const poll = pollCatalog[currentPollIdx];
       const selected = poll.options[poll.selectedOptionIdx];
-      showToast(`✅ Synced with Room SQLite Database: "${selected.text}"`);
+      showToast(`✅ Synced with Room SQLite DB: "${selected.text}"`);
     }
 
     function openUserSwitcherModal() {
@@ -1443,7 +1421,7 @@
         currentPollIdx = matchIdx;
         renderPoll();
         closeSheet('joinSheet');
-        showToast(`🔑 Found & loaded poll code ${code}!`);
+        showToast(`🔑 Loaded poll code ${code}!`);
       } else {
         showToast(`⚡ Joining with shortcode ${code}... Poll synced!`);
         closeSheet('joinSheet');
@@ -1518,7 +1496,7 @@
       clearTimeout(window.toastTimer);
       window.toastTimer = setTimeout(() => {
         toast.classList.remove('show');
-      }, 3200);
+      }, 3000);
     }
 
     // Initialize on load
