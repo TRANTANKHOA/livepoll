@@ -60,8 +60,8 @@ fun WebAccessDialog(
     var copied by remember { mutableStateOf(false) }
 
     val instructionsText = """
-        📱 PulsePoll - How to Vote & Participate:
-        1. Open PulsePoll in your browser or Android device
+        📱 LivePulse - How to Vote & Participate:
+        1. Open LivePulse in your browser or Android device
         2. Tap 'Join with Code' (top navigation bar)
         3. Enter the 6-character poll code (e.g. SOC5V5, DRK777)
         4. Cast your vote & RSVP!
@@ -110,7 +110,7 @@ fun WebAccessDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "PulsePoll runs right inside your browser window. You can create polls, simulate multi-user voting, and share codes with friends:",
+                    text = "LivePulse runs right inside your browser window. You can create polls, simulate multi-user voting, and share codes with friends:",
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
