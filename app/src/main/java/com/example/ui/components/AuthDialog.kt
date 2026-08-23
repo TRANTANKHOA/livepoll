@@ -129,6 +129,23 @@ fun AuthDialog(
             return
         }
 
+        if (provider == AuthProvider.APPLE) {
+            viewModel.signInWithApple(
+                context = context,
+                fallbackName = customName,
+                fallbackEmail = customEmail
+            ) { success, message ->
+                isAuthenticating = false
+                authProviderInProgress = null
+                statusSuccessMessage = message
+                scope.launch {
+                    delay(800)
+                    onDismiss()
+                }
+            }
+            return
+        }
+
         scope.launch {
             delay(500) // Smooth auth handshake
             val (name, email, emoji) = when (provider) {

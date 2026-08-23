@@ -52,7 +52,10 @@ PulsePoll uses Firebase for **Cloud Firestore (Multiplayer live sync)** and **Fi
    - Register your app on [Meta for Developers](https://developers.facebook.com/).
    - Obtain your **App ID** and **App Secret**.
    - In Firebase Console ➔ **Authentication ➔ Sign-in method**, click **Facebook**, toggle **Enable**, and enter your Facebook App ID & Secret.
-3. **Enable Cloud Firestore**:
+3. **Enable Apple Sign-In**:
+   - Register your Services ID and Apple Developer Team on [Apple Developer Portal](https://developer.apple.com/).
+   - In Firebase Console ➔ **Authentication ➔ Sign-in method**, click **Apple**, toggle **Enable**, and enter your Services ID, Apple Team ID, Key ID, and Private Key.
+4. **Enable Cloud Firestore**:
    - Go to **Build ➔ Firestore Database ➔ Create database**.
    - Select a database region close to your users (e.g., `asia-southeast1`, `us-central1`, or `europe-west1`).
    - Choose **Start in production mode** (we will apply rules in Step 3).

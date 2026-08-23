@@ -105,9 +105,39 @@ class PollViewModel(
         }
     }
 
+    fun signInWithApple(
+        context: Context,
+        idToken: String? = null,
+        rawNonce: String? = null,
+        fallbackName: String? = null,
+        fallbackEmail: String? = null,
+        onComplete: (Boolean, String) -> Unit
+    ) {
+        viewModelScope.launch {
+            cloudSyncStatus.value = "🔄 Connecting with Apple ID..."
+            val result = com.example.util.AppleAuthHelper.signInWithApple(
+                context = context,
+                idToken = idToken,
+                rawNonce = rawNonce,
+                fallbackName = fallbackName,
+                fallbackEmail = fallbackEmail
+            )
+            result.onSuccess { user ->
+                setCurrentUser(user)
+                cloudSyncStatus.value = "🟢 Connected as ${user.name}"
+                onComplete(true, "Connected successfully as ${user.name} (Apple ID)")
+            }.onFailure { error ->
+                cloudSyncStatus.value = "⚠️ Apple ID connection failed"
+                val message = error.message ?: "Could not complete Apple ID sign-in"
+                onComplete(false, message)
+            }
+        }
+    }
+
     fun logoutUser(context: Context) {
         com.example.util.GoogleAuthHelper.signOut(context)
         com.example.util.FacebookAuthHelper.signOut(context)
+        com.example.util.AppleAuthHelper.signOut(context)
         val guestUser = UserAccount(
             id = "guest_" + UUID.randomUUID().toString().take(6),
             name = "Guest User",

@@ -219,7 +219,7 @@ fun PollListScreen(
                             }
                             Column {
                                 Text(
-                                    text = "PulsePoll",
+                                    text = "LivePulse",
                                     fontWeight = FontWeight.ExtraBold,
                                     style = MaterialTheme.typography.titleLarge
                                 )

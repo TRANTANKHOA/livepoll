@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "PulsePoll"
+rootProject.name = "LivePulse"
 
 include(":app")
