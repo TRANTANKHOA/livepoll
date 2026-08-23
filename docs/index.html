@@ -115,20 +115,128 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 1.25rem;
+      gap: 0.75rem;
       list-style: none;
+      margin: 0;
+      padding: 0;
     }
 
-    .nav-links a {
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link, .dropdown-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.7rem;
       text-decoration: none;
       color: var(--on-surface-variant);
       font-weight: 600;
-      font-size: 0.9rem;
-      transition: color 0.15s;
+      font-size: 0.88rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
     }
 
-    .nav-links a:hover {
+    .nav-link:hover, .dropdown-trigger:hover, .nav-item:hover .dropdown-trigger {
       color: var(--primary);
+      background: rgba(79, 70, 229, 0.08);
+    }
+
+    .dropdown-chevron {
+      font-size: 0.65rem;
+      transition: transform 0.2s ease;
+      opacity: 0.75;
+    }
+
+    .nav-item:hover .dropdown-chevron, .nav-item.open .dropdown-chevron {
+      transform: rotate(180deg);
+      opacity: 1;
+    }
+
+    /* Dropdown Menu Container */
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 260px;
+      background: var(--surface);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      padding: 0.5rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    /* Show on hover or active class */
+    .nav-item:hover .dropdown-menu,
+    .nav-item.open .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(4px);
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--on-surface);
+      transition: background 0.15s ease;
+    }
+
+    .dropdown-item:hover {
+      background: var(--surface-container-high);
+    }
+
+    .dropdown-item-icon {
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .dropdown-item-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dropdown-item-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--on-surface);
+      line-height: 1.2;
+    }
+
+    .dropdown-item-desc {
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+      margin-top: 0.15rem;
+      line-height: 1.3;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--outline-variant);
+      margin: 0.35rem 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
     .header-cta-btn {
@@ -150,10 +258,58 @@
       background: var(--primary-hover);
     }
 
+    /* Mobile Hamburger Menu Toggle Button */
+    .mobile-menu-toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.6rem;
+      font-size: 1.15rem;
+      cursor: pointer;
+      color: var(--on-surface);
+    }
+
+    /* Mobile Drawer */
+    .mobile-nav-drawer {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1200;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease;
+    }
+
+    .mobile-nav-drawer.open {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-nav-panel {
+      background: var(--surface);
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-lg);
+      border-bottom: 2px solid var(--primary);
+    }
+
     /* Mobile Nav Rules */
-    @media (max-width: 820px) {
+    @media (max-width: 960px) {
       .nav-links {
         display: none;
+      }
+      .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .nav-container {
         padding: 0.65rem 1rem;
@@ -1046,27 +1202,186 @@
 </head>
 <body>
 
-  <!-- Top Header Navigation -->
+  <!-- Top Header Navigation with Dropdown Menus -->
   <header>
     <div class="nav-container">
       <a href="#" class="brand">
         <div class="brand-icon">⚡</div>
         <div class="brand-title">PulsePoll</div>
       </a>
+
+      <!-- Desktop Navigation with Dropdowns -->
       <ul class="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#demo">Live Demo</a></li>
-        <li><a href="#templates">Templates</a></li>
-        <li><a href="#architecture">Architecture</a></li>
-        <li><a href="#production">🚀 Production</a></li>
+        <!-- Dropdown 1: Features & Showcase -->
+        <li class="nav-item" id="navFeaturesItem">
+          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'featuresDropdown')">
+            <span>✨ Features</span>
+            <span class="dropdown-chevron">▼</span>
+          </button>
+          <div class="dropdown-menu" id="featuresDropdown">
+            <a href="#features" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">⚡</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Core App Features</span>
+                <span class="dropdown-item-desc">6-char short codes, RSVP headcounts & live leaderboards</span>
+              </div>
+            </a>
+            <a href="#demo" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">📱</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Interactive Live Demo</span>
+                <span class="dropdown-item-desc">Vote, switch personas & RSVP on live simulated phone</span>
+              </div>
+            </a>
+            <a href="#templates" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">📋</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Poll Templates</span>
+                <span class="dropdown-item-desc">Sports pitches, dinners, outings & sprint retros</span>
+              </div>
+            </a>
+          </div>
+        </li>
+
+        <!-- Dropdown 2: Architecture & Backend -->
+        <li class="nav-item" id="navArchItem">
+          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'archDropdown')">
+            <span>🏛️ Architecture</span>
+            <span class="dropdown-chevron">▼</span>
+          </button>
+          <div class="dropdown-menu" id="archDropdown">
+            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns(); switchArchTab('write');">
+              <span class="dropdown-item-icon">⚡</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Write Pipeline</span>
+                <span class="dropdown-item-desc">Compose ➔ ViewModel ➔ Room DAO ➔ Cloud Firestore</span>
+              </div>
+            </a>
+            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns(); switchArchTab('read');">
+              <span class="dropdown-item-icon">🔄</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Reactive Read Stream</span>
+                <span class="dropdown-item-desc">Local Room SQLite cache + WebSocket SnapshotListeners</span>
+              </div>
+            </a>
+            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns(); switchArchTab('full');">
+              <span class="dropdown-item-icon">🏛️</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">4-Tier System Hierarchy</span>
+                <span class="dropdown-item-desc">Complete Clean MVVM layer separation diagram</span>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">🔑</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Auth & Personas Matrix</span>
+                <span class="dropdown-item-desc">Google Sign-In, Guest mode & In-App Demo Personas</span>
+              </div>
+            </a>
+          </div>
+        </li>
+
+        <!-- Dropdown 3: Deployment & Operations -->
+        <li class="nav-item" id="navProdItem">
+          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'prodDropdown')">
+            <span>🚀 Production</span>
+            <span class="dropdown-chevron">▼</span>
+          </button>
+          <div class="dropdown-menu" id="prodDropdown">
+            <a href="#production" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">🔥</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Firebase Console Runbook</span>
+                <span class="dropdown-item-desc">Spark Free Tier setup & google-services.json placement</span>
+              </div>
+            </a>
+            <a href="#production" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">🔐</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Keystore & SHA-1 Setup</span>
+                <span class="dropdown-item-desc">Google Sign-In fingerprint extraction helper</span>
+              </div>
+            </a>
+            <a href="#production" class="dropdown-item" onclick="closeAllNavDropdowns()">
+              <span class="dropdown-item-icon">📦</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title">Google Play Release (.AAB)</span>
+                <span class="dropdown-item-desc">Production App Bundle compilation & Play Store checklist</span>
+              </div>
+            </a>
+          </div>
+        </li>
       </ul>
-      <div>
+
+      <!-- Right Action & Mobile Toggle -->
+      <div class="header-actions">
         <a href="#production" class="header-cta-btn">
           📦 Deploy Guide
         </a>
+        <button class="mobile-menu-toggle" id="mobileMenuBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+          ☰
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer" onclick="closeMobileNavOnBackdrop(event)">
+    <div class="mobile-nav-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--outline-variant);">
+        <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">⚡ PulsePoll Navigation</div>
+        <button onclick="toggleMobileNav()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.4rem;">App & Showcase</div>
+          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+            <a href="#features" class="dropdown-item" onclick="toggleMobileNav()">
+              <span>⚡</span> <span>Core Features</span>
+            </a>
+            <a href="#demo" class="dropdown-item" onclick="toggleMobileNav()">
+              <span>📱</span> <span>Interactive Phone Demo</span>
+            </a>
+            <a href="#templates" class="dropdown-item" onclick="toggleMobileNav()">
+              <span>📋</span> <span>Poll Templates</span>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--secondary); text-transform: uppercase; margin-bottom: 0.4rem;">Engineering & Backend</div>
+          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+            <a href="#architecture" class="dropdown-item" onclick="toggleMobileNav(); switchArchTab('write');">
+              <span>⚡</span> <span>Write Pipeline (Room + Cloud)</span>
+            </a>
+            <a href="#architecture" class="dropdown-item" onclick="toggleMobileNav(); switchArchTab('read');">
+              <span>🔄</span> <span>Read Stream (Local Cache + Sync)</span>
+            </a>
+            <a href="#architecture" class="dropdown-item" onclick="toggleMobileNav(); switchArchTab('full');">
+              <span>🏛️</span> <span>Full Layer Hierarchy</span>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: #10B981; text-transform: uppercase; margin-bottom: 0.4rem;">Production Operations</div>
+          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+            <a href="#production" class="dropdown-item" onclick="toggleMobileNav()">
+              <span>🔥</span> <span>Firebase Setup Runbook</span>
+            </a>
+            <a href="#production" class="dropdown-item" onclick="toggleMobileNav()">
+              <span>🔐</span> <span>Keystore & Google Sign-In</span>
+            </a>
+            <a href="#production" class="dropdown-item" onclick="toggleMobileNav()">
+              <span>📦</span> <span>Build Play Bundle (.AAB)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Hero Section -->
   <section class="hero-section">
@@ -1420,21 +1735,23 @@
   <section class="section" id="architecture">
     <div class="section-header">
       <div class="section-subtitle">System Architecture & Multi-Cloud Backend</div>
-      <h2 class="section-title">End-to-End Hybrid Cloud & Local Pipeline</h2>
-      <p style="color: var(--on-surface-variant);">Detailed flow showing how user actions travel through Jetpack Compose frontend, ViewModel coroutines, repository domain layer, Room SQLite cache, and Cloud Firestore live sync.</p>
+      <h2 class="section-title">End-to-End System Architecture</h2>
+      <p style="color: var(--on-surface-variant); max-width: 760px; margin: 0 auto;">
+        PulsePoll is built on a <b>Hybrid Offline-First Architecture</b> combining local <b>Room SQLite</b> for zero-latency UI reactivity and <b>Firebase Cloud Firestore</b> for real-time multi-device synchronization.
+      </p>
     </div>
 
     <!-- Interactive Data Flow Diagram Container -->
     <div class="arch-diagram-wrapper">
       <div class="arch-tabs">
         <button class="arch-tab-btn active" id="tabWriteFlow" onclick="switchArchTab('write')">
-          ⚡ 1. Write Flow (Vote / RSVP Sync)
+          ⚡ 1. Write Flow (Vote ➔ SQLite ➔ Cloud Sync)
         </button>
         <button class="arch-tab-btn" id="tabReadFlow" onclick="switchArchTab('read')">
-          🔄 2. Hybrid Read Flow (Cache + Firestore)
+          🔄 2. Read Flow (Local Cache + Live WebSocket)
         </button>
         <button class="arch-tab-btn" id="tabFullStack" onclick="switchArchTab('full')">
-          🏛️ 3. Full Layer Hierarchy
+          🏛️ 3. Full 4-Tier Stack Overview
         </button>
       </div>
 
@@ -1455,9 +1772,9 @@
             <div class="arch-node-body">
               <ul class="arch-spec-list">
                 <li>👆 Tap Option / Cast Vote</li>
-                <li>🎟️ Toggle RSVP (+Guests)</li>
+                <li>🎟️ RSVP (+Guests Count)</li>
                 <li>🔑 Input 6-Char Join Code</li>
-                <li>🌐 Google SSO / Multi-Auth</li>
+                <li>🌐 Google Sign-In / Guest Mode</li>
               </ul>
             </div>
             <div class="arch-node-badge">Touch Events & Gesture Input</div>
@@ -1475,16 +1792,16 @@
             <div class="arch-node-header">
               <div class="arch-node-icon">🎨</div>
               <div>
-                <span class="arch-layer-tag">2. Frontend View</span>
+                <span class="arch-layer-tag">2. Presentation</span>
                 <h4 class="arch-node-title">Jetpack Compose M3</h4>
               </div>
             </div>
             <div class="arch-node-body">
               <ul class="arch-spec-list">
                 <li>🖼️ <code>VotingScreen.kt</code></li>
-                <li>✨ Dynamic Material 3 Theming</li>
-                <li>🎯 Type-safe Compose Navigation</li>
-                <li>⚡ Instant Recomposition</li>
+                <li>✨ Material 3 Motion & Theme</li>
+                <li>🎯 Type-safe Navigation</li>
+                <li>⚡ 0ms Optimistic UI Update</li>
               </ul>
             </div>
             <div class="arch-node-badge">Declarative UI Layer</div>
@@ -1502,14 +1819,14 @@
             <div class="arch-node-header">
               <div class="arch-node-icon">⚙️</div>
               <div>
-                <span class="arch-layer-tag">3. Logic & Controller</span>
+                <span class="arch-layer-tag">3. Domain & State</span>
                 <h4 class="arch-node-title">ViewModel & Repo</h4>
               </div>
             </div>
             <div class="arch-node-body">
               <ul class="arch-spec-list">
                 <li>🧠 <code>PollViewModel.kt</code> (Coroutines)</li>
-                <li>📊 Quorum & Leaderboard Math</li>
+                <li>📊 Quorum & Leaderboard Engine</li>
                 <li>🛡️ <code>PollRepository.kt</code></li>
                 <li>🔑 <code>GoogleAuthHelper.kt</code></li>
               </ul>
@@ -1529,19 +1846,19 @@
             <div class="arch-node-header">
               <div class="arch-node-icon">☁️</div>
               <div>
-                <span class="arch-layer-tag">4. Cloud + Local DB</span>
-                <h4 class="arch-node-title">Firestore & Room</h4>
+                <span class="arch-layer-tag">4. Storage & Sync</span>
+                <h4 class="arch-node-title">Room + Firestore</h4>
               </div>
             </div>
             <div class="arch-node-body">
               <ul class="arch-spec-list">
-                <li>🔥 <code>FirestoreService.kt</code> (Cloud)</li>
                 <li>📦 <code>PulsePollDatabase.kt</code> (Room)</li>
                 <li>📑 <code>PollDao.kt</code> (ACID SQLite)</li>
-                <li>⚡ SnapshotListener Live Sync</li>
+                <li>🔥 <code>FirestoreService.kt</code> (Cloud)</li>
+                <li>⚡ SnapshotListener Live Feed</li>
               </ul>
             </div>
-            <div class="arch-node-badge">Cloud Firestore + Native SQLite WAL</div>
+            <div class="arch-node-badge">Room SQLite (Local) + Firestore (Cloud)</div>
           </div>
 
         </div>
@@ -1552,71 +1869,87 @@
             ⚡ Write Path (Atomic Local Vote + Cloud Firestore Sync)
           </div>
           <p class="flow-summary-desc" id="flowSummaryDesc">
-            1. User taps an option in <b>Compose UI</b> ➔ 2. Trigger invokes <code>viewModel.castVote(optionId)</code> on <code>viewModelScope</code> ➔ 3. <b>PollRepository</b> executes an ACID <code>@Transaction</code> via <b>Room DAO</b> with 0ms latency ➔ 4. Background Coroutine syncs vote document to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. Cloud <b>SnapshotListener</b> broadcasts updates to all active devices in real-time.
+            1. User taps an option in <b>Compose UI</b> ➔ 2. <code>viewModel.castVote(optionId)</code> executes on <code>viewModelScope</code> ➔ 3. <b>Room DAO</b> commits an atomic ACID transaction to local SQLite (0ms latency, works offline) ➔ 4. Background Coroutine pushes the vote document to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. Cloud <b>SnapshotListeners</b> broadcast the new tallies in real-time to other participants.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Supported Authentication Matrix & Cloud Architecture Cards -->
+    <!-- Architectural Deep Dive: 3 Pillar Explanations -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2.5rem;">
-      <!-- Auth Support Card -->
+      
+      <!-- Card 1: Hybrid Storage Model -->
       <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-          <span style="font-size: 1.75rem;">🔑</span>
+          <span style="font-size: 1.75rem;">💾</span>
           <div>
-            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">Authentication Architecture</h3>
-            <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Jetpack Credential Manager + Firebase Auth</span>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">1. Hybrid Storage Engine</h3>
+            <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Room SQLite + Cloud Firestore</span>
           </div>
         </div>
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; color: var(--on-surface-variant);">
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>🌐</span>
-            <div><strong style="color: var(--on-surface);">Google Sign-In:</strong> Native Android Credential Manager + ID Token verification into Firebase Auth.</div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
+          Instead of relying exclusively on the network, PulsePoll uses a <b>two-tier cache</b>:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem;">
+            <span>📦</span>
+            <div><strong style="color: var(--on-surface);">Local SQLite Cache (Room):</strong> Reads and initial writes hit the on-device SQLite database first. Guarantees 0ms UI response time and 100% offline functionality.</div>
           </li>
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>👤</span>
-            <div><strong style="color: var(--on-surface);">Guest Mode:</strong> Instant unique session (<code>guest_xxxxxx</code>) for zero-friction voting without permissions.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>👥</span>
-            <div><strong style="color: var(--on-surface);">Social SSO Personas:</strong> Built-in Facebook & Apple test identities for quorum simulations.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>✉️</span>
-            <div><strong style="color: var(--on-surface);">Custom Profiles:</strong> Fast organization/team custom handle generation with avatar badges.</div>
+          <li style="display: flex; gap: 0.5rem;">
+            <span>☁️</span>
+            <div><strong style="color: var(--on-surface);">Cloud Firestore Relay:</strong> Asynchronous background sync sends updates to Firebase. Realtime WebSocket snapshot listeners sync results between multiple phones without needing a custom server backend.</div>
           </li>
         </ul>
       </div>
 
-      <!-- Cloud Infrastructure & Cost Card -->
+      <!-- Card 2: Production Auth vs In-App Demo Personas -->
       <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-          <span style="font-size: 1.75rem;">☁️</span>
+          <span style="font-size: 1.75rem;">🔑</span>
           <div>
-            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">Cloud Firestore & Cost Model</h3>
-            <span style="font-size: 0.8rem; color: var(--secondary); font-weight: 600;">Free Spark Tier ($0.00 / month)</span>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">2. Authentication & Identity</h3>
+            <span style="font-size: 0.8rem; color: var(--secondary); font-weight: 600;">Production Auth vs Demo Personas</span>
           </div>
         </div>
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; color: var(--on-surface-variant);">
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>⚡</span>
-            <div><strong style="color: var(--on-surface);">Hybrid Cache:</strong> Zero read cost for local user actions; reads hit Room SQLite cache first.</div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
+          PulsePoll clearly separates <b>real user sign-in</b> from <b>multi-user testing tools</b>:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem;">
+            <span>🌐</span>
+            <div><strong style="color: var(--on-surface);">Production (Google & Guest):</strong> Real authentication using Android Jetpack <code>CredentialManager</code> + Firebase Auth for verified accounts, plus a zero-friction Guest session generator.</div>
           </li>
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>📊</span>
-            <div><strong style="color: var(--on-surface);">Generous Spark Allowance:</strong> 50,000 document reads/day & 20,000 writes/day free.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>📡</span>
-            <div><strong style="color: var(--on-surface);">Live WebSocket Sync:</strong> Realtime Snapshot listeners keep all participants in sync.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem; align-items: flex-start;">
-            <span>🔒</span>
-            <div><strong style="color: var(--on-surface);">Security Rules:</strong> Firestore document access gated by user authentication tokens.</div>
+          <li style="display: flex; gap: 0.5rem;">
+            <span>👥</span>
+            <div><strong style="color: var(--on-surface);">In-App Test Personas (FB / Apple):</strong> Built-in simulated profiles (e.g., Sarah Connor, Marcus Aurelius) that let you test group quorum rules (e.g., "5 votes needed to close") on a <b>single device</b> without having to switch physical phones.</div>
           </li>
         </ul>
       </div>
+
+      <!-- Card 3: Free Spark Tier & Security -->
+      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.75rem;">🛡️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">3. Cost Model & Security</h3>
+            <span style="font-size: 0.8rem; color: #10B981; font-weight: 600;">$0 / month Spark Tier & ACL Rules</span>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
+          Engineered for zero maintenance overhead and low costs:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem;">
+            <span>📊</span>
+            <div><strong style="color: var(--on-surface);">50,000 Reads / Day Free:</strong> Because local users read from Room SQLite, cloud document reads are minimized, staying well within Firebase's free allowance.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem;">
+            <span>🔒</span>
+            <div><strong style="color: var(--on-surface);">Granular Security Rules:</strong> <code>firestore.rules</code> ensures only the poll creator can delete or close polls, while public voters can only append their own vote documents.</div>
+          </li>
+        </ul>
+      </div>
+
     </div>
 
     <!-- Technical Specs Summary Grid -->
@@ -2018,18 +2351,18 @@
 
       if (mode === 'write') {
         document.getElementById('tabWriteFlow').classList.add('active');
-        titleEl.innerHTML = '⚡ 1. Write Flow (Atomic Vote Insertion & Consensus Recalculation)';
-        descEl.innerHTML = '1. <b>User</b> taps option ➔ 2. <b>Compose UI</b> dispatches <code>viewModel.castVote(optionId)</code> ➔ 3. <b>ViewModel</b> launches Coroutine on <code>Dispatchers.IO</code> calling <code>repository.recordVote()</code> ➔ 4. <b>Room DAO</b> executes an ACID <code>@Transaction</code> in <b>SQLite</b> ➔ 5. SQLite WAL commit triggers Room Invalidation Tracker to notify observers.';
-        showToast('⚡ Showing Write Flow Pipeline (User ➔ UI ➔ VM ➔ DB)');
+        titleEl.innerHTML = '⚡ 1. Write Flow (Local Instant Write ➔ Cloud Broadcast)';
+        descEl.innerHTML = '1. <b>User</b> taps an option ➔ 2. <b>Compose UI</b> dispatches <code>viewModel.castVote()</code> ➔ 3. <b>Room SQLite</b> writes the vote locally with <b>0ms latency</b> (offline safe) ➔ 4. <b>Coroutine</b> syncs vote to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. <b>SnapshotListener</b> pushes live vote counts to all other connected devices.';
+        showToast('⚡ Showing Write Flow (UI ➔ Room SQLite ➔ Cloud Firestore)');
       } else if (mode === 'read') {
         document.getElementById('tabReadFlow').classList.add('active');
-        titleEl.innerHTML = '🔄 2. Reactive Read Flow (SQLite Live Flow & State Recomposition)';
-        descEl.innerHTML = '1. <b>Room SQLite</b> detects data change via Invalidation Tracker ➔ 2. <b>PollDao</b> emits updated <code>Flow&lt;PollWithDetails&gt;</code> ➔ 3. <b>Repository</b> maps entities to Domain models ➔ 4. <b>ViewModel</b> collects into <code>StateFlow&lt;PollDetailUiState&gt;</code> ➔ 5. <b>Jetpack Compose</b> triggers targeted recomposition to animate progress bars with <b>0ms lag</b>.';
-        showToast('🔄 Showing Reactive Read Stream (DB ➔ Flow ➔ State ➔ UI)');
+        titleEl.innerHTML = '🔄 2. Read Flow (Fast Local Cache + Real-Time WebSocket)';
+        descEl.innerHTML = '1. <b>Room DAO</b> emits immediate local cached state to <code>StateFlow</code> for instant render ➔ 2. <b>Firestore SnapshotListener</b> listens for remote votes in background ➔ 3. When remote peers vote, incoming delta updates local Room cache ➔ 4. <b>Compose UI</b> seamlessly animates progress bars and leaderboard ranking.';
+        showToast('🔄 Showing Read Flow (Room Cache + Firestore WebSocket)');
       } else {
         document.getElementById('tabFullStack').classList.add('active');
-        titleEl.innerHTML = '🏛️ 3. Full 4-Tier Android Clean MVVM Architecture';
-        descEl.innerHTML = '<b>Tier 1: Client/User</b> (Gesture, Touch, SSO Identity) ➔ <b>Tier 2: Frontend View</b> (Material 3 Composables, Navigation Compose) ➔ <b>Tier 3: Controller/Domain</b> (ViewModel, Kotlin Coroutines, Quorum Leaderboard Engine) ➔ <b>Tier 4: Persistence</b> (Room SQLite, Cascade FKs, WAL Indexing, Encrypted Preferences).';
+        titleEl.innerHTML = '🏛️ 3. 4-Tier Android Architecture Overview';
+        descEl.innerHTML = '<b>Tier 1: Client & Identity:</b> User touch gestures, Google Sign-In & In-App Demo Personas.<br><b>Tier 2: Presentation:</b> Jetpack Compose M3, Type-safe Navigation.<br><b>Tier 3: Domain & State:</b> ViewModel, Coroutines, Quorum & Tiebreaker math.<br><b>Tier 4: Storage & Sync:</b> Local Room SQLite (offline cache) + Firebase Cloud Firestore (live sync).';
         showToast('🏛️ Showing Complete Full-Stack Layer Hierarchy');
       }
     }
@@ -2043,6 +2376,43 @@
         toast.classList.remove('show');
       }, 3000);
     }
+
+    // Navigation Dropdowns & Mobile Drawer Handlers
+    function toggleNavDropdown(event, dropdownId) {
+      event.stopPropagation();
+      const targetMenu = document.getElementById(dropdownId);
+      const parentItem = targetMenu.parentElement;
+      const isOpen = parentItem.classList.contains('open');
+
+      closeAllNavDropdowns();
+      if (!isOpen) {
+        parentItem.classList.add('open');
+      }
+    }
+
+    function closeAllNavDropdowns() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('open');
+      });
+    }
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      drawer.classList.toggle('open');
+    }
+
+    function closeMobileNavOnBackdrop(event) {
+      if (event.target.id === 'mobileNavDrawer') {
+        toggleMobileNav();
+      }
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.nav-item')) {
+        closeAllNavDropdowns();
+      }
+    });
 
     // Initialize on load
     document.addEventListener('DOMContentLoaded', () => {
