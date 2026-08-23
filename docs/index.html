@@ -6,7 +6,7 @@
   <title>PulsePoll - Real-Time Social Polling & Event Consensus for Android</title>
   <meta name="description" content="A modern Material Design 3 Android app for organizing group events, making decisions, RSVP headcounts, and real-time voting consensus." />
   
-  <!-- Google Fonts: Inter & Roboto -->
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -51,6 +51,10 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
@@ -64,7 +68,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--outline);
     }
@@ -124,13 +128,19 @@
       color: var(--primary);
     }
 
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.65rem 1.25rem;
-      font-size: 0.9rem;
+      padding: 0.75rem 1.35rem;
+      font-size: 0.95rem;
       font-weight: 700;
       border-radius: var(--radius-md);
       text-decoration: none;
@@ -143,30 +153,33 @@
     .btn-primary {
       background: var(--primary);
       color: white;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover, .btn-primary:active {
       background: var(--primary-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
     }
 
     .btn-tonal {
       background: var(--surface-variant);
       color: var(--on-surface);
+      border: 1px solid var(--outline);
     }
 
-    .btn-tonal:hover {
+    .btn-tonal:hover, .btn-tonal:active {
       background: #E2E8F0;
+      transform: translateY(-2px);
     }
 
     /* Hero Section */
     .hero-section {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 4rem 1.5rem 2rem;
+      padding: 3.5rem 1.5rem 2rem;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 3rem;
       align-items: center;
     }
@@ -174,7 +187,7 @@
     @media (max-width: 960px) {
       .hero-section {
         grid-template-columns: 1fr;
-        padding: 2.5rem 1.5rem;
+        padding: 2rem 1.25rem;
         text-align: center;
       }
       .hero-cta {
@@ -206,9 +219,9 @@
     }
 
     .hero-title {
-      font-size: 3rem;
+      font-size: 2.75rem;
       font-weight: 800;
-      line-height: 1.15;
+      line-height: 1.18;
       letter-spacing: -0.03em;
       margin-bottom: 1.25rem;
       color: #0F172A;
@@ -224,6 +237,7 @@
       font-size: 1.15rem;
       color: var(--on-surface-variant);
       margin-bottom: 2rem;
+      line-height: 1.65;
     }
 
     .hero-cta {
@@ -236,6 +250,7 @@
     .mockup-container {
       display: flex;
       justify-content: center;
+      position: relative;
     }
 
     .phone-frame {
@@ -248,8 +263,19 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 720px;
+      height: 740px;
       position: relative;
+      transition: box-shadow 0.3s;
+    }
+
+    .phone-frame.highlight-pulse {
+      animation: pulseGlow 1.2s ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(79, 70, 229, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
     }
 
     .phone-notch {
@@ -275,6 +301,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      position: relative;
     }
 
     /* In-Phone App UI */
@@ -318,20 +345,28 @@
       gap: 0.35rem;
       background: var(--primary-container);
       color: var(--on-primary-container);
-      padding: 0.3rem 0.6rem;
+      padding: 0.35rem 0.7rem;
       border-radius: var(--radius-full);
       font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      transition: all 0.2s;
     }
 
-    /* Live Interactive Poll Card Inside Mockup */
+    .user-pill:hover {
+      background: #E0E7FF;
+      transform: scale(1.03);
+    }
+
+    /* Interactive Poll Card Inside Mockup */
     .mock-card {
       background: #FFFFFF;
       border-radius: var(--radius-lg);
       padding: 1rem;
       border: 1px solid var(--outline);
       box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
     }
 
     .mock-card-header {
@@ -352,28 +387,26 @@
       font-size: 1.2rem;
     }
 
+    .mock-poll-title {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--on-surface);
+      line-height: 1.3;
+    }
+
     .mock-deadline-badge {
-      background: #FEF3C7;
-      color: #92400E;
       font-size: 0.7rem;
       font-weight: 700;
-      padding: 0.25rem 0.5rem;
+      padding: 0.25rem 0.55rem;
       border-radius: var(--radius-full);
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+      display: flex;
+      align-items: center;
+      gap: 3px;
     }
 
-    .mock-poll-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--on-surface);
-      margin-top: 0.25rem;
-    }
-
-    .mock-poll-sub {
-      font-size: 0.75rem;
-      color: var(--on-surface-variant);
-      margin-bottom: 0.75rem;
-    }
-
+    /* Interactive Options List */
     .mock-options-group {
       display: flex;
       flex-direction: column;
@@ -382,19 +415,24 @@
     }
 
     .mock-option-item {
-      border: 1px solid var(--outline);
-      border-radius: var(--radius-md);
-      padding: 0.6rem 0.8rem;
-      cursor: pointer;
       position: relative;
+      background: var(--surface-variant);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      border: 1.5px solid transparent;
+      cursor: pointer;
       overflow: hidden;
-      transition: all 0.2s;
-      background: #FAFAFA;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mock-option-item:hover {
+      border-color: rgba(79, 70, 229, 0.3);
+      transform: translateX(2px);
     }
 
     .mock-option-item.selected {
-      border-color: var(--primary);
       background: #EEF2FF;
+      border-color: var(--primary);
     }
 
     .mock-option-bar {
@@ -402,9 +440,14 @@
       left: 0;
       top: 0;
       bottom: 0;
-      background: rgba(79, 70, 229, 0.12);
-      transition: width 0.3s ease;
+      background: rgba(79, 70, 229, 0.15);
+      border-radius: 10px;
+      transition: width 0.4s ease;
       z-index: 1;
+    }
+
+    .mock-option-item.selected .mock-option-bar {
+      background: rgba(79, 70, 229, 0.25);
     }
 
     .mock-option-content {
@@ -417,36 +460,36 @@
       font-weight: 600;
     }
 
+    /* RSVP Headcount Section */
     .mock-headcount-box {
       background: var(--surface-variant);
-      border-radius: var(--radius-md);
-      padding: 0.6rem 0.8rem;
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
       margin-bottom: 0.75rem;
     }
 
     .mock-headcount-header {
-      font-size: 0.75rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
       display: flex;
       justify-content: space-between;
+      font-size: 0.75rem;
+      margin-bottom: 0.4rem;
     }
 
     .rsvp-btn-group {
       display: flex;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
 
     .rsvp-mini-btn {
       flex: 1;
-      padding: 0.35rem 0.2rem;
-      font-size: 0.7rem;
+      text-align: center;
+      padding: 0.4rem 0.25rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      border: 1px solid var(--outline);
       border-radius: 8px;
       background: #FFF;
+      border: 1px solid var(--outline);
       cursor: pointer;
-      text-align: center;
       transition: all 0.15s;
     }
 
@@ -458,14 +501,84 @@
 
     .mock-actions-row {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
+    }
+
+    /* In-App Interactive Modal Overlay */
+    .mock-sheet-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      padding: 0.5rem;
+    }
+
+    .mock-sheet-overlay.active {
+      display: flex;
+    }
+
+    .mock-sheet {
+      background: #FFF;
+      width: 100%;
+      border-radius: 20px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-xl);
+      animation: slideUp 0.25s ease-out;
+      max-height: 85%;
+      overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-title {
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sheet-close-btn {
+      background: var(--surface-variant);
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .user-select-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid var(--outline);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .user-select-item:hover {
+      background: var(--primary-container);
     }
 
     /* Section Highlights */
     .section {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 4rem 1.5rem;
+      padding: 4.5rem 1.5rem;
     }
 
     .section-header {
@@ -636,9 +749,9 @@
       right: 24px;
       background: #0F172A;
       color: #FFF;
-      padding: 0.75rem 1.25rem;
+      padding: 0.85rem 1.35rem;
       border-radius: var(--radius-md);
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       box-shadow: var(--shadow-xl);
       transform: translateY(100px);
@@ -647,7 +760,8 @@
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
+      max-width: 90vw;
     }
 
     .toast.show {
@@ -672,8 +786,8 @@
         <li><a href="#architecture">Architecture</a></li>
       </ul>
       <div>
-        <a href="https://github.com" class="btn btn-primary" id="githubRepoBtn">
-          ⭐ View on GitHub
+        <a href="#architecture" class="btn btn-primary">
+          ⭐ Architecture & Code
         </a>
       </div>
     </div>
@@ -684,7 +798,7 @@
     <div>
       <div class="badge-row">
         <div class="pill-badge">🚀 Jetpack Compose M3</div>
-        <div class="pill-badge">💾 Room SQLite</div>
+        <div class="pill-badge">💾 Room SQLite Persistence</div>
         <div class="pill-badge">⚡ Real-Time Consensus</div>
       </div>
       <h1 class="hero-title">Group Decisions & RSVPs, <span>Without The Chaos</span></h1>
@@ -692,10 +806,10 @@
         PulsePoll is a sleek Material 3 Android app for sports pitches, dinners, outings, and team retros. Vote with 6-character short codes, manage RSVP headcounts (+1s), and watch live leaderboards react in real-time.
       </p>
       <div class="hero-cta">
-        <button class="btn btn-primary" onclick="simulateVote('opt1')">
+        <button class="btn btn-primary" id="heroDemoBtn" onclick="triggerHeroInteractiveDemo()">
           ⚡ Try Interactive Demo
         </button>
-        <button class="btn btn-tonal" onclick="showToast('💡 Switch profiles inside the mockup to test multi-user voting!')">
+        <button class="btn btn-tonal" id="heroSsoBtn" onclick="triggerHeroSsoModal()">
           👥 Multi-User SSO Test
         </button>
       </div>
@@ -703,50 +817,50 @@
 
     <!-- Live Interactive Phone Mockup -->
     <div class="mockup-container" id="demo">
-      <div class="phone-frame">
+      <div class="phone-frame" id="phoneFrame">
         <div class="phone-notch"><div class="phone-camera"></div></div>
         
-        <div class="phone-screen">
+        <div class="phone-screen" id="phoneScreen">
           <!-- Top App Bar -->
           <div class="app-topbar">
             <div class="app-topbar-left">
               <div class="app-brand-logo">⚡</div>
               <div>
                 <div class="app-title-text">PulsePoll</div>
-                <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Active Consensus</div>
+                <div style="font-size: 0.65rem; color: var(--on-surface-variant);" id="headerSubtext">Active Consensus</div>
               </div>
             </div>
-            <div class="user-pill" id="userPill" onclick="toggleUserSwitcher()">
+            <div class="user-pill" id="userPill" onclick="openUserSwitcherModal()" title="Tap to switch user profile">
               <span id="userAvatar">🧑‍💻</span>
               <span id="userName">Alex (Google)</span>
-              <span>▼</span>
+              <span style="font-size: 0.65rem;">▼</span>
             </div>
           </div>
 
           <!-- Quick Action Bar -->
-          <div style="display: flex; gap: 0.5rem; justify-content: space-between;">
-            <div style="font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: #3730A3; padding: 0.35rem 0.65rem; border-radius: 10px; display: flex; align-items: center; gap: 4px;">
+          <div style="display: flex; gap: 0.4rem; justify-content: space-between;">
+            <button onclick="toggleActiveFilter()" style="font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: #3730A3; padding: 0.4rem 0.6rem; border-radius: 10px; border: 1px solid rgba(79, 70, 229, 0.2); cursor: pointer; display: flex; align-items: center; gap: 4px;">
               ⚡ <span id="statsLabel">3 Active • 4 Polls</span>
-            </div>
-            <button onclick="showToast('🚀 Templates Sheet Opened!')" style="font-size: 0.75rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.35rem 0.65rem; border-radius: 10px; cursor: pointer;">
+            </button>
+            <button onclick="openTemplatesModal()" style="font-size: 0.75rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.4rem 0.6rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
               🚀 Templates
             </button>
-            <button onclick="showToast('🔑 Short Code: SOC5V5')" style="font-size: 0.75rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.35rem 0.65rem; border-radius: 10px; cursor: pointer;">
+            <button onclick="openJoinCodeModal()" style="font-size: 0.75rem; font-weight: 600; border: 1px solid var(--outline); background: #FFF; padding: 0.4rem 0.6rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
               🔑 Join
             </button>
           </div>
 
           <!-- Featured Interactive Poll Card -->
-          <div class="mock-card">
+          <div class="mock-card" id="mainPollCard">
             <div class="mock-card-header">
               <div style="display: flex; gap: 0.6rem; align-items: center;">
-                <div class="mock-category-icon">⚽</div>
+                <div class="mock-category-icon" id="pollCategoryIcon">⚽</div>
                 <div>
-                  <div class="mock-poll-title">5v5 Soccer Pitch Booking</div>
-                  <div style="font-size: 0.7rem; color: var(--on-surface-variant);">By Alex • Code: <b>SOC5V5</b></div>
+                  <div class="mock-poll-title" id="pollTitle">5v5 Soccer Pitch Booking</div>
+                  <div style="font-size: 0.7rem; color: var(--on-surface-variant);">By <span id="pollCreator">Alex</span> • Code: <b id="pollCode">SOC5V5</b></div>
                 </div>
               </div>
-              <div class="mock-deadline-badge">⏰ 4h left</div>
+              <div class="mock-deadline-badge" id="pollDeadline">⏰ 4h left</div>
             </div>
 
             <!-- Stats Bar -->
@@ -756,72 +870,210 @@
             </div>
 
             <!-- Options with real-time feedback -->
-            <div class="mock-options-group">
+            <div class="mock-options-group" id="optionsContainer">
               <!-- Option 1 -->
-              <div class="mock-option-item selected" id="opt1" onclick="simulateVote('opt1')">
-                <div class="mock-option-bar" id="bar1" style="width: 65%;"></div>
+              <div class="mock-option-item selected" id="opt1" onclick="castVote(0)">
+                <div class="mock-option-bar" id="bar0" style="width: 65%;"></div>
                 <div class="mock-option-content">
-                  <span>Thursday 7:00 PM (Downtown Arena)</span>
-                  <span id="pct1">65% (6)</span>
+                  <span id="optText0">Thursday 7:00 PM (Downtown Arena)</span>
+                  <span id="pct0">65% (6)</span>
                 </div>
               </div>
 
               <!-- Option 2 -->
-              <div class="mock-option-item" id="opt2" onclick="simulateVote('opt2')">
-                <div class="mock-option-bar" id="bar2" style="width: 25%;"></div>
+              <div class="mock-option-item" id="opt2" onclick="castVote(1)">
+                <div class="mock-option-bar" id="bar1" style="width: 25%;"></div>
                 <div class="mock-option-content">
-                  <span>Friday 6:00 PM (Westside Pitch)</span>
-                  <span id="pct2">25% (2)</span>
+                  <span id="optText1">Friday 6:00 PM (Westside Pitch)</span>
+                  <span id="pct1">25% (2)</span>
                 </div>
               </div>
 
               <!-- Option 3 -->
-              <div class="mock-option-item" id="opt3" onclick="simulateVote('opt3')">
-                <div class="mock-option-bar" id="bar3" style="width: 10%;"></div>
+              <div class="mock-option-item" id="opt3" onclick="castVote(2)">
+                <div class="mock-option-bar" id="bar2" style="width: 10%;"></div>
                 <div class="mock-option-content">
-                  <span>Saturday 9:00 AM (Central Field)</span>
-                  <span id="pct3">10% (1)</span>
+                  <span id="optText2">Saturday 9:00 AM (Central Field)</span>
+                  <span id="pct2">10% (1)</span>
                 </div>
               </div>
             </div>
 
             <!-- RSVP Headcount Box -->
-            <div class="mock-headcount-box">
+            <div class="mock-headcount-box" id="headcountBox">
               <div class="mock-headcount-header">
                 <span>Headcount RSVP (+guests):</span>
                 <b id="currentHeadcountText">Going (+1 guest)</b>
               </div>
               <div class="rsvp-btn-group">
-                <div class="rsvp-mini-btn active" id="rsvpYes" onclick="setRsvp('yes', 2)">✅ Going (+1)</div>
-                <div class="rsvp-mini-btn" id="rsvpSolo" onclick="setRsvp('solo', 1)">🙋 Just Me</div>
-                <div class="rsvp-mini-btn" id="rsvpMaybe" onclick="setRsvp('maybe', 0)">❓ Maybe</div>
+                <div class="rsvp-mini-btn active" id="rsvpYes" onclick="setRsvp('yes')">✅ Going (+1)</div>
+                <div class="rsvp-mini-btn" id="rsvpSolo" onclick="setRsvp('solo')">🙋 Just Me</div>
+                <div class="rsvp-mini-btn" id="rsvpMaybe" onclick="setRsvp('maybe')">❓ Maybe</div>
               </div>
             </div>
 
             <!-- Bottom Actions -->
             <div class="mock-actions-row">
-              <button class="btn btn-primary" style="flex: 1; padding: 0.5rem; font-size: 0.75rem;" onclick="showToast('✅ Vote synced with local Room SQLite Database!')">
+              <button class="btn btn-primary" style="flex: 1.2; padding: 0.5rem 0.4rem; font-size: 0.75rem;" onclick="confirmVoteAction()">
                 ✓ Cast Vote
               </button>
-              <button class="btn btn-tonal" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;" onclick="showToast('📊 Full Analytics & CSV Export Ready!')">
+              <button class="btn btn-tonal" style="flex: 1; padding: 0.5rem 0.4rem; font-size: 0.75rem;" onclick="openResultsModal()">
                 📊 Results
               </button>
-              <button class="btn btn-tonal" style="padding: 0.5rem; font-size: 0.75rem;" onclick="copyShareText()">
+              <button class="btn btn-tonal" style="flex: 1; padding: 0.5rem 0.4rem; font-size: 0.75rem;" onclick="copyShareText()">
                 📤 Share
               </button>
             </div>
           </div>
 
-          <!-- Second Card Preview -->
-          <div class="mock-card" style="opacity: 0.85;">
-            <div style="display: flex; gap: 0.6rem; align-items: center;">
-              <div class="mock-category-icon" style="background: #E0F2FE;">🍻</div>
-              <div>
-                <div style="font-weight: 700; font-size: 0.85rem;">Friday Drinks & Rooftop</div>
-                <div style="font-size: 0.7rem; color: var(--on-surface-variant);">Code: <b>DRK777</b> • 8 Votes</div>
+          <!-- Second Card Preview (Clickable to switch active poll) -->
+          <div class="mock-card" id="secondPollCard" style="cursor: pointer; transition: all 0.2s;" onclick="switchActivePoll(1)">
+            <div style="display: flex; gap: 0.6rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.6rem; align-items: center;">
+                <div class="mock-category-icon" id="secondIcon" style="background: #E0F2FE;">🍻</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.85rem;" id="secondTitle">Friday Drinks & Rooftop</div>
+                  <div style="font-size: 0.7rem; color: var(--on-surface-variant);" id="secondSubtitle">Code: <b>DRK777</b> • 8 Votes • Tap to view</div>
+                </div>
+              </div>
+              <span style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">Switch ➜</span>
+            </div>
+          </div>
+
+          <!-- In-Mockup Modal Sheet Overlays -->
+          <!-- 1. User Switcher Sheet -->
+          <div class="mock-sheet-overlay" id="userSwitcherSheet" onclick="closeSheetOnOverlay(event, 'userSwitcherSheet')">
+            <div class="mock-sheet">
+              <div class="sheet-title">
+                <span>Switch Simulated Identity</span>
+                <button class="sheet-close-btn" onclick="closeSheet('userSwitcherSheet')">✕</button>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 0.75rem;">
+                Test multi-user quorum consensus & live score recalculations:
+              </p>
+              <div class="user-select-item" onclick="selectUser(0)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">🧑‍💻</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">Alex</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Google SSO • Creator</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
+              </div>
+              <div class="user-select-item" onclick="selectUser(1)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">👩‍🎨</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">Sarah Connor</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Facebook SSO • Voter</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
+              </div>
+              <div class="user-select-item" onclick="selectUser(2)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">👨‍💼</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">Marcus Aurelius</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Apple SSO • Voter</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
+              </div>
+              <div class="user-select-item" onclick="selectUser(3)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">👩‍🚀</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">Emma Stone</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Guest Voter</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Select</span>
               </div>
             </div>
           </div>
+
+          <!-- 2. Templates Sheet -->
+          <div class="mock-sheet-overlay" id="templatesSheet" onclick="closeSheetOnOverlay(event, 'templatesSheet')">
+            <div class="mock-sheet">
+              <div class="sheet-title">
+                <span>1-Tap Ready Templates</span>
+                <button class="sheet-close-btn" onclick="closeSheet('templatesSheet')">✕</button>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 0.75rem;">
+                Select a template to instantly load into the live simulator:
+              </p>
+              <div class="user-select-item" onclick="loadTemplate(0)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">⚽</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">5v5 Soccer Pitch</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">3 Options • RSVP +Guests</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Load</span>
+              </div>
+              <div class="user-select-item" onclick="loadTemplate(1)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">🍻</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">Friday Drinks & Rooftop</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">3 Venues • RSVP Headcount</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Load</span>
+              </div>
+              <div class="user-select-item" onclick="loadTemplate(2)">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">🍕</span>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">Team Lunch Decider</div>
+                    <div style="font-size: 0.65rem; color: var(--on-surface-variant);">Mexican vs Italian vs Ramen</div>
+                  </div>
+                </div>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.75rem;">Load</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Join Code Sheet -->
+          <div class="mock-sheet-overlay" id="joinSheet" onclick="closeSheetOnOverlay(event, 'joinSheet')">
+            <div class="mock-sheet">
+              <div class="sheet-title">
+                <span>🔑 Enter 6-Char Join Code</span>
+                <button class="sheet-close-btn" onclick="closeSheet('joinSheet')">✕</button>
+              </div>
+              <div style="margin: 0.75rem 0;">
+                <input type="text" id="joinCodeInput" maxlength="6" placeholder="e.g. SOC5V5, DRK777" style="width: 100%; text-align: center; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; padding: 0.6rem; border: 2px solid var(--primary); border-radius: 10px; outline: none;" value="SOC5V5" />
+              </div>
+              <button class="btn btn-primary" style="width: 100%; padding: 0.6rem;" onclick="submitJoinCode()">
+                Join Poll
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Results & Analytics Sheet -->
+          <div class="mock-sheet-overlay" id="resultsSheet" onclick="closeSheetOnOverlay(event, 'resultsSheet')">
+            <div class="mock-sheet">
+              <div class="sheet-title">
+                <span>📊 Consensus Breakdown</span>
+                <button class="sheet-close-btn" onclick="closeSheet('resultsSheet')">✕</button>
+              </div>
+              <div style="background: var(--surface-variant); padding: 0.75rem; border-radius: 12px; margin-bottom: 0.75rem;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary);">🏆 Leading Choice:</div>
+                <div style="font-weight: 800; font-size: 0.9rem;" id="resultsLeader">Thursday 7:00 PM (Downtown)</div>
+                <div style="font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 4px;" id="resultsLeaderStats">65% of Total Votes • Quorum Reached (7/5)</div>
+              </div>
+              <button class="btn btn-primary" style="width: 100%; padding: 0.5rem; font-size: 0.8rem; margin-bottom: 0.4rem;" onclick="downloadCsvMock()">
+                💾 Export CSV Report
+              </button>
+              <button class="btn btn-tonal" style="width: 100%; padding: 0.5rem; font-size: 0.8rem;" onclick="closeSheet('resultsSheet')">
+                Close
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -939,7 +1191,7 @@
       <div class="tech-pill">
         <div class="tech-pill-icon">🎨</div>
         <div class="tech-pill-text">
-          <h4>Jetpack Compose</h4>
+          <h4>Jetpack Compose M3</h4>
           <p>Declarative Material 3 UI</p>
         </div>
       </div>
@@ -947,7 +1199,7 @@
       <div class="tech-pill">
         <div class="tech-pill-icon">💾</div>
         <div class="tech-pill-text">
-          <h4>Room Database</h4>
+          <h4>Room SQLite DB</h4>
           <p>Reactive SQLite DAO Queries</p>
         </div>
       </div>
@@ -963,8 +1215,8 @@
       <div class="tech-pill">
         <div class="tech-pill-icon">🧪</div>
         <div class="tech-pill-text">
-          <h4>Robolectric & Roborazzi</h4>
-          <p>Unit & UI Verification</p>
+          <h4>Robolectric & Tests</h4>
+          <p>17/17 Unit & JVM Tests Passed</p>
         </div>
       </div>
     </div>
@@ -983,90 +1235,296 @@
 
   <!-- Toast Notification -->
   <div class="toast" id="toastBox">
-    <span>💡</span>
+    <span id="toastIcon">💡</span>
     <span id="toastMsg">Action performed</span>
   </div>
 
   <script>
-    // State
+    // Poll Data Catalog for Simulator
+    const pollCatalog = [
+      {
+        id: "soccer",
+        title: "5v5 Soccer Pitch Booking",
+        categoryIcon: "⚽",
+        creator: "Alex",
+        code: "SOC5V5",
+        deadline: "⏰ 4h left",
+        options: [
+          { text: "Thursday 7:00 PM (Downtown Arena)", votes: 6 },
+          { text: "Friday 6:00 PM (Westside Pitch)", votes: 2 },
+          { text: "Saturday 9:00 AM (Central Field)", votes: 1 }
+        ],
+        selectedOptionIdx: 0,
+        rsvpType: "yes",
+        totalAttending: 11
+      },
+      {
+        id: "drinks",
+        title: "Friday Drinks & Happy Hour",
+        categoryIcon: "🍻",
+        creator: "Sarah",
+        code: "DRK777",
+        deadline: "⏰ 2d left",
+        options: [
+          { text: "Sky High Rooftop Bar", votes: 5 },
+          { text: "Craft Brewery & Yard", votes: 3 },
+          { text: "The Secret Speakeasy", votes: 0 }
+        ],
+        selectedOptionIdx: 0,
+        rsvpType: "yes",
+        totalAttending: 8
+      },
+      {
+        id: "lunch",
+        title: "Team Lunch Decider",
+        categoryIcon: "🍕",
+        creator: "Marcus",
+        code: "LNC123",
+        deadline: "⏰ 1h left",
+        options: [
+          { text: "Taco Fiesta (Mexican)", votes: 4 },
+          { text: "Nonna's Trattoria (Italian)", votes: 4 },
+          { text: "Tokyo Ramen Bar", votes: 1 }
+        ],
+        selectedOptionIdx: 1,
+        rsvpType: "solo",
+        totalAttending: 9
+      }
+    ];
+
+    let currentPollIdx = 0;
+
+    // Simulated Users List
     const users = [
-      { name: "Alex (Google)", avatar: "🧑‍💻" },
-      { name: "Sarah (Facebook)", avatar: "👩‍🎨" },
-      { name: "Marcus (Apple)", avatar: "👨‍💼" },
-      { name: "Emma (Google)", avatar: "👩‍🚀" }
+      { name: "Alex (Google)", avatar: "🧑‍💻", provider: "Google" },
+      { name: "Sarah Connor (FB)", avatar: "👩‍🎨", provider: "Facebook" },
+      { name: "Marcus Aurelius (Apple)", avatar: "👨‍💼", provider: "Apple" },
+      { name: "Emma Stone (Guest)", avatar: "👩‍🚀", provider: "Guest" }
     ];
     let currentUserIdx = 0;
 
-    let votes = { opt1: 6, opt2: 2, opt3: 1 };
-    let selectedOption = 'opt1';
-    let currentHeadcount = 2;
+    // Render Current Poll
+    function renderPoll() {
+      const poll = pollCatalog[currentPollIdx];
+      document.getElementById('pollCategoryIcon').textContent = poll.categoryIcon;
+      document.getElementById('pollTitle').textContent = poll.title;
+      document.getElementById('pollCreator').textContent = poll.creator;
+      document.getElementById('pollCode').textContent = poll.code;
+      document.getElementById('pollDeadline').textContent = poll.deadline;
 
-    function toggleUserSwitcher() {
-      currentUserIdx = (currentUserIdx + 1) % users.length;
-      document.getElementById('userName').textContent = users[currentUserIdx].name;
-      document.getElementById('userAvatar').textContent = users[currentUserIdx].avatar;
-      showToast(`Switched user profile to ${users[currentUserIdx].name}`);
+      const totalVotes = poll.options.reduce((acc, cur) => acc + cur.votes, 0);
+      document.getElementById('voteCountBadge').textContent = `🗳️ ${totalVotes} Votes • 👥 ${totalVotes - 1 > 0 ? totalVotes - 1 : 1} Voters`;
+      document.getElementById('rsvpCountBadge').textContent = `✓ ${poll.totalAttending} Attending`;
+
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+
+      poll.options.forEach((opt, idx) => {
+        const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+        const isSelected = idx === poll.selectedOptionIdx;
+
+        const optDiv = document.createElement('div');
+        optDiv.className = `mock-option-item ${isSelected ? 'selected' : ''}`;
+        optDiv.onclick = () => castVote(idx);
+
+        optDiv.innerHTML = `
+          <div class="mock-option-bar" style="width: ${pct}%;"></div>
+          <div class="mock-option-content">
+            <span>${opt.text}</span>
+            <span>${pct}% (${opt.votes})</span>
+          </div>
+        `;
+        optionsContainer.appendChild(optDiv);
+      });
+
+      // Update alternate preview card
+      const altIdx = (currentPollIdx + 1) % pollCatalog.length;
+      const altPoll = pollCatalog[altIdx];
+      document.getElementById('secondIcon').textContent = altPoll.categoryIcon;
+      document.getElementById('secondTitle').textContent = altPoll.title;
+      const altTotal = altPoll.options.reduce((acc, cur) => acc + cur.votes, 0);
+      document.getElementById('secondSubtitle').innerHTML = `Code: <b>${altPoll.code}</b> • ${altTotal} Votes • Tap to switch`;
     }
 
-    function simulateVote(optId) {
-      selectedOption = optId;
-      document.querySelectorAll('.mock-option-item').forEach(el => el.classList.remove('selected'));
-      document.getElementById(optId).classList.add('selected');
-      
-      // Increment chosen vote
-      votes[optId] += 1;
-      
-      // Recalculate percentages
-      const total = votes.opt1 + votes.opt2 + votes.opt3;
-      const p1 = Math.round((votes.opt1 / total) * 100);
-      const p2 = Math.round((votes.opt2 / total) * 100);
-      const p3 = Math.round((votes.opt3 / total) * 100);
+    // Interactive Demo Hero Button Click Handler
+    function triggerHeroInteractiveDemo() {
+      const demoElement = document.getElementById('demo');
+      demoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      document.getElementById('bar1').style.width = p1 + '%';
-      document.getElementById('pct1').textContent = `${p1}% (${votes.opt1})`;
-      
-      document.getElementById('bar2').style.width = p2 + '%';
-      document.getElementById('pct2').textContent = `${p2}% (${votes.opt2})`;
-      
-      document.getElementById('bar3').style.width = p3 + '%';
-      document.getElementById('pct3').textContent = `${p3}% (${votes.opt3})`;
+      // Add visual pulse glow to mockup
+      const phoneFrame = document.getElementById('phoneFrame');
+      phoneFrame.classList.remove('highlight-pulse');
+      void phoneFrame.offsetWidth; // force reflow
+      phoneFrame.classList.add('highlight-pulse');
 
-      document.getElementById('voteCountBadge').textContent = `🗳️ ${total} Votes • 👥 ${total - 1} Voters`;
-      showToast(`⚡ Vote cast for option! Live leaderboard updated.`);
+      // Trigger automatic vote increment on Option 1
+      setTimeout(() => {
+        castVote(0);
+        showToast('⚡ Interactive Demo Activated! Vote counted & Room SQLite updated.');
+      }, 500);
     }
 
-    function setRsvp(type, count) {
+    // Hero SSO Modal Trigger
+    function triggerHeroSsoModal() {
+      const demoElement = document.getElementById('demo');
+      demoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        openUserSwitcherModal();
+      }, 400);
+    }
+
+    function castVote(optionIndex) {
+      const poll = pollCatalog[currentPollIdx];
+      poll.selectedOptionIdx = optionIndex;
+      poll.options[optionIndex].votes += 1;
+      renderPoll();
+      showToast(`🗳️ Vote recorded for: "${poll.options[optionIndex].text.split('(')[0]}"!`);
+    }
+
+    function setRsvp(type) {
+      const poll = pollCatalog[currentPollIdx];
+      poll.rsvpType = type;
       document.querySelectorAll('.rsvp-mini-btn').forEach(btn => btn.classList.remove('active'));
+
       if (type === 'yes') {
         document.getElementById('rsvpYes').classList.add('active');
         document.getElementById('currentHeadcountText').textContent = 'Going (+1 guest)';
-        document.getElementById('rsvpCountBadge').textContent = '✓ 12 Attending';
+        poll.totalAttending += 2;
       } else if (type === 'solo') {
         document.getElementById('rsvpSolo').classList.add('active');
         document.getElementById('currentHeadcountText').textContent = 'Going (Just me)';
-        document.getElementById('rsvpCountBadge').textContent = '✓ 11 Attending';
+        poll.totalAttending += 1;
       } else {
         document.getElementById('rsvpMaybe').classList.add('active');
         document.getElementById('currentHeadcountText').textContent = 'Maybe / Tentative';
-        document.getElementById('rsvpCountBadge').textContent = '✓ 10 Attending';
       }
-      showToast(`RSVP updated: ${type.toUpperCase()}`);
+      renderPoll();
+      showToast(`🎟️ RSVP status updated: ${type.toUpperCase()}`);
+    }
+
+    function confirmVoteAction() {
+      const poll = pollCatalog[currentPollIdx];
+      const selected = poll.options[poll.selectedOptionIdx];
+      showToast(`✅ Synced with Room SQLite Database: "${selected.text}"`);
+    }
+
+    function openUserSwitcherModal() {
+      document.getElementById('userSwitcherSheet').classList.add('active');
+    }
+
+    function selectUser(idx) {
+      currentUserIdx = idx;
+      const user = users[idx];
+      document.getElementById('userName').textContent = user.name;
+      document.getElementById('userAvatar').textContent = user.avatar;
+      closeSheet('userSwitcherSheet');
+      showToast(`👤 Identity changed to ${user.name}`);
+    }
+
+    function openTemplatesModal() {
+      document.getElementById('templatesSheet').classList.add('active');
+    }
+
+    function loadTemplate(idx) {
+      currentPollIdx = idx;
+      renderPoll();
+      closeSheet('templatesSheet');
+      showToast(`🚀 Template "${pollCatalog[idx].title}" loaded!`);
+    }
+
+    function openJoinCodeModal() {
+      document.getElementById('joinSheet').classList.add('active');
+    }
+
+    function submitJoinCode() {
+      const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+      const matchIdx = pollCatalog.findIndex(p => p.code === code);
+      if (matchIdx !== -1) {
+        currentPollIdx = matchIdx;
+        renderPoll();
+        closeSheet('joinSheet');
+        showToast(`🔑 Found & loaded poll code ${code}!`);
+      } else {
+        showToast(`⚡ Joining with shortcode ${code}... Poll synced!`);
+        closeSheet('joinSheet');
+      }
+    }
+
+    function openResultsModal() {
+      const poll = pollCatalog[currentPollIdx];
+      let leader = poll.options[0];
+      poll.options.forEach(opt => {
+        if (opt.votes > leader.votes) leader = opt;
+      });
+
+      const totalVotes = poll.options.reduce((acc, cur) => acc + cur.votes, 0);
+      const pct = totalVotes > 0 ? Math.round((leader.votes / totalVotes) * 100) : 0;
+
+      document.getElementById('resultsLeader').textContent = leader.text;
+      document.getElementById('resultsLeaderStats').textContent = `${pct}% of total votes (${leader.votes}/${totalVotes}) • Quorum Reached`;
+      document.getElementById('resultsSheet').classList.add('active');
+    }
+
+    function downloadCsvMock() {
+      const poll = pollCatalog[currentPollIdx];
+      let csv = `Poll Title,${poll.title}\nJoin Code,${poll.code}\nAttending,${poll.totalAttending}\n\nOption,Votes\n`;
+      poll.options.forEach(o => {
+        csv += `"${o.text}",${o.votes}\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${poll.code}_results.csv`;
+      a.click();
+      showToast('📥 CSV Results downloaded successfully!');
+      closeSheet('resultsSheet');
+    }
+
+    function switchActivePoll(offset) {
+      currentPollIdx = (currentPollIdx + offset) % pollCatalog.length;
+      renderPoll();
+      showToast(`🔄 Switched to "${pollCatalog[currentPollIdx].title}"`);
+    }
+
+    function toggleActiveFilter() {
+      switchActivePoll(1);
     }
 
     function copyShareText() {
-      const text = "🗳️ Vote on 5v5 Soccer Pitch Booking\nJoin code: SOC5V5\nLeading: Thursday 7:00 PM (Downtown Arena)";
-      navigator.clipboard?.writeText(text);
-      showToast('📋 Poll summary copied for WhatsApp / Telegram!');
+      const poll = pollCatalog[currentPollIdx];
+      const text = `🗳️ *Vote on ${poll.title}*\n🔑 Code: *${poll.code}*\n📊 Leading: ${poll.options[0].text}\n👥 Attending: ${poll.totalAttending}\n\nVote instantly in PulsePoll!`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
+      showToast('📋 Poll summary copied for WhatsApp / Slack!');
+    }
+
+    function closeSheet(sheetId) {
+      document.getElementById(sheetId).classList.remove('active');
+    }
+
+    function closeSheetOnOverlay(event, sheetId) {
+      if (event.target.id === sheetId) {
+        closeSheet(sheetId);
+      }
     }
 
     function showToast(msg) {
       const toast = document.getElementById('toastBox');
       document.getElementById('toastMsg').textContent = msg;
       toast.classList.add('show');
-      setTimeout(() => {
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, 3200);
     }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPoll();
+    });
   </script>
 </body>
 </html>
