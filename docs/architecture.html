@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>System Architecture & Data Flows - LivePulse Docs</title>
+  <meta name="description" content="Technical architecture of LivePulse: Hybrid Room SQLite offline cache, Cloud Firestore WebSocket sync, and Clean MVVM design." />
+  <meta name="theme-color" content="#4F46E5" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-title">LivePulse</div>
+      </a>
+
+      <!-- Desktop Navigation with Dropdowns -->
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">✨ Overview</a>
+        </li>
+        <li class="nav-item active">
+          <a href="architecture.html" class="nav-link">🏛️ Architecture</a>
+        </li>
+        <li class="nav-item">
+          <a href="portability.html" class="nav-link">🔄 Portability</a>
+        </li>
+        <li class="nav-item">
+          <a href="defense.html" class="nav-link">🛡️ Distributed Defense</a>
+        </li>
+        <li class="nav-item">
+          <a href="production.html" class="nav-link">🚀 Production</a>
+        </li>
+      </ul>
+
+      <!-- Right Action & Mobile Toggle -->
+      <div class="header-actions">
+        <a href="production.html" class="header-cta-btn">
+          📦 Deploy Guide
+        </a>
+        <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer" onclick="closeMobileNavOnBackdrop(event)">
+    <div class="mobile-nav-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--outline-variant);">
+        <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">⚡ LivePulse Docs</div>
+        <button onclick="toggleMobileNav()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">✕</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="index.html" class="dropdown-item"><span>✨</span> <span>Overview & Live Demo</span></a>
+        <a href="architecture.html" class="dropdown-item" style="background: var(--primary-container); color: var(--primary); font-weight: 700;"><span>🏛️</span> <span>System Architecture</span></a>
+        <a href="portability.html" class="dropdown-item"><span>🔄</span> <span>Backend Portability</span></a>
+        <a href="defense.html" class="dropdown-item"><span>🛡️</span> <span>Distributed Defense</span></a>
+        <a href="production.html" class="dropdown-item"><span>🚀</span> <span>Production & Deploy</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <div class="page-hero">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Docs</a> <span>›</span> <span>Architecture</span>
+      </div>
+      <div class="pill-badge" style="margin-bottom: 0.75rem;">🏛️ Engineering Deep-Dive</div>
+      <h1 class="hero-title" style="margin-bottom: 0.75rem;">System Architecture & Data Flows</h1>
+      <p class="hero-desc" style="max-width: 720px; margin: 0 auto;">
+        An in-depth look at LivePulse's <b>Offline-First Reactive Pipeline</b> combining local <b>Room SQLite</b> caching for 0ms UI responsiveness with <b>Firebase Firestore</b> WebSocket synchronization.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <main class="section">
+    <!-- Interactive Data Flow Diagram Container -->
+    <div class="arch-diagram-wrapper">
+      <div class="arch-tabs">
+        <button class="arch-tab-btn active" id="tabWriteFlow" onclick="switchArchTab('write')">
+          ⚡ 1. Write Flow (Vote ➔ SQLite ➔ Cloud Sync)
+        </button>
+        <button class="arch-tab-btn" id="tabReadFlow" onclick="switchArchTab('read')">
+          🔄 2. Read Flow (Local Cache + Live WebSocket)
+        </button>
+        <button class="arch-tab-btn" id="tabFullStack" onclick="switchArchTab('full')">
+          🏛️ 3. Full 4-Tier Stack Overview
+        </button>
+      </div>
+
+      <!-- Diagram View Container -->
+      <div class="arch-canvas" id="archCanvas">
+        <!-- 4 Step Pipeline Grid -->
+        <div class="flow-pipeline-grid">
+          
+          <!-- Layer 1: User Action -->
+          <div class="arch-node-card user-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">👤</div>
+              <div>
+                <span class="arch-layer-tag">1. Client / User</span>
+                <h4 class="arch-node-title">User Interaction</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>👆 Tap Option / Cast Vote</li>
+                <li>🎟️ RSVP (+Guests Count)</li>
+                <li>🔑 Input 6-Char Join Code</li>
+                <li>🌐 Google Sign-In / Guest Mode</li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Touch Events & Gesture Input</div>
+          </div>
+
+          <!-- Flow Arrow 1 -->
+          <div class="flow-arrow-indicator">
+            <div class="flow-dot"></div>
+            <span class="flow-arrow-label">Events</span>
+            <div class="flow-arrow-icon">➔</div>
+          </div>
+
+          <!-- Layer 2: Frontend Jetpack Compose -->
+          <div class="arch-node-card front-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🎨</div>
+              <div>
+                <span class="arch-layer-tag">2. Presentation</span>
+                <h4 class="arch-node-title">Jetpack Compose M3</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>🖼️ <code>VotingScreen.kt</code></li>
+                <li>✨ Material 3 Motion & Theme</li>
+                <li>🎯 Type-safe Navigation</li>
+                <li>⚡ 0ms Optimistic UI Update</li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Declarative UI Layer</div>
+          </div>
+
+          <!-- Flow Arrow 2 -->
+          <div class="flow-arrow-indicator">
+            <div class="flow-dot"></div>
+            <span class="flow-arrow-label">StateFlow</span>
+            <div class="flow-arrow-icon">➔</div>
+          </div>
+
+          <!-- Layer 3: Backend / Logic / ViewModel -->
+          <div class="arch-node-card back-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">⚙️</div>
+              <div>
+                <span class="arch-layer-tag">3. Domain & State</span>
+                <h4 class="arch-node-title">ViewModel & Repo</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>🧠 <code>PollViewModel.kt</code> (Coroutines)</li>
+                <li>📊 Quorum & Leaderboard Engine</li>
+                <li>🛡️ <code>PollRepository.kt</code></li>
+                <li>🔑 <code>GoogleAuthHelper.kt</code></li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Kotlin Coroutines Dispatchers.IO</div>
+          </div>
+
+          <!-- Flow Arrow 3 -->
+          <div class="flow-arrow-indicator">
+            <div class="flow-dot"></div>
+            <span class="flow-arrow-label">Dual-Sync</span>
+            <div class="flow-arrow-icon">➔</div>
+          </div>
+
+          <!-- Layer 4: Persistent Storage & Cloud Firestore -->
+          <div class="arch-node-card db-layer">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">☁️</div>
+              <div>
+                <span class="arch-layer-tag">4. Storage & Sync</span>
+                <h4 class="arch-node-title">Room + Firestore</h4>
+              </div>
+            </div>
+            <div class="arch-node-body">
+              <ul class="arch-spec-list">
+                <li>📦 <code>PulsePollDatabase.kt</code> (Room)</li>
+                <li>📑 <code>PollDao.kt</code> (ACID SQLite)</li>
+                <li>🔥 <code>FirestoreService.kt</code> (Cloud)</li>
+                <li>⚡ SnapshotListener Live Feed</li>
+              </ul>
+            </div>
+            <div class="arch-node-badge">Room SQLite (Local) + Firestore (Cloud)</div>
+          </div>
+
+        </div>
+
+        <!-- Dynamic Flow Details Explainer Box -->
+        <div class="flow-summary-box" id="flowSummaryBox">
+          <div class="flow-summary-title" id="flowSummaryTitle">
+            ⚡ Write Path (Atomic Local Vote + Cloud Firestore Sync)
+          </div>
+          <p class="flow-summary-desc" id="flowSummaryDesc">
+            1. User taps an option in <b>Compose UI</b> ➔ 2. <code>viewModel.castVote(optionId)</code> executes on <code>viewModelScope</code> ➔ 3. <b>Room DAO</b> commits an atomic ACID transaction to local SQLite (0ms latency, works offline) ➔ 4. Background Coroutine pushes the vote document to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. Cloud <b>SnapshotListeners</b> broadcast the new tallies in real-time to other participants.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architectural Deep Dive: 3 Pillar Explanations -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2.5rem;">
+      
+      <!-- Card 1: Hybrid Storage Model -->
+      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.75rem;">💾</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">1. Hybrid Storage Engine</h3>
+            <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Room SQLite + Cloud Firestore</span>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
+          Instead of relying exclusively on the network, LivePulse uses a <b>two-tier cache</b>:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem;">
+            <span>📦</span>
+            <div><strong style="color: var(--on-surface);">Local SQLite Cache (Room):</strong> Reads and initial writes hit the on-device SQLite database first. Guarantees 0ms UI response time and 100% offline functionality.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem;">
+            <span>☁️</span>
+            <div><strong style="color: var(--on-surface);">Cloud Firestore Relay:</strong> Asynchronous background sync sends updates to Firebase. Realtime WebSocket snapshot listeners sync results between multiple phones without needing a custom server backend.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 2: Production Auth vs In-App Demo Personas -->
+      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.75rem;">🔑</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">2. Authentication & Identity</h3>
+            <span style="font-size: 0.8rem; color: var(--secondary); font-weight: 600;">Production Auth vs Demo Personas</span>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
+          LivePulse clearly separates <b>real user sign-in</b> from <b>multi-user testing tools</b>:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem;">
+            <span>🌐</span>
+            <div><strong style="color: var(--on-surface);">Production (Google, Facebook & Apple):</strong> Real authentication using Android Jetpack <code>CredentialManager</code>, Meta SDK, and Apple OAuth Provider tokens linked to Firebase Auth, plus instant Guest sessions.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem;">
+            <span>👥</span>
+            <div><strong style="color: var(--on-surface);">In-App Multi-User Switcher:</strong> Quick-switch between verified Google, Facebook (Sarah Connor), Apple ID (Marcus Aurelius), and Custom personas on a <b>single device</b> to test live quorum consensus without physical multi-phone setups.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 3: Free Spark Tier & Security -->
+      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.75rem;">🛡️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">3. Cost Model & Security</h3>
+            <span style="font-size: 0.8rem; color: #10B981; font-weight: 600;">$0 / month Spark Tier & ACL Rules</span>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
+          Engineered for zero maintenance overhead and low costs:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
+          <li style="display: flex; gap: 0.5rem;">
+            <span>📊</span>
+            <div><strong style="color: var(--on-surface);">50,000 Reads / Day Free:</strong> Because local users read from Room SQLite, cloud document reads are minimized, staying well within Firebase's free allowance.</div>
+          </li>
+          <li style="display: flex; gap: 0.5rem;">
+            <span>🔒</span>
+            <div><strong style="color: var(--on-surface);">Granular Security Rules:</strong> <code>firestore.rules</code> ensures only the poll creator can delete or close polls, while public voters can only append their own vote documents.</div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Kotlin Code Architecture Sample -->
+    <div style="background: #0F172A; border-radius: var(--radius-lg); padding: 1.5rem; color: #F8FAFC; box-shadow: var(--shadow-md); margin-top: 2.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #38BDF8;">PollRepository.kt (Clean Architecture)</span>
+        <span style="font-size: 0.75rem; color: #94A3B8;">KOTLIN COROUTINES + FLOW</span>
+      </div>
+      <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.55; color: #E2E8F0; overflow-x: auto;"><code><span style="color: #64748B;">// Real-time stream: Emits SQLite cache immediately, then updates from Cloud WebSocket</span>
+<span style="color: #F472B6;">fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
+    <span style="color: #64748B;">// 1. Emit local Room cache instantly (0ms latency, 100% offline capable)</span>
+    <span style="color: #F472B6;">val</span> localData = pollDao.getPollWithDetails(pollId)
+    trySend(localData)
+
+    <span style="color: #64748B;">// 2. Attach Firestore Realtime SnapshotListener</span>
+    <span style="color: #F472B6;">val</span> registration = firestore.collection(<span style="color: #A7F3D0;">"polls"</span>).document(pollId)
+        .addSnapshotListener { snapshot, error -&gt;
+            <span style="color: #F472B6;">if</span> (error != <span style="color: #F472B6;">null</span> || snapshot == <span style="color: #F472B6;">null</span>) <span style="color: #F472B6;">return@addSnapshotListener</span>
+            <span style="color: #F472B6;">val</span> remotePoll = snapshot.toObject(<span style="color: #38BDF8;">PollEntity</span>::<span style="color: #F472B6;">class</span>.java) ?: <span style="color: #F472B6;">return@addSnapshotListener</span>
+            
+            <span style="color: #64748B;">// 3. Upsert to Room SQLite, automatically re-triggering StateFlow for UI</span>
+            coroutineScope.launch(Dispatchers.IO) {
+                pollDao.upsertPoll(remotePoll)
+            }
+        }
+
+    awaitClose { registration.remove() }
+}</code></pre>
+    </div>
+
+    <!-- Navigation between modules -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--outline);">
+      <a href="index.html" class="btn btn-tonal">← Overview & Live Demo</a>
+      <a href="portability.html" class="btn btn-primary">Next: Backend Portability →</a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="architecture.html">Architecture</a></li>
+      <li><a href="portability.html">Portability</a></li>
+      <li><a href="defense.html">Distributed Defense</a></li>
+      <li><a href="production.html">Production Runbook</a></li>
+    </ul>
+    <p>© 2026 LivePulse Engineering • Android Jetpack Compose M3 + Offline-First Consensus Engine</p>
+  </footer>
+
+  <script>
+    function switchArchTab(type) {
+      const btnWrite = document.getElementById('tabWriteFlow');
+      const btnRead = document.getElementById('tabReadFlow');
+      const btnFull = document.getElementById('tabFullStack');
+      const titleEl = document.getElementById('flowSummaryTitle');
+      const descEl = document.getElementById('flowSummaryDesc');
+
+      btnWrite.classList.remove('active');
+      btnRead.classList.remove('active');
+      btnFull.classList.remove('active');
+
+      if (type === 'write') {
+        btnWrite.classList.add('active');
+        titleEl.innerHTML = '⚡ Write Path (Atomic Local Vote + Cloud Firestore Sync)';
+        descEl.innerHTML = '1. User taps an option in <b>Compose UI</b> ➔ 2. <code>viewModel.castVote(optionId)</code> executes on <code>viewModelScope</code> ➔ 3. <b>Room DAO</b> commits an atomic ACID transaction to local SQLite (0ms latency, works offline) ➔ 4. Background Coroutine pushes the vote document to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. Cloud <b>SnapshotListeners</b> broadcast the new tallies in real-time to other participants.';
+      } else if (type === 'read') {
+        btnRead.classList.add('active');
+        titleEl.innerHTML = '🔄 Read Path (Zero-Latency SQLite Cache + Live WebSocket Ingestion)';
+        descEl.innerHTML = '1. UI observes <code>viewModel.currentPoll</code> (Kotlin <code>StateFlow</code>) ➔ 2. Repository returns immediate cached result from <b>Room DAO</b> (instant screen render) ➔ 3. <b>Firestore SnapshotListener</b> maintains active TLS WebSocket to Firebase servers ➔ 4. Incoming deltas trigger an upsert into local Room database ➔ 5. Room Flow automatically pushes updated state to Compose UI.';
+      } else {
+        btnFull.classList.add('active');
+        titleEl.innerHTML = '🏛️ Full 4-Tier Clean MVVM Architecture';
+        descEl.innerHTML = '<b>Presentation:</b> Jetpack Compose with Material Design 3 dynamic color & motion.<br><b>Domain/State:</b> ViewModel with StateFlow, Quorum & Tiebreak calculation engine.<br><b>Data Layer:</b> Abstracted <code>PollRepository</code> interface mediating between local SQLite and remote clouds.<br><b>Persistence:</b> Room Database (ACID SQLite) paired with Firebase Firestore WebSocket snapshot listeners.';
+      }
+    }
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      drawer.classList.toggle('open');
+    }
+
+    function closeMobileNavOnBackdrop(event) {
+      if (event.target.id === 'mobileNavDrawer') {
+        toggleMobileNav();
+      }
+    }
+  </script>
+</body>
+</html>

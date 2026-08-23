@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Production Deployment & Operations Runbook - LivePulse Docs</title>
+  <meta name="description" content="Step-by-step runbook for Firebase Console setup, SHA-1 fingerprint extraction, Google Sign-In, and Android App Bundle (.aab) Play Store release." />
+  <meta name="theme-color" content="#4F46E5" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-title">LivePulse</div>
+      </a>
+
+      <!-- Desktop Navigation with Dropdowns -->
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">✨ Overview</a>
+        </li>
+        <li class="nav-item">
+          <a href="architecture.html" class="nav-link">🏛️ Architecture</a>
+        </li>
+        <li class="nav-item">
+          <a href="portability.html" class="nav-link">🔄 Portability</a>
+        </li>
+        <li class="nav-item">
+          <a href="defense.html" class="nav-link">🛡️ Distributed Defense</a>
+        </li>
+        <li class="nav-item active">
+          <a href="production.html" class="nav-link">🚀 Production</a>
+        </li>
+      </ul>
+
+      <!-- Right Action & Mobile Toggle -->
+      <div class="header-actions">
+        <a href="index.html#demo" class="header-cta-btn">
+          📱 Try Live Demo
+        </a>
+        <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer" onclick="closeMobileNavOnBackdrop(event)">
+    <div class="mobile-nav-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--outline-variant);">
+        <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">⚡ LivePulse Docs</div>
+        <button onclick="toggleMobileNav()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">✕</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="index.html" class="dropdown-item"><span>✨</span> <span>Overview & Live Demo</span></a>
+        <a href="architecture.html" class="dropdown-item"><span>🏛️</span> <span>System Architecture</span></a>
+        <a href="portability.html" class="dropdown-item"><span>🔄</span> <span>Backend Portability</span></a>
+        <a href="defense.html" class="dropdown-item"><span>🛡️</span> <span>Distributed Defense</span></a>
+        <a href="production.html" class="dropdown-item" style="background: var(--primary-container); color: var(--primary); font-weight: 700;"><span>🚀</span> <span>Production & Deploy</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <div class="page-hero">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Docs</a> <span>›</span> <span>Production</span>
+      </div>
+      <div class="pill-badge" style="margin-bottom: 0.75rem;">🚀 Zero-Downtime Operations</div>
+      <h1 class="hero-title" style="margin-bottom: 0.75rem;">Production Deployment & Operations Runbook</h1>
+      <p class="hero-desc" style="max-width: 760px; margin: 0 auto;">
+        Everything required to take LivePulse from development into Google Play Store distribution with Firebase backend setup and Google Sign-In authentication.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <main class="section">
+    
+    <!-- Step 1: Firebase Console Setup -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 1.5rem; background: #FFEDD5; color: #EA580C; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">1</span>
+        <div>
+          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Firebase Console & Cloud Firestore Setup</h2>
+          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">100% Free on Firebase Spark Plan ($0/month)</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.6;">
+        <p>1. Open <a href="https://console.firebase.google.com" target="_blank" style="color: var(--primary); font-weight: 700;">console.firebase.google.com</a> and click <b>"Add project"</b> (name it e.g. <code>livepulse-prod</code>).</p>
+        <p>2. In project settings, click the <b>Android icon</b> to register the Android app:</p>
+        <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.35rem;">
+          <li><b>Android package name:</b> Set to your <code>applicationId</code> from <code>app/build.gradle.kts</code>.</li>
+          <li><b>App nickname:</b> LivePulse</li>
+          <li><b>Debug signing certificate SHA-1:</b> See Step 2 below to extract your fingerprint.</li>
+        </ul>
+        <p>3. Download <code>google-services.json</code> and place it in your <code>app/</code> directory (e.g. <code>/app/google-services.json</code>).</p>
+        <p>4. In Firebase Console sidebar, go to <b>Build ➔ Firestore Database ➔ Create database</b> (start in Production mode, select your nearest region).</p>
+        <p>5. Under the <b>Rules</b> tab, paste the secure rules provided in our <a href="defense.html" style="color: var(--primary); font-weight: 700;">Distributed Defense Guide</a>.</p>
+      </div>
+    </div>
+
+    <!-- Step 2: SHA-1 & Google Sign-In Extraction -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 1.5rem; background: #EEF2FF; color: var(--primary); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">2</span>
+        <div>
+          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Keystore & SHA-1 Fingerprint Extraction</h2>
+          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Required for Google Sign-In & Play Integrity</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 1rem;">
+        Google Sign-In uses OAuth 2.0 bound to the cryptographic SHA-1 fingerprint of your signing key. Run this command in your terminal or Android Studio:
+      </p>
+
+      <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
+          <span>TERMINAL (DEBUG KEYSTORE)</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android</code></pre>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--on-surface-variant);">
+        Copy the <code>SHA1: XX:XX:XX...</code> string and paste it into your <b>Firebase Project Settings ➔ Your apps ➔ Add fingerprint</b>. Also add your Web Client ID to the AI Studio Secrets panel.
+      </p>
+    </div>
+
+    <!-- Step 3: Android App Bundle (.aab) Build -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 1.5rem; background: #DCFCE7; color: #166534; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">3</span>
+        <div>
+          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Compiling Production Android App Bundle (.AAB)</h2>
+          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Google Play Store Standard Release Format</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 1rem;">
+        Google Play requires apps to be published as an <b>Android App Bundle (<code>.aab</code>)</b> for dynamic split delivery (reducing user download size by up to 60%).
+      </p>
+
+      <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
+          <span>BUILD COMMAND</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>gradle :app:bundleRelease</code></pre>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--on-surface-variant);">
+        The output artifact will be generated at: <code>app/build/outputs/bundle/release/app-release.aab</code>.
+      </p>
+    </div>
+
+    <!-- Step 4: Google Play Store Release Checklist -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 1.5rem; background: #F3E8FF; color: #6B21A8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">4</span>
+        <div>
+          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Google Play Store Pre-Launch Checklist</h2>
+          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Verify all launch standards prior to submitting</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">✅ Adaptive Icons Configured</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">Adaptive vector launcher icon in <code>mipmap-anydpi-v26/ic_launcher.xml</code> with foreground/background layers.</p>
+        </div>
+
+        <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">✅ Edge-to-Edge Enabled</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;"><code>enableEdgeToEdge()</code> called in <code>MainActivity.kt</code> with WindowInsets scaffold padding.</p>
+        </div>
+
+        <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">✅ Minimum Touch Target Size</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">All interactive components adhere to Material 3 standard 48dp x 48dp clickable targets.</p>
+        </div>
+
+        <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">✅ Robolectric JVM Test Suite</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">17/17 Unit & JVM tests verified with <code>gradle :app:testDebugUnitTest</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation between modules -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--outline);">
+      <a href="defense.html" class="btn btn-tonal">← Distributed Defense</a>
+      <a href="index.html" class="btn btn-primary">Return to Overview & Live Demo ⚡</a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="architecture.html">Architecture</a></li>
+      <li><a href="portability.html">Portability</a></li>
+      <li><a href="defense.html">Distributed Defense</a></li>
+      <li><a href="production.html">Production Runbook</a></li>
+    </ul>
+    <p>© 2026 LivePulse Engineering • Android Jetpack Compose M3 + Offline-First Consensus Engine</p>
+  </footer>
+
+  <script>
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      drawer.classList.toggle('open');
+    }
+
+    function closeMobileNavOnBackdrop(event) {
+      if (event.target.id === 'mobileNavDrawer') {
+        toggleMobileNav();
+      }
+    }
+  </script>
+</body>
+</html>

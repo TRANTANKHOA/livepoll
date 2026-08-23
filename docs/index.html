@@ -11,1360 +11,43 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --primary: #4F46E5;
-      --primary-hover: #4338CA;
-      --primary-container: #EEF2FF;
-      --on-primary-container: #3730A3;
-      
-      --secondary: #0284C7;
-      --secondary-container: #E0F2FE;
-      --on-secondary-container: #075985;
-      
-      --tertiary: #EA580C;
-      --tertiary-container: #FFEDD5;
-      
-      --bg: #F8FAFC;
-      --surface: #FFFFFF;
-      --surface-variant: #F1F5F9;
-      --on-surface: #0F172A;
-      --on-surface-variant: #475569;
-      --outline: #E2E8F0;
-
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
-      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 22px;
-      --radius-full: 9999px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--on-surface);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    /* Top Navigation Bar */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--outline);
-      width: 100%;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0.75rem 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      text-decoration: none;
-      color: var(--on-surface);
-      flex-shrink: 0;
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      color: white;
-      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
-    }
-
-    .brand-title {
-      font-weight: 800;
-      font-size: 1.2rem;
-      letter-spacing: -0.02em;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .nav-item {
-      position: relative;
-    }
-
-    .nav-link, .dropdown-trigger {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.45rem 0.7rem;
-      text-decoration: none;
-      color: var(--on-surface-variant);
-      font-weight: 600;
-      font-size: 0.88rem;
-      border-radius: var(--radius-sm);
-      transition: all 0.15s ease;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .nav-link:hover, .dropdown-trigger:hover, .nav-item:hover .dropdown-trigger {
-      color: var(--primary);
-      background: rgba(79, 70, 229, 0.08);
-    }
-
-    .dropdown-chevron {
-      font-size: 0.65rem;
-      transition: transform 0.2s ease;
-      opacity: 0.75;
-    }
-
-    .nav-item:hover .dropdown-chevron, .nav-item.open .dropdown-chevron {
-      transform: rotate(180deg);
-      opacity: 1;
-    }
-
-    /* Dropdown Menu Container */
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      min-width: 260px;
-      background: var(--surface);
-      border: 1px solid var(--outline-variant);
-      border-radius: var(--radius-md);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-      padding: 0.5rem;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(8px);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 1100;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    /* Show on hover or active class */
-    .nav-item:hover .dropdown-menu,
-    .nav-item.open .dropdown-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(4px);
-    }
-
-    .dropdown-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-      padding: 0.55rem 0.65rem;
-      border-radius: var(--radius-sm);
-      text-decoration: none;
-      color: var(--on-surface);
-      transition: background 0.15s ease;
-    }
-
-    .dropdown-item:hover {
-      background: var(--surface-container-high);
-    }
-
-    .dropdown-item-icon {
-      font-size: 1.15rem;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .dropdown-item-content {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .dropdown-item-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--on-surface);
-      line-height: 1.2;
-    }
-
-    .dropdown-item-desc {
-      font-size: 0.72rem;
-      color: var(--on-surface-variant);
-      margin-top: 0.15rem;
-      line-height: 1.3;
-    }
-
-    .dropdown-divider {
-      height: 1px;
-      background: var(--outline-variant);
-      margin: 0.35rem 0;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .header-cta-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 0.9rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: var(--radius-md);
-      background: var(--primary);
-      color: white;
-      text-decoration: none;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .header-cta-btn:hover {
-      background: var(--primary-hover);
-    }
-
-    /* Mobile Hamburger Menu Toggle Button */
-    .mobile-menu-toggle {
-      display: none;
-      background: transparent;
-      border: 1px solid var(--outline-variant);
-      border-radius: var(--radius-sm);
-      padding: 0.4rem 0.6rem;
-      font-size: 1.15rem;
-      cursor: pointer;
-      color: var(--on-surface);
-    }
-
-    /* Mobile Drawer */
-    .mobile-nav-drawer {
-      display: none;
-      position: fixed;
-      top: 60px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(4px);
-      z-index: 1200;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s ease;
-    }
-
-    .mobile-nav-drawer.open {
-      display: block;
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .mobile-nav-panel {
-      background: var(--surface);
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 1.25rem;
-      box-shadow: var(--shadow-lg);
-      border-bottom: 2px solid var(--primary);
-    }
-
-    /* Mobile Nav Rules */
-    @media (max-width: 960px) {
-      .nav-links {
-        display: none;
-      }
-      .mobile-menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .nav-container {
-        padding: 0.65rem 1rem;
-      }
-      .header-cta-btn {
-        padding: 0.45rem 0.75rem;
-        font-size: 0.8rem;
-      }
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.85rem 1.4rem;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border-radius: var(--radius-md);
-      text-decoration: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: none;
-      font-family: inherit;
-      min-height: 48px;
-      user-select: none;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
-    }
-
-    .btn-primary:active {
-      transform: scale(0.98);
-      background: var(--primary-hover);
-    }
-
-    .btn-tonal {
-      background: var(--surface-variant);
-      color: var(--on-surface);
-      border: 1px solid var(--outline);
-    }
-
-    .btn-tonal:active {
-      transform: scale(0.98);
-      background: #E2E8F0;
-    }
-
-    /* Hero Section */
-    .hero-section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2.5rem 1.25rem 2rem;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 2.5rem;
-      align-items: center;
-    }
-
-    .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
-    }
-
-    .pill-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.3rem 0.75rem;
-      border-radius: var(--radius-full);
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: var(--primary-container);
-      color: var(--on-primary-container);
-      border: 1px solid rgba(79, 70, 229, 0.2);
-    }
-
-    .hero-title {
-      font-size: clamp(2rem, 5.5vw, 3rem);
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-      margin-bottom: 1rem;
-      color: #0F172A;
-    }
-
-    .hero-title span {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-desc {
-      font-size: clamp(0.95rem, 2.5vw, 1.12rem);
-      color: var(--on-surface-variant);
-      margin-bottom: 1.75rem;
-      line-height: 1.6;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 900px) {
-      .hero-section {
-        grid-template-columns: 1fr;
-        padding: 1.75rem 1rem 1.5rem;
-        text-align: center;
-      }
-      .badge-row {
-        justify-content: center;
-      }
-      .hero-cta {
-        justify-content: center;
-        flex-direction: column;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-      }
-      .hero-cta .btn {
-        width: 100%;
-      }
-    }
-
-    /* Phone Mockup Frame */
-    .mockup-container {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      padding: 0.5rem 0;
-    }
-
-    .phone-frame {
-      width: 100%;
-      max-width: 380px;
-      background: #FFFFFF;
-      border-radius: 36px;
-      border: 6px solid #0F172A;
-      box-shadow: var(--shadow-xl), 0 15px 35px -10px rgba(79, 70, 229, 0.25);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: all 0.3s;
-    }
-
-    .phone-frame.highlight-pulse {
-      animation: pulseGlow 1.2s ease-in-out;
-    }
-
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
-      70% { box-shadow: 0 0 0 18px rgba(79, 70, 229, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
-    }
-
-    .phone-notch {
-      height: 20px;
-      background: #0F172A;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .phone-camera {
-      width: 60px;
-      height: 8px;
-      background: #000;
-      border-radius: 0 0 8px 8px;
-    }
-
-    .phone-screen {
-      flex: 1;
-      background: var(--bg);
-      padding: 0.85rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      position: relative;
-      min-height: 540px;
-    }
-
-    /* Inside App UI */
-    .app-topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #FFF;
-      padding: 0.55rem 0.75rem;
-      border-radius: 12px;
-      border: 1px solid var(--outline);
-    }
-
-    .app-topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .app-brand-logo {
-      width: 26px;
-      height: 26px;
-      background: var(--primary);
-      border-radius: 7px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-
-    .app-title-text {
-      font-weight: 800;
-      font-size: 0.9rem;
-    }
-
-    .user-pill {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      background: var(--primary-container);
-      color: var(--on-primary-container);
-      padding: 0.3rem 0.6rem;
-      border-radius: var(--radius-full);
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid rgba(79, 70, 229, 0.2);
-    }
-
-    /* Interactive Poll Card */
-    .mock-card {
-      background: #FFFFFF;
-      border-radius: var(--radius-md);
-      padding: 0.85rem;
-      border: 1px solid var(--outline);
-      box-shadow: var(--shadow-sm);
-      text-align: left;
-    }
-
-    .mock-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.65rem;
-      gap: 0.5rem;
-    }
-
-    .mock-category-icon {
-      width: 34px;
-      height: 34px;
-      background: var(--primary-container);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-    }
-
-    .mock-poll-title {
-      font-weight: 800;
-      font-size: 0.92rem;
-      color: var(--on-surface);
-      line-height: 1.25;
-    }
-
-    .mock-deadline-badge {
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: var(--radius-full);
-      background: var(--tertiary-container);
-      color: var(--tertiary);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* Options List */
-    .mock-options-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-      margin-bottom: 0.65rem;
-    }
-
-    .mock-option-item {
-      position: relative;
-      background: var(--surface-variant);
-      border-radius: 10px;
-      padding: 0.6rem 0.7rem;
-      border: 1.5px solid transparent;
-      cursor: pointer;
-      overflow: hidden;
-      transition: all 0.15s;
-    }
-
-    .mock-option-item.selected {
-      background: #EEF2FF;
-      border-color: var(--primary);
-    }
-
-    .mock-option-bar {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      background: rgba(79, 70, 229, 0.15);
-      border-radius: 8px;
-      transition: width 0.35s ease;
-      z-index: 1;
-    }
-
-    .mock-option-item.selected .mock-option-bar {
-      background: rgba(79, 70, 229, 0.25);
-    }
-
-    .mock-option-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.78rem;
-      font-weight: 600;
-      gap: 0.5rem;
-    }
-
-    /* RSVP Section */
-    .mock-headcount-box {
-      background: var(--surface-variant);
-      border-radius: 10px;
-      padding: 0.55rem 0.65rem;
-      margin-bottom: 0.65rem;
-    }
-
-    .mock-headcount-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .rsvp-btn-group {
-      display: flex;
-      gap: 0.3rem;
-    }
-
-    .rsvp-mini-btn {
-      flex: 1;
-      text-align: center;
-      padding: 0.35rem 0.2rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      border-radius: 6px;
-      background: #FFF;
-      border: 1px solid var(--outline);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .rsvp-mini-btn.active {
-      background: var(--primary);
-      color: #FFF;
-      border-color: var(--primary);
-    }
-
-    .mock-actions-row {
-      display: flex;
-      gap: 0.35rem;
-    }
-
-    /* In-Mockup Modal Overlay */
-    .mock-sheet-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(2px);
-      z-index: 50;
-      display: none;
-      align-items: flex-end;
-      padding: 0.4rem;
-    }
-
-    .mock-sheet-overlay.active {
-      display: flex;
-    }
-
-    .mock-sheet {
-      background: #FFF;
-      width: 100%;
-      border-radius: 16px;
-      padding: 1rem;
-      box-shadow: var(--shadow-xl);
-      animation: slideUp 0.2s ease-out;
-      max-height: 88%;
-      overflow-y: auto;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .sheet-title {
-      font-weight: 800;
-      font-size: 0.95rem;
-      margin-bottom: 0.6rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .sheet-close-btn {
-      background: var(--surface-variant);
-      border: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .user-select-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.55rem 0.7rem;
-      border-radius: 8px;
-      border: 1px solid var(--outline);
-      margin-bottom: 0.45rem;
-      cursor: pointer;
-    }
-
-    .user-select-item:active {
-      background: var(--primary-container);
-    }
-
-    /* Sections */
-    .section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 3.5rem 1.25rem;
-    }
-
-    .section-header {
-      text-align: center;
-      max-width: 700px;
-      margin: 0 auto 2.5rem;
-    }
-
-    .section-subtitle {
-      color: var(--primary);
-      font-weight: 800;
-      font-size: 0.82rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.4rem;
-    }
-
-    .section-title {
-      font-size: clamp(1.65rem, 4vw, 2.25rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.75rem;
-      color: var(--on-surface);
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .feature-card {
-      background: #FFFFFF;
-      border: 1px solid var(--outline);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .feature-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--primary-container);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-    }
-
-    .feature-card h3 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-      color: var(--on-surface);
-    }
-
-    .feature-card p {
-      color: var(--on-surface-variant);
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-
-    /* Template Table with Horizontal Scroll */
-    .template-table-container {
-      background: #FFFFFF;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--outline);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      box-shadow: var(--shadow-sm);
-    }
-
-    table {
-      width: 100%;
-      min-width: 600px;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    th, td {
-      padding: 0.85rem 1.25rem;
-      border-bottom: 1px solid var(--outline);
-    }
-
-    th {
-      background: var(--surface-variant);
-      font-weight: 700;
-      color: var(--on-surface);
-    }
-
-    td:first-child {
-      font-weight: 600;
-    }
-
-    /* Tech Stack Grid */
-    .tech-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1rem;
-    }
-
-    .tech-pill {
-      background: #FFF;
-      border: 1px solid var(--outline);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .tech-pill-icon {
-      font-size: 1.4rem;
-    }
-
-    .tech-pill-text h4 {
-      font-size: 0.92rem;
-      font-weight: 700;
-    }
-
-    .tech-pill-text p {
-      font-size: 0.78rem;
-      color: var(--on-surface-variant);
-    }
-
-    /* Architecture Data Flow Diagram Styles */
-    .arch-diagram-wrapper {
-      background: #FFFFFF;
-      border: 1px solid var(--outline);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-md);
-      margin-top: 1.5rem;
-      position: relative;
-    }
-
-    .arch-tabs {
-      display: flex;
-      gap: 0.5rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--outline);
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .arch-tab-btn {
-      padding: 0.6rem 1.1rem;
-      border-radius: var(--radius-md);
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      background: var(--surface-variant);
-      color: var(--on-surface-variant);
-      border: 1px solid var(--outline);
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-
-    .arch-tab-btn:hover {
-      background: #E2E8F0;
-      color: var(--on-surface);
-    }
-
-    .arch-tab-btn.active {
-      background: var(--primary);
-      color: #FFFFFF;
-      border-color: var(--primary);
-      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
-    }
-
-    .flow-pipeline-grid {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
-      gap: 0.75rem;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .arch-node-card {
-      background: #F8FAFC;
-      border: 1.5px solid var(--outline);
-      border-radius: var(--radius-md);
-      padding: 1.15rem;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.25s ease;
-    }
-
-    .arch-node-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .arch-node-card.user-layer {
-      border-top: 4px solid #0284C7;
-    }
-
-    .arch-node-card.front-layer {
-      border-top: 4px solid #4F46E5;
-    }
-
-    .arch-node-card.back-layer {
-      border-top: 4px solid #9333EA;
-    }
-
-    .arch-node-card.db-layer {
-      border-top: 4px solid #10B981;
-    }
-
-    .arch-node-header {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .arch-node-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      border: 1px solid var(--outline);
-      flex-shrink: 0;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .arch-layer-tag {
-      font-size: 0.7rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--primary);
-      display: block;
-    }
-
-    .arch-node-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--on-surface);
-      line-height: 1.2;
-    }
-
-    .arch-node-body {
-      flex: 1;
-      margin-bottom: 0.75rem;
-    }
-
-    .arch-spec-list {
-      list-style: none;
-      font-size: 0.8rem;
-      color: var(--on-surface-variant);
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .arch-spec-list code {
-      font-family: 'JetBrains Mono', monospace;
-      background: #E2E8F0;
-      padding: 0.15rem 0.35rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      color: #0F172A;
-      font-weight: 600;
-    }
-
-    .arch-node-badge {
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 0.3rem 0.6rem;
-      border-radius: var(--radius-full);
-      background: #FFFFFF;
-      border: 1px solid var(--outline);
-      text-align: center;
-      color: var(--on-surface-variant);
-    }
-
-    /* Flow Arrows */
-    .flow-arrow-indicator {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.25rem;
-      position: relative;
-    }
-
-    .flow-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary);
-      animation: pulseDot 1.5s infinite ease-in-out;
-    }
-
-    @keyframes pulseDot {
-      0% { transform: scale(0.8); opacity: 0.4; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(0.8); opacity: 0.4; }
-    }
-
-    .flow-arrow-label {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .flow-arrow-icon {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--primary);
-    }
-
-    /* Flow Summary Explainer Box */
-    .flow-summary-box {
-      background: #EEF2FF;
-      border: 1.5px solid rgba(79, 70, 229, 0.25);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.25rem;
-    }
-
-    .flow-summary-title {
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: var(--on-primary-container);
-      margin-bottom: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .flow-summary-desc {
-      font-size: 0.85rem;
-      color: #334155;
-      line-height: 1.6;
-    }
-
-    .flow-summary-desc b {
-      color: var(--on-primary-container);
-    }
-
-    .flow-summary-desc code {
-      font-family: 'JetBrains Mono', monospace;
-      background: #E0E7FF;
-      padding: 0.1rem 0.35rem;
-      border-radius: 4px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #3730A3;
-    }
-
-    /* Responsive adjustments for architecture pipeline */
-    @media (max-width: 960px) {
-      .flow-pipeline-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-      .flow-arrow-indicator {
-        flex-direction: row;
-        padding: 0.25rem 0;
-      }
-      .flow-arrow-icon {
-        transform: rotate(90deg);
-      }
-    }
-
-    /* Footer */
-    footer {
-      background: #FFFFFF;
-      border-top: 1px solid var(--outline);
-      padding: 2.5rem 1.25rem;
-      text-align: center;
-      color: var(--on-surface-variant);
-      font-size: 0.85rem;
-    }
-
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1.25rem;
-      margin-bottom: 1.25rem;
-      list-style: none;
-    }
-
-    .footer-links a {
-      color: var(--on-surface);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #0F172A;
-      color: #FFF;
-      padding: 0.75rem 1.25rem;
-      border-radius: var(--radius-md);
-      font-size: 0.85rem;
-      font-weight: 600;
-      box-shadow: var(--shadow-xl);
-      opacity: 0;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: max-content;
-      max-width: 92vw;
-      text-align: center;
-    }
-
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Top Header Navigation with Dropdown Menus -->
+  <!-- Top Header Navigation -->
   <header>
     <div class="nav-container">
-      <a href="#" class="brand">
+      <a href="index.html" class="brand">
         <div class="brand-icon">⚡</div>
         <div class="brand-title">LivePulse</div>
       </a>
 
-      <!-- Desktop Navigation with Dropdowns -->
+      <!-- Desktop Navigation -->
       <ul class="nav-links">
-        <!-- Dropdown 1: Features & Showcase -->
-        <li class="nav-item" id="navFeaturesItem">
-          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'featuresDropdown')">
-            <span>✨ Features</span>
-            <span class="dropdown-chevron">▼</span>
-          </button>
-          <div class="dropdown-menu" id="featuresDropdown">
-            <a href="#features" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">⚡</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Core App Features</span>
-                <span class="dropdown-item-desc">6-char short codes, RSVP headcounts & live leaderboards</span>
-              </div>
-            </a>
-            <a href="#demo" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">📱</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Interactive Live Demo</span>
-                <span class="dropdown-item-desc">Vote, switch personas & RSVP on live simulated phone</span>
-              </div>
-            </a>
-            <a href="#templates" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">📋</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Poll Templates</span>
-                <span class="dropdown-item-desc">Sports pitches, dinners, outings & sprint retros</span>
-              </div>
-            </a>
-          </div>
+        <li class="nav-item active">
+          <a href="index.html" class="nav-link">✨ Overview</a>
         </li>
-
-        <!-- Dropdown 2: Architecture & Backend -->
-        <li class="nav-item" id="navArchItem">
-          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'archDropdown')">
-            <span>🏛️ Architecture</span>
-            <span class="dropdown-chevron">▼</span>
-          </button>
-          <div class="dropdown-menu" id="archDropdown">
-            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns(); switchArchTab('write');">
-              <span class="dropdown-item-icon">⚡</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Write Pipeline</span>
-                <span class="dropdown-item-desc">Compose ➔ ViewModel ➔ Room DAO ➔ Cloud Firestore</span>
-              </div>
-            </a>
-            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns(); switchArchTab('read');">
-              <span class="dropdown-item-icon">🔄</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Reactive Read Stream</span>
-                <span class="dropdown-item-desc">Local Room SQLite cache + WebSocket SnapshotListeners</span>
-              </div>
-            </a>
-            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns(); switchArchTab('full');">
-              <span class="dropdown-item-icon">🏛️</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">4-Tier System Hierarchy</span>
-                <span class="dropdown-item-desc">Complete Clean MVVM layer separation diagram</span>
-              </div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#architecture" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">🔑</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Auth & Personas Matrix</span>
-                <span class="dropdown-item-desc">Google Sign-In, Guest mode & In-App Demo Personas</span>
-              </div>
-            </a>
-          </div>
+        <li class="nav-item">
+          <a href="architecture.html" class="nav-link">🏛️ Architecture</a>
         </li>
-
-        <!-- Dropdown 3: Portability & Backend Independence -->
-        <li class="nav-item" id="navPortabilityItem">
-          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'portabilityDropdown')">
-            <span>🔄 Portability</span>
-            <span class="dropdown-chevron">▼</span>
-          </button>
-          <div class="dropdown-menu" id="portabilityDropdown">
-            <a href="#portability" class="dropdown-item" onclick="closeAllNavDropdowns(); switchProviderTab('firebase');">
-              <span class="dropdown-item-icon">🔥</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Firebase (Default BaaS)</span>
-                <span class="dropdown-item-desc">Zero-server Firestore WebSocket snapshot listeners</span>
-              </div>
-            </a>
-            <a href="#portability" class="dropdown-item" onclick="closeAllNavDropdowns(); switchProviderTab('supabase');">
-              <span class="dropdown-item-icon">⚡</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Supabase & PostgreSQL</span>
-                <span class="dropdown-item-desc">Open-source Postgres + Realtime CDC sync adapter</span>
-              </div>
-            </a>
-            <a href="#portability" class="dropdown-item" onclick="closeAllNavDropdowns(); switchProviderTab('aws');">
-              <span class="dropdown-item-icon">☁️</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">AWS AppSync & DynamoDB</span>
-                <span class="dropdown-item-desc">Enterprise GraphQL subscriptions & Cognito auth</span>
-              </div>
-            </a>
-            <a href="#portability" class="dropdown-item" onclick="closeAllNavDropdowns(); switchProviderTab('custom');">
-              <span class="dropdown-item-icon">🛠️</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Self-Hosted / Ktor / Node</span>
-                <span class="dropdown-item-desc">Custom REST + WebSockets or gRPC backend engine</span>
-              </div>
-            </a>
-            <a href="#defense" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">🛡️</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Distributed Attack Defense</span>
-                <span class="dropdown-item-desc">5-Layer anti-DDoS, bot prevention & cross-backend matrix</span>
-              </div>
-            </a>
-          </div>
+        <li class="nav-item">
+          <a href="portability.html" class="nav-link">🔄 Portability</a>
         </li>
-
-        <!-- Dropdown 4: Deployment & Operations -->
-        <li class="nav-item" id="navProdItem">
-          <button class="dropdown-trigger" onclick="toggleNavDropdown(event, 'prodDropdown')">
-            <span>🚀 Production</span>
-            <span class="dropdown-chevron">▼</span>
-          </button>
-          <div class="dropdown-menu" id="prodDropdown">
-            <a href="#production" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">🔥</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Firebase Console Runbook</span>
-                <span class="dropdown-item-desc">Spark Free Tier setup & google-services.json placement</span>
-              </div>
-            </a>
-            <a href="#production" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">🔐</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Keystore & SHA-1 Setup</span>
-                <span class="dropdown-item-desc">Google Sign-In fingerprint extraction helper</span>
-              </div>
-            </a>
-            <a href="#production" class="dropdown-item" onclick="closeAllNavDropdowns()">
-              <span class="dropdown-item-icon">📦</span>
-              <div class="dropdown-item-content">
-                <span class="dropdown-item-title">Google Play Release (.AAB)</span>
-                <span class="dropdown-item-desc">Production App Bundle compilation & Play Store checklist</span>
-              </div>
-            </a>
-          </div>
+        <li class="nav-item">
+          <a href="defense.html" class="nav-link">🛡️ Distributed Defense</a>
+        </li>
+        <li class="nav-item">
+          <a href="production.html" class="nav-link">🚀 Production</a>
         </li>
       </ul>
 
       <!-- Right Action & Mobile Toggle -->
       <div class="header-actions">
-        <a href="#production" class="header-cta-btn">
+        <a href="production.html" class="header-cta-btn">
           📦 Deploy Guide
         </a>
-        <button class="mobile-menu-toggle" id="mobileMenuBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+        <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
           ☰
         </button>
       </div>
@@ -1379,77 +62,27 @@
         <button onclick="toggleMobileNav()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">✕</button>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.4rem;">App & Showcase</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <a href="#features" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>⚡</span> <span>Core Features</span>
-            </a>
-            <a href="#demo" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>📱</span> <span>Interactive Phone Demo</span>
-            </a>
-            <a href="#templates" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>📋</span> <span>Poll Templates</span>
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: var(--secondary); text-transform: uppercase; margin-bottom: 0.4rem;">Engineering & Architecture</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <a href="#architecture" class="dropdown-item" onclick="toggleMobileNav(); switchArchTab('write');">
-              <span>⚡</span> <span>Write Pipeline (Room + Cloud)</span>
-            </a>
-            <a href="#architecture" class="dropdown-item" onclick="toggleMobileNav(); switchArchTab('read');">
-              <span>🔄</span> <span>Read Stream (Local Cache + Sync)</span>
-            </a>
-            <a href="#architecture" class="dropdown-item" onclick="toggleMobileNav(); switchArchTab('full');">
-              <span>🏛️</span> <span>Full Layer Hierarchy</span>
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: #8B5CF6; text-transform: uppercase; margin-bottom: 0.4rem;">Portability & Cloud Stack</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <a href="#portability" class="dropdown-item" onclick="toggleMobileNav(); switchProviderTab('firebase');">
-              <span>🔥</span> <span>Firebase BaaS (Default)</span>
-            </a>
-            <a href="#portability" class="dropdown-item" onclick="toggleMobileNav(); switchProviderTab('supabase');">
-              <span>⚡</span> <span>Supabase & PostgreSQL</span>
-            </a>
-            <a href="#portability" class="dropdown-item" onclick="toggleMobileNav(); switchProviderTab('aws');">
-              <span>☁️</span> <span>AWS AppSync & DynamoDB</span>
-            </a>
-            <a href="#portability" class="dropdown-item" onclick="toggleMobileNav(); switchProviderTab('custom');">
-              <span>🛠️</span> <span>Self-Hosted REST / WebSockets</span>
-            </a>
-            <a href="#defense" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>🛡️</span> <span>Distributed Attack Defense</span>
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: #10B981; text-transform: uppercase; margin-bottom: 0.4rem;">Production Operations</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <a href="#production" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>🔥</span> <span>Firebase Setup Runbook</span>
-            </a>
-            <a href="#production" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>🔐</span> <span>Keystore & Google Sign-In</span>
-            </a>
-            <a href="#production" class="dropdown-item" onclick="toggleMobileNav()">
-              <span>📦</span> <span>Build Play Bundle (.AAB)</span>
-            </a>
-          </div>
-        </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="index.html" class="dropdown-item" style="background: var(--primary-container); color: var(--primary); font-weight: 700;">
+          <span>✨</span> <span>Overview & Live Demo</span>
+        </a>
+        <a href="architecture.html" class="dropdown-item">
+          <span>🏛️</span> <span>System Architecture</span>
+        </a>
+        <a href="portability.html" class="dropdown-item">
+          <span>🔄</span> <span>Backend Portability</span>
+        </a>
+        <a href="defense.html" class="dropdown-item">
+          <span>🛡️</span> <span>Distributed Attack Defense</span>
+        </a>
+        <a href="production.html" class="dropdown-item">
+          <span>🚀</span> <span>Production Operations</span>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- Hero Section -->
+  <!-- Hero Section with Interactive Live Phone Mockup -->
   <section class="hero-section">
     <div>
       <div class="badge-row">
@@ -1571,7 +204,7 @@
             </div>
           </div>
 
-          <!-- Modals inside simulator -->
+          <!-- In-App Modals -->
           <!-- 1. User Switcher Sheet -->
           <div class="mock-sheet-overlay" id="userSwitcherSheet" onclick="closeSheetOnOverlay(event, 'userSwitcherSheet')">
             <div class="mock-sheet">
@@ -1697,12 +330,103 @@
     </div>
   </section>
 
+  <!-- Modular Documentation Topic Portals -->
+  <section class="section" style="background: var(--surface); border-top: 1px solid var(--outline); border-bottom: 1px solid var(--outline);">
+    <div class="section-header">
+      <div class="section-subtitle">Documentation Hub</div>
+      <h2 class="section-title">Explore Engineering & Operations Topics</h2>
+      <p style="color: var(--on-surface-variant);">Explore detailed technical specifications, architecture diagrams, cloud integrations, and deployment guides broken down by domain.</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Card 1: Architecture -->
+      <a href="architecture.html" class="hub-card">
+        <div>
+          <div class="hub-card-top">
+            <div class="hub-card-icon" style="background: #EEF2FF; color: var(--primary);">🏛️</div>
+            <div>
+              <h3 class="hub-card-title">System Architecture</h3>
+              <span class="hub-card-tag" style="color: var(--primary);">Offline-First & Reactive Flows</span>
+            </div>
+          </div>
+          <p class="hub-card-desc">
+            Deep dive into the 4-tier Clean MVVM system, atomic Room SQLite local caching for 0ms latency, and Firebase Firestore bi-directional WebSocket snapshot listeners.
+          </p>
+        </div>
+        <div class="hub-card-footer">
+          <span>Read Architecture Guide</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- Card 2: Portability -->
+      <a href="portability.html" class="hub-card">
+        <div>
+          <div class="hub-card-top">
+            <div class="hub-card-icon" style="background: #E0F2FE; color: #0284C7;">🔄</div>
+            <div>
+              <h3 class="hub-card-title">Backend Portability</h3>
+              <span class="hub-card-tag" style="color: #0284C7;">Zero Vendor Lock-in</span>
+            </div>
+          </div>
+          <p class="hub-card-desc">
+            Learn how the Repository Interface abstraction allows effortless transitions between Firebase, Supabase / PostgreSQL, AWS AppSync / DynamoDB, or Self-Hosted Ktor.
+          </p>
+        </div>
+        <div class="hub-card-footer">
+          <span>Explore Backend Adapters</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- Card 3: Distributed Defense -->
+      <a href="defense.html" class="hub-card">
+        <div>
+          <div class="hub-card-top">
+            <div class="hub-card-icon" style="background: #F3E8FF; color: #8B5CF6;">🛡️</div>
+            <div>
+              <h3 class="hub-card-title">Distributed Attack Defense</h3>
+              <span class="hub-card-tag" style="color: #8B5CF6;">5-Layer Zero-Trust Security</span>
+            </div>
+          </div>
+          <p class="hub-card-desc">
+            Explore our 5-Layer protection against DDoS, bot farms, short-code brute forcing, Sybil attacks, and "Denial of Wallet" runaway cloud billing attacks.
+          </p>
+        </div>
+        <div class="hub-card-footer">
+          <span>View Defense Matrix</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- Card 4: Production Runbook -->
+      <a href="production.html" class="hub-card">
+        <div>
+          <div class="hub-card-top">
+            <div class="hub-card-icon" style="background: #DCFCE7; color: #166534;">🚀</div>
+            <div>
+              <h3 class="hub-card-title">Production & Deployment</h3>
+              <span class="hub-card-tag" style="color: #166534;">Launch & Store Release</span>
+            </div>
+          </div>
+          <p class="hub-card-desc">
+            Complete runbook for Firebase Spark setup, SHA-1 keytool extraction, Google Sign-In credentials, Android App Bundle (.aab) building, and Play Store pre-flight checklist.
+          </p>
+        </div>
+        <div class="hub-card-footer">
+          <span>Read Deploy Runbook</span>
+          <span>→</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
   <!-- Key Features Grid -->
   <section class="section" id="features">
     <div class="section-header">
       <div class="section-subtitle">Core Capabilities</div>
       <h2 class="section-title">Designed for Modern Group Workflows</h2>
-      <p style="color: var(--on-surface-variant);">From weekend sports leagues to team decision making, PulsePoll brings clarity and speed to group events.</p>
+      <p style="color: var(--on-surface-variant);">From weekend sports leagues to team decision making, LivePulse brings clarity and speed to group events.</p>
     </div>
 
     <div class="grid-3">
@@ -1797,229 +521,14 @@
     </div>
   </section>
 
-  <!-- Technical Architecture & Data Flow Diagram -->
-  <section class="section" id="architecture">
+  <!-- Technical Specs Summary Grid -->
+  <section class="section">
     <div class="section-header">
-      <div class="section-subtitle">System Architecture & Multi-Cloud Backend</div>
-      <h2 class="section-title">End-to-End System Architecture</h2>
-      <p style="color: var(--on-surface-variant); max-width: 760px; margin: 0 auto;">
-        PulsePoll is built on a <b>Hybrid Offline-First Architecture</b> combining local <b>Room SQLite</b> for zero-latency UI reactivity and <b>Firebase Cloud Firestore</b> for real-time multi-device synchronization.
-      </p>
+      <div class="section-subtitle">Stack Highlights</div>
+      <h2 class="section-title">Engineered to Production Standards</h2>
     </div>
 
-    <!-- Interactive Data Flow Diagram Container -->
-    <div class="arch-diagram-wrapper">
-      <div class="arch-tabs">
-        <button class="arch-tab-btn active" id="tabWriteFlow" onclick="switchArchTab('write')">
-          ⚡ 1. Write Flow (Vote ➔ SQLite ➔ Cloud Sync)
-        </button>
-        <button class="arch-tab-btn" id="tabReadFlow" onclick="switchArchTab('read')">
-          🔄 2. Read Flow (Local Cache + Live WebSocket)
-        </button>
-        <button class="arch-tab-btn" id="tabFullStack" onclick="switchArchTab('full')">
-          🏛️ 3. Full 4-Tier Stack Overview
-        </button>
-      </div>
-
-      <!-- Diagram View Container -->
-      <div class="arch-canvas" id="archCanvas">
-        <!-- 4 Step Pipeline Grid -->
-        <div class="flow-pipeline-grid">
-          
-          <!-- Layer 1: User Action -->
-          <div class="arch-node-card user-layer">
-            <div class="arch-node-header">
-              <div class="arch-node-icon">👤</div>
-              <div>
-                <span class="arch-layer-tag">1. Client / User</span>
-                <h4 class="arch-node-title">User Interaction</h4>
-              </div>
-            </div>
-            <div class="arch-node-body">
-              <ul class="arch-spec-list">
-                <li>👆 Tap Option / Cast Vote</li>
-                <li>🎟️ RSVP (+Guests Count)</li>
-                <li>🔑 Input 6-Char Join Code</li>
-                <li>🌐 Google Sign-In / Guest Mode</li>
-              </ul>
-            </div>
-            <div class="arch-node-badge">Touch Events & Gesture Input</div>
-          </div>
-
-          <!-- Flow Arrow 1 -->
-          <div class="flow-arrow-indicator">
-            <div class="flow-dot"></div>
-            <span class="flow-arrow-label">Events</span>
-            <div class="flow-arrow-icon">➔</div>
-          </div>
-
-          <!-- Layer 2: Frontend Jetpack Compose -->
-          <div class="arch-node-card front-layer">
-            <div class="arch-node-header">
-              <div class="arch-node-icon">🎨</div>
-              <div>
-                <span class="arch-layer-tag">2. Presentation</span>
-                <h4 class="arch-node-title">Jetpack Compose M3</h4>
-              </div>
-            </div>
-            <div class="arch-node-body">
-              <ul class="arch-spec-list">
-                <li>🖼️ <code>VotingScreen.kt</code></li>
-                <li>✨ Material 3 Motion & Theme</li>
-                <li>🎯 Type-safe Navigation</li>
-                <li>⚡ 0ms Optimistic UI Update</li>
-              </ul>
-            </div>
-            <div class="arch-node-badge">Declarative UI Layer</div>
-          </div>
-
-          <!-- Flow Arrow 2 -->
-          <div class="flow-arrow-indicator">
-            <div class="flow-dot"></div>
-            <span class="flow-arrow-label">StateFlow</span>
-            <div class="flow-arrow-icon">➔</div>
-          </div>
-
-          <!-- Layer 3: Backend / Logic / ViewModel -->
-          <div class="arch-node-card back-layer">
-            <div class="arch-node-header">
-              <div class="arch-node-icon">⚙️</div>
-              <div>
-                <span class="arch-layer-tag">3. Domain & State</span>
-                <h4 class="arch-node-title">ViewModel & Repo</h4>
-              </div>
-            </div>
-            <div class="arch-node-body">
-              <ul class="arch-spec-list">
-                <li>🧠 <code>PollViewModel.kt</code> (Coroutines)</li>
-                <li>📊 Quorum & Leaderboard Engine</li>
-                <li>🛡️ <code>PollRepository.kt</code></li>
-                <li>🔑 <code>GoogleAuthHelper.kt</code></li>
-              </ul>
-            </div>
-            <div class="arch-node-badge">Kotlin Coroutines Dispatchers.IO</div>
-          </div>
-
-          <!-- Flow Arrow 3 -->
-          <div class="flow-arrow-indicator">
-            <div class="flow-dot"></div>
-            <span class="flow-arrow-label">Dual-Sync</span>
-            <div class="flow-arrow-icon">➔</div>
-          </div>
-
-          <!-- Layer 4: Persistent Storage & Cloud Firestore -->
-          <div class="arch-node-card db-layer">
-            <div class="arch-node-header">
-              <div class="arch-node-icon">☁️</div>
-              <div>
-                <span class="arch-layer-tag">4. Storage & Sync</span>
-                <h4 class="arch-node-title">Room + Firestore</h4>
-              </div>
-            </div>
-            <div class="arch-node-body">
-              <ul class="arch-spec-list">
-                <li>📦 <code>PulsePollDatabase.kt</code> (Room)</li>
-                <li>📑 <code>PollDao.kt</code> (ACID SQLite)</li>
-                <li>🔥 <code>FirestoreService.kt</code> (Cloud)</li>
-                <li>⚡ SnapshotListener Live Feed</li>
-              </ul>
-            </div>
-            <div class="arch-node-badge">Room SQLite (Local) + Firestore (Cloud)</div>
-          </div>
-
-        </div>
-
-        <!-- Dynamic Flow Details Explainer Box -->
-        <div class="flow-summary-box" id="flowSummaryBox">
-          <div class="flow-summary-title" id="flowSummaryTitle">
-            ⚡ Write Path (Atomic Local Vote + Cloud Firestore Sync)
-          </div>
-          <p class="flow-summary-desc" id="flowSummaryDesc">
-            1. User taps an option in <b>Compose UI</b> ➔ 2. <code>viewModel.castVote(optionId)</code> executes on <code>viewModelScope</code> ➔ 3. <b>Room DAO</b> commits an atomic ACID transaction to local SQLite (0ms latency, works offline) ➔ 4. Background Coroutine pushes the vote document to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. Cloud <b>SnapshotListeners</b> broadcast the new tallies in real-time to other participants.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Architectural Deep Dive: 3 Pillar Explanations -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2.5rem;">
-      
-      <!-- Card 1: Hybrid Storage Model -->
-      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-          <span style="font-size: 1.75rem;">💾</span>
-          <div>
-            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">1. Hybrid Storage Engine</h3>
-            <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Room SQLite + Cloud Firestore</span>
-          </div>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
-          Instead of relying exclusively on the network, PulsePoll uses a <b>two-tier cache</b>:
-        </p>
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
-          <li style="display: flex; gap: 0.5rem;">
-            <span>📦</span>
-            <div><strong style="color: var(--on-surface);">Local SQLite Cache (Room):</strong> Reads and initial writes hit the on-device SQLite database first. Guarantees 0ms UI response time and 100% offline functionality.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem;">
-            <span>☁️</span>
-            <div><strong style="color: var(--on-surface);">Cloud Firestore Relay:</strong> Asynchronous background sync sends updates to Firebase. Realtime WebSocket snapshot listeners sync results between multiple phones without needing a custom server backend.</div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Card 2: Production Auth vs In-App Demo Personas -->
-      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-          <span style="font-size: 1.75rem;">🔑</span>
-          <div>
-            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">2. Authentication & Identity</h3>
-            <span style="font-size: 0.8rem; color: var(--secondary); font-weight: 600;">Production Auth vs Demo Personas</span>
-          </div>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
-          PulsePoll clearly separates <b>real user sign-in</b> from <b>multi-user testing tools</b>:
-        </p>
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
-          <li style="display: flex; gap: 0.5rem;">
-            <span>🌐</span>
-            <div><strong style="color: var(--on-surface);">Production (Google, Facebook & Apple):</strong> Real authentication using Android Jetpack <code>CredentialManager</code>, Meta SDK, and Apple OAuth Provider tokens linked to Firebase Auth, plus instant Guest sessions.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem;">
-            <span>👥</span>
-            <div><strong style="color: var(--on-surface);">In-App Multi-User Switcher:</strong> Quick-switch between verified Google, Facebook (Sarah Connor), Apple ID (Marcus Aurelius), and Custom personas on a <b>single device</b> to test live quorum consensus without physical multi-phone setups.</div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Card 3: Free Spark Tier & Security -->
-      <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-          <span style="font-size: 1.75rem;">🛡️</span>
-          <div>
-            <h3 style="margin: 0; font-size: 1.2rem; color: var(--on-surface);">3. Cost Model & Security</h3>
-            <span style="font-size: 0.8rem; color: #10B981; font-weight: 600;">$0 / month Spark Tier & ACL Rules</span>
-          </div>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.5; margin-bottom: 0.75rem;">
-          Engineered for zero maintenance overhead and low costs:
-        </p>
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--on-surface-variant);">
-          <li style="display: flex; gap: 0.5rem;">
-            <span>📊</span>
-            <div><strong style="color: var(--on-surface);">50,000 Reads / Day Free:</strong> Because local users read from Room SQLite, cloud document reads are minimized, staying well within Firebase's free allowance.</div>
-          </li>
-          <li style="display: flex; gap: 0.5rem;">
-            <span>🔒</span>
-            <div><strong style="color: var(--on-surface);">Granular Security Rules:</strong> <code>firestore.rules</code> ensures only the poll creator can delete or close polls, while public voters can only append their own vote documents.</div>
-          </li>
-        </ul>
-      </div>
-
-    </div>
-
-    <!-- Technical Specs Summary Grid -->
-    <div class="tech-grid" style="margin-top: 2rem;">
+    <div class="tech-grid">
       <div class="tech-pill">
         <div class="tech-pill-icon">🎨</div>
         <div class="tech-pill-text">
@@ -2054,751 +563,244 @@
     </div>
   </section>
 
-  <!-- Portability & Backend Independence Section -->
-  <section class="section" id="portability">
-    <div class="section-header">
-      <div class="section-subtitle">Decoupled Architecture & Cloud Independence</div>
-      <h2 class="section-title">Backend Portability & Zero Vendor Lock-in</h2>
-      <p style="color: var(--on-surface-variant); max-width: 800px; margin: 0 auto;">
-        LivePulse is built with strict <b>Clean MVVM boundaries</b>. While Firebase Firestore provides the default zero-config cloud relay, the data sync and authentication layers are fully abstracted behind Kotlin Repository interfaces. You can easily swap the cloud adapter for Supabase, AWS, or your own self-hosted server without touching the UI or local Room database.
-      </p>
-    </div>
-
-    <!-- Provider Selection Interactive Tabs -->
-    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-md); margin-bottom: 2.5rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--outline-variant); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-        <div>
-          <h3 style="margin: 0; font-size: 1.25rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
-            <span>🔄</span> Pluggable Cloud Sync Adapters
-          </h3>
-          <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
-            Click a provider below to inspect how LivePulse adapts to different backend infrastructures:
-          </p>
-        </div>
-
-        <!-- Provider Buttons -->
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="btn btn-primary" id="btnProviderFirebase" onclick="switchProviderTab('firebase')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
-            🔥 Firebase (Default)
-          </button>
-          <button class="btn btn-tonal" id="btnProviderSupabase" onclick="switchProviderTab('supabase')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
-            ⚡ Supabase / Postgres
-          </button>
-          <button class="btn btn-tonal" id="btnProviderAws" onclick="switchProviderTab('aws')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
-            ☁️ AWS AppSync
-          </button>
-          <button class="btn btn-tonal" id="btnProviderCustom" onclick="switchProviderTab('custom')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
-            🛠️ Self-Hosted REST / WS
-          </button>
-        </div>
-      </div>
-
-      <!-- Provider Dynamic Content Card -->
-      <div id="providerDetailCard" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <!-- Left: Architecture & Explanation -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span id="providerIcon" style="font-size: 2.25rem;">🔥</span>
-            <div>
-              <h4 id="providerTitle" style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Firebase Cloud Firestore (Default)</h4>
-              <span id="providerBadge" style="font-size: 0.75rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.15); padding: 0.2rem 0.5rem; border-radius: 6px;">Zero Server Setup • Spark $0/mo</span>
-            </div>
-          </div>
-
-          <p id="providerDesc" style="font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.6; margin: 0;">
-            LivePulse uses Firestore as a serverless real-time document store. Snapshot listeners stream delta updates directly into Kotlin <code>StateFlow</code> with sub-100ms latency. No servers, Docker containers, or maintenance required.
-          </p>
-
-          <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-md); padding: 1rem;">
-            <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">Key Architecture Traits</div>
-            <ul id="providerTraitsList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--on-surface);">
-              <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Bi-directional WebSocket <code>addSnapshotListener</code></li>
-              <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Google Sign-In (CredentialManager) + Meta + Apple + Guest</li>
-              <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (Instant UI response + offline queue)</li>
-              <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> 100% Free on Spark Tier (50k daily reads / 20k writes)</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Right: Code Snippet / Repository Adapter -->
-        <div style="background: #0F172A; border-radius: var(--radius-md); padding: 1.25rem; color: #F8FAFC; display: flex; flex-direction: column; justify-content: space-between;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
-            <span id="codeFilename" style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #94A3B8;">FirestorePollRepository.kt</span>
-            <span id="codeLangTag" style="font-size: 0.7rem; font-weight: 700; color: #38BDF8;">KOTLIN ADAPTER</span>
-          </div>
-
-          <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.55; color: #E2E8F0; overflow-x: auto; flex: 1;"><code id="providerCodeSnippet"><span style="color: #64748B;">// Firebase Firestore Realtime Stream Adapter</span>
-<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">FirestorePollRepository</span>(
-    <span style="color: #F472B6;">private val</span> db: <span style="color: #38BDF8;">FirebaseFirestore</span>,
-    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
-) : <span style="color: #38BDF8;">PollRepository</span> {
-
-    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
-        <span style="color: #64748B;">// 1. Emit local Room cache instantly (0ms)</span>
-        <span style="color: #F472B6;">val</span> local = pollDao.getPollWithDetails(pollId)
-        trySend(local)
-
-        <span style="color: #64748B;">// 2. Attach WebSocket listener for remote votes</span>
-        <span style="color: #F472B6;">val</span> listener = db.collection(<span style="color: #A7F3D0;">"polls"</span>).document(pollId)
-            .addSnapshotListener { snapshot, _ -&gt;
-                snapshot?.toObject(<span style="color: #38BDF8;">PollEntity</span>::<span style="color: #F472B6;">class</span>.java)?.let { remote -&gt;
-                    pollDao.upsertPoll(remote) <span style="color: #64748B;">// Updates Room & triggers UI Flow</span>
-                }
-            }
-        awaitClose { listener.remove() }
-    }
-}</code></pre>
-          <div style="font-size: 0.75rem; color: #94A3B8; margin-top: 0.75rem; text-align: right;">
-            💡 <i>Replacing the cloud sync requires editing only this 1 repository file.</i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3 Pillars of Cloud Independence -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-      
-      <!-- Pillar 1: Repository Interface Abstraction -->
-      <div class="feature-card">
-        <div class="feature-icon-box" style="background: rgba(79, 70, 229, 0.15); color: var(--primary);">🛡️</div>
-        <h3>1. Strict Repository Interface Contract</h3>
-        <p>The UI (Compose) and ViewModels communicate exclusively through the <code>PollRepository</code> interface. No Firebase or Google imports leak into the UI or domain modules.</p>
-        <div style="margin-top: 0.75rem; font-size: 0.82rem; background: var(--surface-variant); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
-          interface PollRepository {<br>
-          &nbsp;&nbsp;fun observePoll(id): Flow&lt;PollWithDetails?&gt;<br>
-          &nbsp;&nbsp;suspend fun castVote(optionId, persona)<br>
-          &nbsp;&nbsp;suspend fun syncPendingOfflineVotes()<br>
-          }
-        </div>
-      </div>
-
-      <!-- Pillar 2: Offline-First Room SQLite Engine -->
-      <div class="feature-card">
-        <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">💾</div>
-        <h3>2. Vendor-Neutral Local SQLite (Room)</h3>
-        <p>Local state management uses standard SQLite and Android Jetpack Room. The app remains fully functional, responsive, and queryable with zero network connectivity or cloud credentials.</p>
-        <div style="margin-top: 0.75rem; font-size: 0.82rem; background: var(--surface-variant); padding: 0.5rem 0.75rem; border-radius: 6px;">
-          <b>✓ Zero cloud locks:</b> All vote totals, participant rankings, RSVP counts, and tiebreak math execute on-device in pure Kotlin algorithms.
-        </div>
-      </div>
-
-      <!-- Pillar 3: Multi-Provider Authentication Matrix -->
-      <div class="feature-card">
-        <div class="feature-icon-box" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">👥</div>
-        <h3>3. Multi-Identity & Local Persona Support</h3>
-        <p>Authentication is decoupled from a single identity provider. Users can authenticate via Google CredentialManager, Apple Sign-In, Meta Facebook SDK, or Instant Local Guest mode.</p>
-        <div style="margin-top: 0.75rem; font-size: 0.82rem; background: var(--surface-variant); padding: 0.5rem 0.75rem; border-radius: 6px;">
-          <b>✓ In-App Persona Switcher:</b> Switch between Alex, Sarah Connor, and Marcus Aurelius without logging out to test group voting on one phone.
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Backend Comparison Matrix Table -->
-    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); overflow-x: auto;">
-      <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
-        <span>📊</span> Backend Provider Comparison Matrix
-      </h3>
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 2px solid var(--outline-variant); color: var(--on-surface);">
-            <th style="padding: 0.75rem 0.5rem;">Backend Option</th>
-            <th style="padding: 0.75rem 0.5rem;">Sync Protocol</th>
-            <th style="padding: 0.75rem 0.5rem;">Auth Integration</th>
-            <th style="padding: 0.75rem 0.5rem;">Offline Cache</th>
-            <th style="padding: 0.75rem 0.5rem;">Hosting Cost</th>
-            <th style="padding: 0.75rem 0.5rem;">Migration Effort</th>
-          </tr>
-        </thead>
-        <tbody style="color: var(--on-surface-variant);">
-          <tr style="border-bottom: 1px solid var(--outline-variant); background: rgba(79, 70, 229, 0.04);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--primary);">🔥 Firebase Firestore (Current)</td>
-            <td style="padding: 0.75rem 0.5rem;">TLS WebSockets (SnapshotListeners)</td>
-            <td style="padding: 0.75rem 0.5rem;">Google, Meta, Apple, Guest</td>
-            <td style="padding: 0.75rem 0.5rem;">Room SQLite (ACID)</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #10B981; font-weight: 700;">$0/mo</span> (Spark Tier)</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #10B981; font-weight: 700;">Zero</span> (Default configured)</td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--outline-variant);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">⚡ Supabase & PostgreSQL</td>
-            <td style="padding: 0.75rem 0.5rem;">Postgres Realtime CDC (WebSockets)</td>
-            <td style="padding: 0.75rem 0.5rem;">Supabase Auth (OAuth/JWT)</td>
-            <td style="padding: 0.75rem 0.5rem;">Room SQLite (ACID)</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #10B981; font-weight: 700;">$0/mo</span> (Free Tier / Self-Host)</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #38BDF8; font-weight: 700;">~2 hours</span> (Swap Repo file)</td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--outline-variant);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">☁️ AWS AppSync + DynamoDB</td>
-            <td style="padding: 0.75rem 0.5rem;">GraphQL Subscriptions</td>
-            <td style="padding: 0.75rem 0.5rem;">AWS Cognito User Pools</td>
-            <td style="padding: 0.75rem 0.5rem;">Room SQLite (ACID)</td>
-            <td style="padding: 0.75rem 0.5rem;">Pay-per-request (Free Tier 12mo)</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #F59E0B; font-weight: 700;">~4 hours</span> (Amplify SDK)</td>
-          </tr>
-          <tr>
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">🛠️ Self-Hosted REST / WebSockets</td>
-            <td style="padding: 0.75rem 0.5rem;">Ktor / Node.js / Go WebSocket</td>
-            <td style="padding: 0.75rem 0.5rem;">Custom JWT / OAuth2</td>
-            <td style="padding: 0.75rem 0.5rem;">Room SQLite (ACID)</td>
-            <td style="padding: 0.75rem 0.5rem;">$5/mo VPS or On-Premise Free</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #38BDF8; font-weight: 700;">~3 hours</span> (Ktor client)</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Kotlin Multiplatform (KMP) Readiness Note -->
-    <div style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(139, 92, 246, 0.08)); border: 1px solid rgba(79, 70, 229, 0.2); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
-      <span style="font-size: 2rem;">🚀</span>
-      <div>
-        <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; color: var(--primary);">Kotlin Multiplatform (KMP) Ready</h4>
-        <p style="margin: 0; font-size: 0.85rem; color: var(--on-surface-variant); line-height: 1.5;">
-          All domain models (<code>PollEntity</code>, <code>OptionEntity</code>, <code>VoteEntity</code>), quorum aggregation algorithms, and tie-breaking logic in <code>DomainAndCalculations.kt</code> are written in pure Kotlin with <b>no Android framework dependencies</b>. They can be compiled directly into a shared KMP module for iOS (SwiftUI / Compose Multiplatform) or Desktop.
-        </p>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- Distributed Attack Defense & Cross-Provider Security Section -->
-  <section class="section" id="defense">
-    <div class="section-header">
-      <div class="section-subtitle">Security Architecture & Anti-Abuse Engineering</div>
-      <h2 class="section-title">Distributed Attack Defense & Cross-Stack Protection</h2>
-      <p style="color: var(--on-surface-variant); max-width: 800px; margin: 0 auto;">
-        Real-time voting and polling platforms are frequent targets for <b>volumetric DDoS</b>, <b>botnet vote-stuffing (Sybil attacks)</b>, <b>short-code brute forcing</b>, and <b>cost-exhaustion attacks ("Denial of Wallet")</b>. LivePulse implements a 5-layer defense-in-depth security model that remains <b>100% portable across Firebase, Supabase, AWS, and self-hosted environments</b>.
-      </p>
-    </div>
-
-    <!-- The 5-Layer Defense Hierarchy Visual -->
-    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-md); margin-bottom: 2.5rem;">
-      <h3 style="margin: 0 0 1.25rem 0; font-size: 1.2rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
-        <span>🛡️</span> The 5-Layer Defense Hierarchy
-      </h3>
-
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Layer 1 -->
-        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 1rem;">
-          <div style="font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: #3B82F6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">1</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-              <span style="font-weight: 700; color: #1D4ED8; font-size: 0.95rem;">Edge & Volumetric DDoS Mitigation (L3/L4 & L7)</span>
-              <span style="font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: #1D4ED8; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">Global Anycast Edge</span>
-            </div>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
-              Absorbs multi-terabit SYN/UDP floods at Google / Cloudflare / AWS edge PoPs before traffic ever reaches your backend or billing meter.
-            </p>
-          </div>
-        </div>
-
-        <!-- Layer 2 -->
-        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 1rem;">
-          <div style="font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: #10B981; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">2</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-              <span style="font-weight: 700; color: #047857; font-size: 0.95rem;">Cryptographic Device Attestation (Anti-Bot & Anti-Emulator)</span>
-              <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.2); color: #047857; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">Play Integrity API</span>
-            </div>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
-              Hardware-backed attestation token issued by Google Play Services confirms requests originate from genuine physical Android devices, blocking headless scripts, Python crawlers, and emulator farms with HTTP 403.
-            </p>
-          </div>
-        </div>
-
-        <!-- Layer 3 -->
-        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: var(--radius-md); padding: 1rem;">
-          <div style="font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: #8B5CF6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">3</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-              <span style="font-weight: 700; color: #6D28D9; font-size: 0.95rem;">Sybil Attack & Short-Code Brute Force Prevention</span>
-              <span style="font-size: 0.75rem; background: rgba(139, 92, 246, 0.2); color: #6D28D9; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">reCAPTCHA & Idempotency</span>
-            </div>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
-              Invisible risk-scoring algorithms protect short-code discovery, while compound document keys (<code>${pollId}_${voterId}</code>) guarantee that spamming 10,000 duplicate requests records exactly 1 vote.
-            </p>
-          </div>
-        </div>
-
-        <!-- Layer 4 -->
-        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 1rem;">
-          <div style="font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: #F59E0B; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">4</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-              <span style="font-weight: 700; color: #B45309; font-size: 0.95rem;">Database-Level Row Security & Schema Validation</span>
-              <span style="font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); color: #B45309; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">Zero-Trust Enforcement</span>
-            </div>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
-              Server-side security rules (Firestore Rules / Postgres RLS) reject unauthorized writes, payload bloat injections, and voter spoofing directly at the database engine, ignoring any compromised client code.
-            </p>
-          </div>
-        </div>
-
-        <!-- Layer 5 -->
-        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 1rem;">
-          <div style="font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: #EF4444; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">5</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-              <span style="font-weight: 700; color: #B91C1C; font-size: 0.95rem;">Financial Defense & "Denial of Wallet" Hard Caps</span>
-              <span style="font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); color: #B91C1C; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">Budget Shields</span>
-            </div>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
-              Google Cloud / AWS / Supabase budget caps automatically throttle operations before runaway compute or read charges can occur, while client-side <code>debounce(300ms)</code> eliminates accidental flood loops.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cross-Provider Defense Translation Matrix -->
-    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); overflow-x: auto; margin-bottom: 2.5rem;">
-      <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
-        <span>🌐</span> Cross-Provider Defense Translation Matrix
-      </h3>
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 2px solid var(--outline-variant); color: var(--on-surface);">
-            <th style="padding: 0.75rem 0.5rem;">Defense Layer</th>
-            <th style="padding: 0.75rem 0.5rem;">🔥 Firebase (Current)</th>
-            <th style="padding: 0.75rem 0.5rem;">⚡ Supabase / PostgreSQL</th>
-            <th style="padding: 0.75rem 0.5rem;">☁️ AWS AppSync / DynamoDB</th>
-            <th style="padding: 0.75rem 0.5rem;">🛠️ Self-Hosted (Ktor / Go)</th>
-          </tr>
-        </thead>
-        <tbody style="color: var(--on-surface-variant);">
-          <tr style="border-bottom: 1px solid var(--outline-variant); background: rgba(79, 70, 229, 0.04);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--primary);">1. Device Attestation</td>
-            <td style="padding: 0.75rem 0.5rem;"><b>Firebase App Check</b> + Play Integrity</td>
-            <td style="padding: 0.75rem 0.5rem;">Play Integrity in Edge Function</td>
-            <td style="padding: 0.75rem 0.5rem;">AppSync Lambda Authorizer + Integrity</td>
-            <td style="padding: 0.75rem 0.5rem;">Ktor / Express Play Integrity middleware</td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--outline-variant);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">2. Volumetric DDoS</td>
-            <td style="padding: 0.75rem 0.5rem;">Google Global Anycast + Armor</td>
-            <td style="padding: 0.75rem 0.5rem;">Cloudflare Enterprise Edge (Native)</td>
-            <td style="padding: 0.75rem 0.5rem;">AWS Shield Standard + AWS WAF</td>
-            <td style="padding: 0.75rem 0.5rem;">Cloudflare Proxy + Nginx <code>limit_req</code></td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--outline-variant);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">3. Sybil & Bot Defense</td>
-            <td style="padding: 0.75rem 0.5rem;">reCAPTCHA Enterprise</td>
-            <td style="padding: 0.75rem 0.5rem;">Cloudflare Turnstile / hCaptcha</td>
-            <td style="padding: 0.75rem 0.5rem;">AWS WAF Bot Control Rule Group</td>
-            <td style="padding: 0.75rem 0.5rem;">Server-side Turnstile / reCAPTCHA</td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--outline-variant);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">4. Single-Vote Idempotency</td>
-            <td style="padding: 0.75rem 0.5rem;">Doc Key: <code>/votes/{voterId}</code></td>
-            <td style="padding: 0.75rem 0.5rem;"><code>UNIQUE(poll_id, voter_id)</code></td>
-            <td style="padding: 0.75rem 0.5rem;">DynamoDB <code>PK/SK</code> Composite Key</td>
-            <td style="padding: 0.75rem 0.5rem;">DB Unique Index or Redis <code>SETNX</code></td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--outline-variant);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">5. Database Authorization</td>
-            <td style="padding: 0.75rem 0.5rem;"><code>firestore.rules</code> (auth.uid match)</td>
-            <td style="padding: 0.75rem 0.5rem;"><b>Postgres Row Level Security (RLS)</b></td>
-            <td style="padding: 0.75rem 0.5rem;">AppSync <code>@auth(rules: [...])</code></td>
-            <td style="padding: 0.75rem 0.5rem;">JWT Middleware (<code>claims.sub == uid</code>)</td>
-          </tr>
-          <tr>
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">6. Financial "Denial of Wallet"</td>
-            <td style="padding: 0.75rem 0.5rem;">GCP Budget Alerts & Daily Quotas</td>
-            <td style="padding: 0.75rem 0.5rem;">Supabase Spend Cap Toggle</td>
-            <td style="padding: 0.75rem 0.5rem;">AWS Budgets with Auto-Shutdown</td>
-            <td style="padding: 0.75rem 0.5rem;"><b>$5/mo Fixed VPS (Zero Spikes)</b></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Security Implementation Code Comparison -->
-    <div style="background: #0F172A; border-radius: var(--radius-lg); padding: 1.5rem; color: #F8FAFC; box-shadow: var(--shadow-md);">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.75rem; margin-bottom: 1rem;">
-        <h4 style="margin: 0; font-size: 1rem; color: #38BDF8; display: flex; align-items: center; gap: 0.5rem;">
-          <span>💻</span> Database Authorization Comparison: Firebase Rules vs. PostgreSQL RLS
-        </h4>
-        <span style="font-size: 0.72rem; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">SECURITY PARITY</span>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <!-- Left: Firestore Rules -->
-        <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: #F59E0B; margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace;">firestore.rules (Firebase)</div>
-          <pre style="margin: 0; background: #020617; border-radius: var(--radius-md); padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.5; color: #E2E8F0; overflow-x: auto;"><code>match /polls/{pollId}/votes/{voterId} {
-  <span style="color: #64748B;">// Only the authenticated voter can cast their vote</span>
-  allow write: if request.auth != null 
-               &amp;&amp; request.auth.uid == voterId
-               &amp;&amp; request.resource.data.keys().hasOnly(
-                  ['optionId', 'persona', 'rsvp', 'timestamp']
-               );
-}</code></pre>
-        </div>
-
-        <!-- Right: Postgres RLS -->
-        <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: #10B981; margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace;">schema.sql (PostgreSQL / Supabase RLS)</div>
-          <pre style="margin: 0; background: #020617; border-radius: var(--radius-md); padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.5; color: #E2E8F0; overflow-x: auto;"><code><span style="color: #64748B;">-- Enable Row Level Security</span>
-<span style="color: #F472B6;">ALTER TABLE</span> votes <span style="color: #F472B6;">ENABLE ROW LEVEL SECURITY</span>;
-
-<span style="color: #64748B;">-- Enforce voter identity on insert/update</span>
-<span style="color: #F472B6;">CREATE POLICY</span> <span style="color: #A7F3D0;">"Voter write self only"</span> 
-<span style="color: #F472B6;">ON</span> votes <span style="color: #F472B6;">FOR ALL</span> 
-<span style="color: #F472B6;">USING</span> (auth.uid() = voter_id)
-<span style="color: #F472B6;">WITH CHECK</span> (auth.uid() = voter_id);</code></pre>
-        </div>
-      </div>
-
-      <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #334155; font-size: 0.8rem; color: #94A3B8; display: flex; align-items: center; justify-content: space-between;">
-        <span>🔒 <b>Zero-Trust Guarantee:</b> Even if a client is decompiled or modified, malicious writes are dropped server-side on both platforms.</span>
-        <a href="#production" style="color: #38BDF8; text-decoration: none; font-weight: 600;">View Production Setup →</a>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- Production Deployment & Manual Setup Guide -->
-  <section class="section" id="production">
-    <div class="section-header">
-      <div class="section-subtitle">Release Engineering & Operations</div>
-      <h2 class="section-title">Production Deployment & Manual Setup</h2>
-      <p style="color: var(--on-surface-variant);">Complete end-to-end instructions, manual console setup, and automation scripts for deploying PulsePoll to Google Play Store and Firebase.</p>
-    </div>
-
-    <!-- Production Setup Grid -->
-    <div class="grid-3" style="margin-bottom: 2rem;">
-      <!-- Step 1: Firebase Console -->
-      <div class="feature-card">
-        <div class="feature-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">🔥</div>
-        <h3>1. Firebase & Auth Setup</h3>
-        <p>1. Create a Firebase project on the <b>Spark Free Tier</b> ($0/mo).<br>
-        2. Register package <code>com.aistudio.pollpulse.qxrvlz</code>.<br>
-        3. Enable <b>Google Sign-In</b> & <b>Cloud Firestore</b>.<br>
-        4. Place <code>google-services.json</code> into <code>/app</code>.</p>
-      </div>
-
-      <!-- Step 2: SHA-1 & Keystore -->
-      <div class="feature-card">
-        <div class="feature-icon-box" style="background: rgba(79, 70, 229, 0.15); color: var(--primary);">🔐</div>
-        <h3>2. Release Keystore & SHA-1</h3>
-        <p>1. Run <code>bash scripts/generate-release-keystore.sh</code>.<br>
-        2. Copy SHA-1 & SHA-256 certificate fingerprints.<br>
-        3. Add fingerprints in Firebase Console ➔ Project Settings.<br>
-        4. Configure signing in <code>gradle.properties</code>.</p>
-      </div>
-
-      <!-- Step 3: Google Play Bundle -->
-      <div class="feature-card">
-        <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">📦</div>
-        <h3>3. Play Store Rollout (.AAB)</h3>
-        <p>1. Run <code>bash scripts/build-release.sh</code>.<br>
-        2. Locate bundle at <code>app-release.aab</code>.<br>
-        3. Upload to Google Play Console Internal Testing track.<br>
-        4. Promote to Closed Beta and Production!</p>
-      </div>
-    </div>
-
-    <!-- Production Commands Code Snippet Box -->
-    <div style="background: #0F172A; border-radius: var(--radius-lg); padding: 1.5rem; color: #F8FAFC; box-shadow: var(--shadow-md);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.75rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #EF4444;"></span>
-          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #F59E0B;"></span>
-          <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #10B981;"></span>
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #94A3B8; margin-left: 0.5rem;">production-release-commands.sh</span>
-        </div>
-        <span style="font-size: 0.75rem; color: #38BDF8; font-weight: 700;">BASH SCRIPTS</span>
-      </div>
-
-      <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6; overflow-x: auto; color: #E2E8F0;"><code><span style="color: #64748B;"># 1. Generate 2048-bit Release Keystore & extract SHA-1/SHA-256 for Firebase</span>
-<span style="color: #38BDF8;">bash</span> scripts/generate-release-keystore.sh
-
-<span style="color: #64748B;"># 2. Deploy Firestore Security Rules</span>
-<span style="color: #38BDF8;">bash</span> scripts/deploy-firestore-rules.sh
-
-<span style="color: #64748B;"># 3. Build Google Play Bundle (.aab) and standalone signed Release APK</span>
-<span style="color: #38BDF8;">bash</span> scripts/build-release.sh
-
-<span style="color: #64748B;"># Output: app/build/outputs/bundle/release/app-release.aab</span></code></pre>
-    </div>
-
-    <!-- Link to full markdown guide -->
-    <div style="text-align: center; margin-top: 1.5rem;">
-      <p style="font-size: 0.9rem; color: var(--on-surface-variant);">
-        📖 Full manual step-by-step checklist available in <code style="background: var(--surface-variant); padding: 0.2rem 0.4rem; border-radius: 4px;">PRODUCTION_DEPLOYMENT.md</code>
-      </p>
-    </div>
-  </section>
+  <!-- Toast Element -->
+  <div class="toast" id="toastBox">
+    <span>💡</span>
+    <span id="toastMsg">Action triggered</span>
+  </div>
 
   <!-- Footer -->
   <footer>
     <ul class="footer-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#demo">Live Demo</a></li>
-      <li><a href="#templates">Templates</a></li>
-      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="architecture.html">Architecture</a></li>
+      <li><a href="portability.html">Portability</a></li>
+      <li><a href="defense.html">Distributed Defense</a></li>
+      <li><a href="production.html">Production Runbook</a></li>
     </ul>
-    <p>© 2026 PulsePoll Android App. Open source and built with Jetpack Compose & Material 3.</p>
+    <p>© 2026 LivePulse Engineering • Android Jetpack Compose M3 + Offline-First Consensus Engine</p>
   </footer>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="toastBox">
-    <span id="toastIcon">💡</span>
-    <span id="toastMsg">Action performed</span>
-  </div>
-
+  <!-- Interactive Simulator JavaScript -->
   <script>
-    // Poll Data Catalog for Simulator
-    const pollCatalog = [
-      {
-        id: "soccer",
-        title: "5v5 Soccer Pitch Booking",
-        categoryIcon: "⚽",
-        creator: "Alex",
-        code: "SOC5V5",
-        deadline: "⏰ 4h left",
-        options: [
-          { text: "Thursday 7:00 PM (Downtown Arena)", votes: 6 },
-          { text: "Friday 6:00 PM (Westside Pitch)", votes: 2 },
-          { text: "Saturday 9:00 AM (Central Field)", votes: 1 }
-        ],
-        selectedOptionIdx: 0,
-        rsvpType: "yes",
-        totalAttending: 11
-      },
-      {
-        id: "drinks",
-        title: "Friday Drinks & Happy Hour",
-        categoryIcon: "🍻",
-        creator: "Sarah",
-        code: "DRK777",
-        deadline: "⏰ 2d left",
-        options: [
-          { text: "Sky High Rooftop Bar", votes: 5 },
-          { text: "Craft Brewery & Yard", votes: 3 },
-          { text: "The Secret Speakeasy", votes: 0 }
-        ],
-        selectedOptionIdx: 0,
-        rsvpType: "yes",
-        totalAttending: 8
-      },
-      {
-        id: "lunch",
-        title: "Team Lunch Decider",
-        categoryIcon: "🍕",
-        creator: "Marcus",
-        code: "LNC123",
-        deadline: "⏰ 1h left",
-        options: [
-          { text: "Taco Fiesta (Mexican)", votes: 4 },
-          { text: "Nonna's Trattoria (Italian)", votes: 4 },
-          { text: "Tokyo Ramen Bar", votes: 1 }
-        ],
-        selectedOptionIdx: 1,
-        rsvpType: "solo",
-        totalAttending: 9
-      }
-    ];
-
-    let currentPollIdx = 0;
-
-    // Simulated Users List
-    const users = [
-      { name: "Alex (Google)", avatar: "🧑‍💻", provider: "Google" },
-      { name: "Sarah (FB)", avatar: "👩‍🎨", provider: "Facebook" },
-      { name: "Marcus (Apple)", avatar: "👨‍💼", provider: "Apple" }
-    ];
-    let currentUserIdx = 0;
+    // State Store for Simulated Phone
+    const state = {
+      currentUserIndex: 0,
+      users: [
+        { id: 'user_alex', name: 'Alex (Google)', avatar: '🧑‍💻', provider: 'Google', rsvp: 'yes', votedOption: 0 },
+        { id: 'user_sarah', name: 'Sarah Connor', avatar: '👩‍🎨', provider: 'Facebook', rsvp: 'solo', votedOption: 1 },
+        { id: 'user_marcus', name: 'Marcus Aurelius', avatar: '👨‍💼', provider: 'Apple', rsvp: 'yes', votedOption: 0 }
+      ],
+      activePollIndex: 0,
+      polls: [
+        {
+          id: 'poll_soccer',
+          title: '5v5 Soccer Pitch Booking',
+          creator: 'Alex',
+          code: 'SOC5V5',
+          categoryIcon: '⚽',
+          categoryBg: '#EEF2FF',
+          deadline: '⏰ 4h left',
+          options: [
+            { id: 0, text: 'Thu 7:00 PM (Downtown)', votes: 6, percent: 65, isWinner: true },
+            { id: 1, text: 'Fri 6:00 PM (Westside)', votes: 2, percent: 22, isWinner: false },
+            { id: 2, text: 'Sat 9:00 AM (Central)', votes: 1, percent: 13, isWinner: false }
+          ],
+          totalVotes: 9,
+          totalVoters: 7,
+          attendingCount: 11
+        },
+        {
+          id: 'poll_drinks',
+          title: 'Friday Drinks & Rooftop',
+          creator: 'Sarah',
+          code: 'DRK777',
+          categoryIcon: '🍻',
+          categoryBg: '#E0F2FE',
+          deadline: '⏰ Tomorrow',
+          options: [
+            { id: 0, text: 'Sky High Rooftop Bar', votes: 8, percent: 57, isWinner: true },
+            { id: 1, text: 'Craft Brewery & Yard', votes: 4, percent: 29, isWinner: false },
+            { id: 2, text: 'The Secret Speakeasy', votes: 2, percent: 14, isWinner: false }
+          ],
+          totalVotes: 14,
+          totalVoters: 12,
+          attendingCount: 16
+        },
+        {
+          id: 'poll_lunch',
+          title: 'Team Lunch Decider',
+          creator: 'Marcus',
+          code: 'LNC123',
+          categoryIcon: '🍕',
+          categoryBg: '#FFEDD5',
+          deadline: '⏰ 1h left',
+          options: [
+            { id: 0, text: 'Taco Fiesta (Mexican)', votes: 5, percent: 45, isWinner: true },
+            { id: 1, text: "Nonna's Trattoria (Italian)", votes: 4, percent: 36, isWinner: false },
+            { id: 2, text: 'Tokyo Ramen Bar', votes: 2, percent: 19, isWinner: false }
+          ],
+          totalVotes: 11,
+          totalVoters: 11,
+          attendingCount: 11
+        }
+      ]
+    };
 
     function renderPoll() {
-      const poll = pollCatalog[currentPollIdx];
+      const poll = state.polls[state.activePollIndex];
+      const user = state.users[state.currentUserIndex];
+
+      document.getElementById('userAvatar').textContent = user.avatar;
+      document.getElementById('userName').textContent = user.name;
       document.getElementById('pollCategoryIcon').textContent = poll.categoryIcon;
+      document.getElementById('pollCategoryIcon').style.background = poll.categoryBg;
       document.getElementById('pollTitle').textContent = poll.title;
       document.getElementById('pollCreator').textContent = poll.creator;
       document.getElementById('pollCode').textContent = poll.code;
       document.getElementById('pollDeadline').textContent = poll.deadline;
 
-      const totalVotes = poll.options.reduce((acc, cur) => acc + cur.votes, 0);
-      document.getElementById('voteCountBadge').textContent = `🗳️ ${totalVotes} Votes • 👥 ${totalVotes > 1 ? totalVotes - 1 : 1} Voters`;
-      document.getElementById('rsvpCountBadge').textContent = `✓ ${poll.totalAttending} Attending`;
+      document.getElementById('voteCountBadge').textContent = `🗳️ ${poll.totalVotes} Votes • 👥 ${poll.totalVoters} Voters`;
+      document.getElementById('rsvpCountBadge').textContent = `✓ ${poll.attendingCount} Attending`;
 
-      const optionsContainer = document.getElementById('optionsContainer');
-      optionsContainer.innerHTML = '';
+      const optContainer = document.getElementById('optionsContainer');
+      optContainer.innerHTML = '';
 
       poll.options.forEach((opt, idx) => {
-        const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
-        const isSelected = idx === poll.selectedOptionIdx;
-
+        const isSelected = user.votedOption === opt.id;
         const optDiv = document.createElement('div');
         optDiv.className = `mock-option-item ${isSelected ? 'selected' : ''}`;
-        optDiv.onclick = () => castVote(idx);
+        optDiv.onclick = () => selectOption(opt.id);
 
         optDiv.innerHTML = `
-          <div class="mock-option-bar" style="width: ${pct}%;"></div>
+          <div class="mock-option-bar" style="width: ${opt.percent}%;"></div>
           <div class="mock-option-content">
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${opt.text}</span>
-            <span style="flex-shrink: 0; font-weight: 700;">${pct}% (${opt.votes})</span>
+            <span style="display: flex; align-items: center; gap: 0.4rem;">
+              <span>${isSelected ? '🔘' : '⚪'}</span>
+              <span>${opt.text} ${opt.isWinner ? '🏆' : ''}</span>
+            </span>
+            <span style="font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">${opt.percent}% (${opt.votes})</span>
           </div>
         `;
-        optionsContainer.appendChild(optDiv);
+        optContainer.appendChild(optDiv);
       });
 
-      // Update alternate preview card
-      const altIdx = (currentPollIdx + 1) % pollCatalog.length;
-      const altPoll = pollCatalog[altIdx];
-      document.getElementById('secondIcon').textContent = altPoll.categoryIcon;
-      document.getElementById('secondTitle').textContent = altPoll.title;
-      document.getElementById('secondSubtitle').innerHTML = `Code: <b>${altPoll.code}</b> • Tap to switch`;
+      renderRsvpButtons(user.rsvp);
+
+      // Render secondary poll preview
+      const secIdx = (state.activePollIndex + 1) % state.polls.length;
+      const secPoll = state.polls[secIdx];
+      document.getElementById('secondIcon').textContent = secPoll.categoryIcon;
+      document.getElementById('secondIcon').style.background = secPoll.categoryBg;
+      document.getElementById('secondTitle').textContent = secPoll.title;
+      document.getElementById('secondSubtitle').innerHTML = `Code: <b>${secPoll.code}</b> • Tap to switch`;
     }
 
-    function triggerHeroInteractiveDemo() {
-      const demoElement = document.getElementById('demo');
-      demoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    function renderRsvpButtons(rsvpStatus) {
+      document.getElementById('rsvpYes').className = 'rsvp-mini-btn ' + (rsvpStatus === 'yes' ? 'active' : '');
+      document.getElementById('rsvpSolo').className = 'rsvp-mini-btn ' + (rsvpStatus === 'solo' ? 'active' : '');
+      document.getElementById('rsvpMaybe').className = 'rsvp-mini-btn ' + (rsvpStatus === 'maybe' ? 'active' : '');
 
-      const phoneFrame = document.getElementById('phoneFrame');
-      phoneFrame.classList.remove('highlight-pulse');
-      void phoneFrame.offsetWidth;
-      phoneFrame.classList.add('highlight-pulse');
-
-      setTimeout(() => {
-        castVote(0);
-        showToast('⚡ Interactive Demo Activated! Vote counted & Room SQLite updated.');
-      }, 400);
+      const textEl = document.getElementById('currentHeadcountText');
+      if (rsvpStatus === 'yes') textEl.textContent = 'Going (+1 guest)';
+      else if (rsvpStatus === 'solo') textEl.textContent = 'Going (Solo)';
+      else textEl.textContent = 'Maybe (Not counted)';
     }
 
-    function triggerHeroSsoModal() {
-      const demoElement = document.getElementById('demo');
-      demoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => {
-        openUserSwitcherModal();
-      }, 350);
-    }
+    function selectOption(optionId) {
+      const user = state.users[state.currentUserIndex];
+      const poll = state.polls[state.activePollIndex];
 
-    function castVote(optionIndex) {
-      const poll = pollCatalog[currentPollIdx];
-      poll.selectedOptionIdx = optionIndex;
-      poll.options[optionIndex].votes += 1;
-      renderPoll();
-      showToast(`🗳️ Vote recorded for "${poll.options[optionIndex].text.split('(')[0]}"`);
-    }
+      if (user.votedOption === optionId) return;
 
-    function setRsvp(type) {
-      const poll = pollCatalog[currentPollIdx];
-      poll.rsvpType = type;
-      document.querySelectorAll('.rsvp-mini-btn').forEach(btn => btn.classList.remove('active'));
-
-      if (type === 'yes') {
-        document.getElementById('rsvpYes').classList.add('active');
-        document.getElementById('currentHeadcountText').textContent = 'Going (+1 guest)';
-        poll.totalAttending += 2;
-      } else if (type === 'solo') {
-        document.getElementById('rsvpSolo').classList.add('active');
-        document.getElementById('currentHeadcountText').textContent = 'Going (Just me)';
-        poll.totalAttending += 1;
+      if (user.votedOption !== null) {
+        const oldOpt = poll.options.find(o => o.id === user.votedOption);
+        if (oldOpt && oldOpt.votes > 0) oldOpt.votes--;
       } else {
-        document.getElementById('rsvpMaybe').classList.add('active');
-        document.getElementById('currentHeadcountText').textContent = 'Maybe / Tentative';
+        poll.totalVotes++;
       }
+
+      const newOpt = poll.options.find(o => o.id === optionId);
+      if (newOpt) newOpt.votes++;
+      user.votedOption = optionId;
+
+      recalculatePercentages(poll);
       renderPoll();
-      showToast(`🎟️ RSVP status: ${type.toUpperCase()}`);
+      showToast(`🗳️ Vote registered: "${newOpt.text}"`);
+    }
+
+    function setRsvp(status) {
+      const user = state.users[state.currentUserIndex];
+      const poll = state.polls[state.activePollIndex];
+      
+      const oldStatus = user.rsvp;
+      user.rsvp = status;
+
+      let oldContribution = oldStatus === 'yes' ? 2 : (oldStatus === 'solo' ? 1 : 0);
+      let newContribution = status === 'yes' ? 2 : (status === 'solo' ? 1 : 0);
+      poll.attendingCount += (newContribution - oldContribution);
+
+      renderPoll();
+      showToast(`🎟️ RSVP updated to: ${status.toUpperCase()}`);
+    }
+
+    function recalculatePercentages(poll) {
+      let total = poll.options.reduce((acc, o) => acc + o.votes, 0);
+      let maxVotes = -1;
+      let winnerId = -1;
+
+      poll.options.forEach(o => {
+        o.percent = total > 0 ? Math.round((o.votes / total) * 100) : 0;
+        if (o.votes > maxVotes && o.votes > 0) {
+          maxVotes = o.votes;
+          winnerId = o.id;
+        }
+      });
+
+      poll.options.forEach(o => {
+        o.isWinner = (o.id === winnerId);
+      });
+      poll.totalVotes = total;
     }
 
     function confirmVoteAction() {
-      const poll = pollCatalog[currentPollIdx];
-      const selected = poll.options[poll.selectedOptionIdx];
-      showToast(`✅ Synced with Room SQLite DB: "${selected.text}"`);
+      const frame = document.getElementById('phoneFrame');
+      frame.classList.add('highlight-pulse');
+      setTimeout(() => frame.classList.remove('highlight-pulse'), 1200);
+      showToast('⚡ Live vote synched to Room SQLite & Cloud Firestore!');
+    }
+
+    function switchActivePoll(offset) {
+      state.activePollIndex = (state.activePollIndex + offset) % state.polls.length;
+      renderPoll();
+      showToast(`Switched active poll to: ${state.polls[state.activePollIndex].title}`);
+    }
+
+    function selectUser(userIndex) {
+      state.currentUserIndex = userIndex;
+      closeSheet('userSwitcherSheet');
+      renderPoll();
+      showToast(`🧑 Switched active persona to ${state.users[userIndex].name}`);
     }
 
     function openUserSwitcherModal() {
       document.getElementById('userSwitcherSheet').classList.add('active');
     }
 
-    function selectUser(idx) {
-      currentUserIdx = idx;
-      const user = users[idx];
-      document.getElementById('userName').textContent = user.name;
-      document.getElementById('userAvatar').textContent = user.avatar;
-      closeSheet('userSwitcherSheet');
-      showToast(`👤 Identity changed to ${user.name}`);
-    }
-
     function openTemplatesModal() {
       document.getElementById('templatesSheet').classList.add('active');
-    }
-
-    function loadTemplate(idx) {
-      currentPollIdx = idx;
-      renderPoll();
-      closeSheet('templatesSheet');
-      showToast(`🚀 Template "${pollCatalog[idx].title}" loaded!`);
     }
 
     function openJoinCodeModal() {
       document.getElementById('joinSheet').classList.add('active');
     }
 
-    function submitJoinCode() {
-      const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-      const matchIdx = pollCatalog.findIndex(p => p.code === code);
-      if (matchIdx !== -1) {
-        currentPollIdx = matchIdx;
-        renderPoll();
-        closeSheet('joinSheet');
-        showToast(`🔑 Loaded poll code ${code}!`);
-      } else {
-        showToast(`⚡ Joining with shortcode ${code}... Poll synced!`);
-        closeSheet('joinSheet');
-      }
-    }
-
     function openResultsModal() {
-      const poll = pollCatalog[currentPollIdx];
-      let leader = poll.options[0];
-      poll.options.forEach(opt => {
-        if (opt.votes > leader.votes) leader = opt;
-      });
-
-      const totalVotes = poll.options.reduce((acc, cur) => acc + cur.votes, 0);
-      const pct = totalVotes > 0 ? Math.round((leader.votes / totalVotes) * 100) : 0;
-
+      const poll = state.polls[state.activePollIndex];
+      const leader = poll.options.find(o => o.isWinner) || poll.options[0];
       document.getElementById('resultsLeader').textContent = leader.text;
-      document.getElementById('resultsLeaderStats').textContent = `${pct}% of total votes (${leader.votes}/${totalVotes}) • Quorum Reached`;
+      document.getElementById('resultsLeaderStats').textContent = `${leader.percent}% of votes • ${poll.totalVotes} Total Votes Cast`;
       document.getElementById('resultsSheet').classList.add('active');
-    }
-
-    function downloadCsvMock() {
-      const poll = pollCatalog[currentPollIdx];
-      let csv = `Poll Title,${poll.title}\nJoin Code,${poll.code}\nAttending,${poll.totalAttending}\n\nOption,Votes\n`;
-      poll.options.forEach(o => {
-        csv += `"${o.text}",${o.votes}\n`;
-      });
-      
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${poll.code}_results.csv`;
-      a.click();
-      showToast('📥 CSV Results downloaded successfully!');
-      closeSheet('resultsSheet');
-    }
-
-    function switchActivePoll(offset) {
-      currentPollIdx = (currentPollIdx + offset) % pollCatalog.length;
-      renderPoll();
-      showToast(`🔄 Switched to "${pollCatalog[currentPollIdx].title}"`);
-    }
-
-    function toggleActiveFilter() {
-      switchActivePoll(1);
-    }
-
-    function copyShareText() {
-      const poll = pollCatalog[currentPollIdx];
-      const text = `🗳️ *Vote on ${poll.title}*\n🔑 Code: *${poll.code}*\n📊 Leading: ${poll.options[0].text}\n👥 Attending: ${poll.totalAttending}\n\nVote instantly in PulsePoll!`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text);
-      }
-      showToast('📋 Poll summary copied for WhatsApp / Slack!');
     }
 
     function closeSheet(sheetId) {
@@ -2811,194 +813,55 @@
       }
     }
 
-    // Architecture Diagram Tab Switcher
-    function switchArchTab(mode) {
-      document.querySelectorAll('.arch-tab-btn').forEach(btn => btn.classList.remove('active'));
-      const titleEl = document.getElementById('flowSummaryTitle');
-      const descEl = document.getElementById('flowSummaryDesc');
+    function loadTemplate(index) {
+      state.activePollIndex = index;
+      closeSheet('templatesSheet');
+      renderPoll();
+      showToast(`🚀 Template Loaded: ${state.polls[index].title}`);
+    }
 
-      if (mode === 'write') {
-        document.getElementById('tabWriteFlow').classList.add('active');
-        titleEl.innerHTML = '⚡ 1. Write Flow (Local Instant Write ➔ Cloud Broadcast)';
-        descEl.innerHTML = '1. <b>User</b> taps an option ➔ 2. <b>Compose UI</b> dispatches <code>viewModel.castVote()</code> ➔ 3. <b>Room SQLite</b> writes the vote locally with <b>0ms latency</b> (offline safe) ➔ 4. <b>Coroutine</b> syncs vote to <b>Cloud Firestore</b> (<code>polls/{id}/votes</code>) ➔ 5. <b>SnapshotListener</b> pushes live vote counts to all other connected devices.';
-        showToast('⚡ Showing Write Flow (UI ➔ Room SQLite ➔ Cloud Firestore)');
-      } else if (mode === 'read') {
-        document.getElementById('tabReadFlow').classList.add('active');
-        titleEl.innerHTML = '🔄 2. Read Flow (Fast Local Cache + Real-Time WebSocket)';
-        descEl.innerHTML = '1. <b>Room DAO</b> emits immediate local cached state to <code>StateFlow</code> for instant render ➔ 2. <b>Firestore SnapshotListener</b> listens for remote votes in background ➔ 3. When remote peers vote, incoming delta updates local Room cache ➔ 4. <b>Compose UI</b> seamlessly animates progress bars and leaderboard ranking.';
-        showToast('🔄 Showing Read Flow (Room Cache + Firestore WebSocket)');
+    function submitJoinCode() {
+      const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+      const matchIndex = state.polls.findIndex(p => p.code === code);
+      if (matchIndex !== -1) {
+        state.activePollIndex = matchIndex;
+        closeSheet('joinSheet');
+        renderPoll();
+        showToast(`🔑 Joined poll: ${state.polls[matchIndex].title}`);
       } else {
-        document.getElementById('tabFullStack').classList.add('active');
-        titleEl.innerHTML = '🏛️ 3. 4-Tier Android Architecture Overview';
-        descEl.innerHTML = '<b>Tier 1: Client & Identity:</b> User touch gestures, Google Sign-In & In-App Demo Personas.<br><b>Tier 2: Presentation:</b> Jetpack Compose M3, Type-safe Navigation.<br><b>Tier 3: Domain & State:</b> ViewModel, Coroutines, Quorum & Tiebreaker math.<br><b>Tier 4: Storage & Sync:</b> Local Room SQLite (offline cache) + Firebase Cloud Firestore (live sync).';
-        showToast('🏛️ Showing Complete Full-Stack Layer Hierarchy');
+        showToast(`⚠️ Join code "${code}" not found. Try "SOC5V5" or "DRK777"`);
       }
     }
 
-    // Backend Portability Provider Switcher
-    function switchProviderTab(provider) {
-      const btnFirebase = document.getElementById('btnProviderFirebase');
-      const btnSupabase = document.getElementById('btnProviderSupabase');
-      const btnAws = document.getElementById('btnProviderAws');
-      const btnCustom = document.getElementById('btnProviderCustom');
-
-      [btnFirebase, btnSupabase, btnAws, btnCustom].forEach(btn => {
-        btn.className = 'btn btn-tonal';
-      });
-
-      const iconEl = document.getElementById('providerIcon');
-      const titleEl = document.getElementById('providerTitle');
-      const badgeEl = document.getElementById('providerBadge');
-      const descEl = document.getElementById('providerDesc');
-      const traitsListEl = document.getElementById('providerTraitsList');
-      const filenameEl = document.getElementById('codeFilename');
-      const langTagEl = document.getElementById('codeLangTag');
-      const codeSnippetEl = document.getElementById('providerCodeSnippet');
-
-      if (provider === 'firebase') {
-        btnFirebase.className = 'btn btn-primary';
-        iconEl.textContent = '🔥';
-        titleEl.textContent = 'Firebase Cloud Firestore (Default)';
-        badgeEl.textContent = 'Zero Server Setup • Spark $0/mo';
-        badgeEl.style.color = '#F59E0B';
-        badgeEl.style.background = 'rgba(245, 158, 11, 0.15)';
-        descEl.innerHTML = 'LivePulse uses Firestore as a serverless real-time document store. Snapshot listeners stream delta updates directly into Kotlin <code>StateFlow</code> with sub-100ms latency. No servers, Docker containers, or maintenance required.';
-        traitsListEl.innerHTML = `
-          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Bi-directional WebSocket <code>addSnapshotListener</code></li>
-          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Google Sign-In (CredentialManager) + Meta + Apple + Guest</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (Instant UI response + offline queue)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> 100% Free on Spark Tier (50k daily reads / 20k writes)</li>
-        `;
-        filenameEl.textContent = 'FirestorePollRepository.kt';
-        langTagEl.textContent = 'KOTLIN ADAPTER';
-        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// Firebase Firestore Realtime Stream Adapter</span>
-<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">FirestorePollRepository</span>(
-    <span style="color: #F472B6;">private val</span> db: <span style="color: #38BDF8;">FirebaseFirestore</span>,
-    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
-) : <span style="color: #38BDF8;">PollRepository</span> {
-
-    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
-        <span style="color: #64748B;">// 1. Emit local Room cache instantly (0ms)</span>
-        <span style="color: #F472B6;">val</span> local = pollDao.getPollWithDetails(pollId)
-        trySend(local)
-
-        <span style="color: #64748B;">// 2. Attach WebSocket listener for remote votes</span>
-        <span style="color: #F472B6;">val</span> listener = db.collection(<span style="color: #A7F3D0;">"polls"</span>).document(pollId)
-            .addSnapshotListener { snapshot, _ -&gt;
-                snapshot?.toObject(<span style="color: #38BDF8;">PollEntity</span>::<span style="color: #F472B6;">class</span>.java)?.let { remote -&gt;
-                    pollDao.upsertPoll(remote) <span style="color: #64748B;">// Updates Room & triggers UI Flow</span>
-                }
-            }
-        awaitClose { listener.remove() }
-    }
-}`;
-        showToast('🔥 Switched to Firebase Firestore Provider Spec');
-      } else if (provider === 'supabase') {
-        btnSupabase.className = 'btn btn-primary';
-        iconEl.textContent = '⚡';
-        titleEl.textContent = 'Supabase & PostgreSQL (Open-Source)';
-        badgeEl.textContent = 'Open-Source Postgres • Realtime CDC';
-        badgeEl.style.color = '#10B981';
-        badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
-        descEl.innerHTML = 'Supabase replaces Firestore with relational PostgreSQL tables and Realtime Change Data Capture (CDC). The Kotlin Supabase SDK streams postgres <code>INSERT / UPDATE</code> events straight into the repository.';
-        traitsListEl.innerHTML = `
-          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Postgres Realtime WebSockets (<code>realtime.channel</code>)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Supabase Auth (OAuth2, Magic Link, JWT Tokens)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (Matches PostgreSQL schema)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> Free tier (500MB DB) or 100% Free Self-Hosted Docker</li>
-        `;
-        filenameEl.textContent = 'SupabasePollRepository.kt';
-        langTagEl.textContent = 'KOTLIN ADAPTER';
-        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// Supabase PostgreSQL Realtime Adapter</span>
-<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">SupabasePollRepository</span>(
-    <span style="color: #F472B6;">private val</span> client: <span style="color: #38BDF8;">SupabaseClient</span>,
-    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
-) : <span style="color: #38BDF8;">PollRepository</span> {
-
-    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = channelFlow {
-        <span style="color: #64748B;">// 1. Initial Room cache load</span>
-        send(pollDao.getPollWithDetails(pollId))
-
-        <span style="color: #64748B;">// 2. Supabase Realtime channel stream</span>
-        <span style="color: #F472B6;">val</span> channel = client.realtime.channel(<span style="color: #A7F3D0;">"poll:$pollId"</span>)
-        channel.postgresChangeFlow&lt;<span style="color: #38BDF8;">PostgresAction</span>&gt;(<span style="color: #A7F3D0;">"public"</span>) {
-            table = <span style="color: #A7F3D0;">"votes"</span>
-        }.collect { change -&gt;
-            pollDao.recordVote(change.toVoteEntity())
-        }
-    }
-}`;
-        showToast('⚡ Switched to Supabase / PostgreSQL Provider Spec');
-      } else if (provider === 'aws') {
-        btnAws.className = 'btn btn-primary';
-        iconEl.textContent = '☁️';
-        titleEl.textContent = 'AWS AppSync & DynamoDB (Enterprise)';
-        badgeEl.textContent = 'GraphQL Subscriptions • AWS Cognito';
-        badgeEl.style.color = '#38BDF8';
-        badgeEl.style.background = 'rgba(56, 189, 248, 0.15)';
-        descEl.innerHTML = 'For enterprise environments on AWS, AppSync delivers managed GraphQL subscriptions over WebSockets backed by DynamoDB single-table design and AWS Cognito user authentication.';
-        traitsListEl.innerHTML = `
-          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> AWS AppSync GraphQL Subscriptions (<code>onVoteAdded</code>)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> AWS Cognito User Pools / Identity Pools</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (ACID compliant)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> AWS Free Tier (12 months) + Pay-as-you-go</li>
-        `;
-        filenameEl.textContent = 'AwsAppSyncPollRepository.kt';
-        langTagEl.textContent = 'KOTLIN ADAPTER';
-        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// AWS AppSync GraphQL Subscription Adapter</span>
-<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">AwsAppSyncPollRepository</span>(
-    <span style="color: #F472B6;">private val</span> amplify: <span style="color: #38BDF8;">RxAmplifyCategory</span>,
-    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
-) : <span style="color: #38BDF8;">PollRepository</span> {
-
-    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
-        send(pollDao.getPollWithDetails(pollId))
-
-        <span style="color: #64748B;">// Subscribe to GraphQL mutation stream</span>
-        <span style="color: #F472B6;">val</span> subscription = amplify.API.subscribe(
-            ModelSubscription.onCreate(<span style="color: #38BDF8;">Vote</span>::<span style="color: #F472B6;">class</span>.java)
-        ).subscribe { voteEvent -&gt;
-            pollDao.recordVote(voteEvent.data.toEntity())
-        }
-        awaitClose { subscription.dispose() }
-    }
-}`;
-        showToast('☁️ Switched to AWS AppSync Provider Spec');
-      } else {
-        btnCustom.className = 'btn btn-primary';
-        iconEl.textContent = '🛠️';
-        titleEl.textContent = 'Self-Hosted REST / WebSockets (Ktor / Go / Node)';
-        badgeEl.textContent = '100% Private On-Premise • Zero Cloud';
-        badgeEl.style.color = '#A855F7';
-        badgeEl.style.background = 'rgba(168, 85, 247, 0.15)';
-        descEl.innerHTML = 'Complete data sovereignty for enterprise intranets or private networks. Connect to a custom backend written in Kotlin Ktor, Go, Python FastAPI, or Node.js over standard WebSockets or gRPC.';
-        traitsListEl.innerHTML = `
-          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Ktor HTTP Client WebSockets (<code>wss://api.mycorp.internal/ws</code>)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Custom JWT Bearer Tokens / SAML SSO / LDAP</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (On-device encrypted with SQLCipher)</li>
-          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> $0 (Existing server infrastructure or $5 VPS)</li>
-        `;
-        filenameEl.textContent = 'KtorWsPollRepository.kt';
-        langTagEl.textContent = 'KOTLIN ADAPTER';
-        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// Custom Self-Hosted Ktor WebSocket Adapter</span>
-<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">KtorWsPollRepository</span>(
-    <span style="color: #F472B6;">private val</span> client: <span style="color: #38BDF8;">HttpClient</span>,
-    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
-) : <span style="color: #38BDF8;">PollRepository</span> {
-
-    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = flow {
-        emit(pollDao.getPollWithDetails(pollId))
-        client.webSocket(<span style="color: #A7F3D0;">"wss://poll.internal/stream/$pollId"</span>) {
-            <span style="color: #F472B6;">for</span> (frame <span style="color: #F472B6;">in</span> incoming) {
-                <span style="color: #F472B6;">val</span> delta = Json.decodeFromString&lt;<span style="color: #38BDF8;">VoteDelta</span>&gt;((frame <span style="color: #F472B6;">as</span> Frame.Text).readText())
-                pollDao.applyVoteDelta(delta)
-                emit(pollDao.getPollWithDetails(pollId))
-            }
-        }
-    }
-}`;
-        showToast('🛠️ Switched to Self-Hosted REST / WebSocket Spec');
+    function copyShareText() {
+      const poll = state.polls[state.activePollIndex];
+      const text = `⚡ Vote on "${poll.title}"! Join Code: ${poll.code} via LivePulse Android App.`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
       }
+      showToast('📤 Share link & code copied to clipboard!');
+    }
+
+    function downloadCsvMock() {
+      showToast('💾 CSV Export generated: poll_results.csv');
+      closeSheet('resultsSheet');
+    }
+
+    function toggleActiveFilter() {
+      showToast(`Showing all ${state.polls.length} synchronized group polls`);
+    }
+
+    function triggerHeroInteractiveDemo() {
+      const frame = document.getElementById('phoneFrame');
+      frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      frame.classList.add('highlight-pulse');
+      setTimeout(() => frame.classList.remove('highlight-pulse'), 1200);
+      showToast('👆 Tap on any option or RSVP button inside the phone frame!');
+    }
+
+    function triggerHeroSsoModal() {
+      openUserSwitcherModal();
+      document.getElementById('phoneFrame').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function showToast(msg) {
@@ -3009,25 +872,6 @@
       window.toastTimer = setTimeout(() => {
         toast.classList.remove('show');
       }, 3000);
-    }
-
-    // Navigation Dropdowns & Mobile Drawer Handlers
-    function toggleNavDropdown(event, dropdownId) {
-      event.stopPropagation();
-      const targetMenu = document.getElementById(dropdownId);
-      const parentItem = targetMenu.parentElement;
-      const isOpen = parentItem.classList.contains('open');
-
-      closeAllNavDropdowns();
-      if (!isOpen) {
-        parentItem.classList.add('open');
-      }
-    }
-
-    function closeAllNavDropdowns() {
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('open');
-      });
     }
 
     function toggleMobileNav() {
@@ -3041,14 +885,7 @@
       }
     }
 
-    // Close dropdowns on outside click
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.nav-item')) {
-        closeAllNavDropdowns();
-      }
-    });
-
-    // Initialize on load
+    // Initialize simulator on load
     document.addEventListener('DOMContentLoaded', () => {
       renderPoll();
     });

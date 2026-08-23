@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Distributed Attack Defense & Cross-Stack Protection - LivePulse Docs</title>
+  <meta name="description" content="5-Layer Anti-DDoS, Hardware Play Integrity Attestation, Sybil protection, and Cross-Cloud security rules for LivePulse." />
+  <meta name="theme-color" content="#4F46E5" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-title">LivePulse</div>
+      </a>
+
+      <!-- Desktop Navigation with Dropdowns -->
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">✨ Overview</a>
+        </li>
+        <li class="nav-item">
+          <a href="architecture.html" class="nav-link">🏛️ Architecture</a>
+        </li>
+        <li class="nav-item">
+          <a href="portability.html" class="nav-link">🔄 Portability</a>
+        </li>
+        <li class="nav-item active">
+          <a href="defense.html" class="nav-link">🛡️ Distributed Defense</a>
+        </li>
+        <li class="nav-item">
+          <a href="production.html" class="nav-link">🚀 Production</a>
+        </li>
+      </ul>
+
+      <!-- Right Action & Mobile Toggle -->
+      <div class="header-actions">
+        <a href="production.html" class="header-cta-btn">
+          📦 Deploy Guide
+        </a>
+        <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer" onclick="closeMobileNavOnBackdrop(event)">
+    <div class="mobile-nav-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--outline-variant);">
+        <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">⚡ LivePulse Docs</div>
+        <button onclick="toggleMobileNav()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">✕</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="index.html" class="dropdown-item"><span>✨</span> <span>Overview & Live Demo</span></a>
+        <a href="architecture.html" class="dropdown-item"><span>🏛️</span> <span>System Architecture</span></a>
+        <a href="portability.html" class="dropdown-item"><span>🔄</span> <span>Backend Portability</span></a>
+        <a href="defense.html" class="dropdown-item" style="background: var(--primary-container); color: var(--primary); font-weight: 700;"><span>🛡️</span> <span>Distributed Defense</span></a>
+        <a href="production.html" class="dropdown-item"><span>🚀</span> <span>Production & Deploy</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <div class="page-hero">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Docs</a> <span>›</span> <span>Defense</span>
+      </div>
+      <div class="pill-badge" style="margin-bottom: 0.75rem;">🛡️ Zero-Trust Security</div>
+      <h1 class="hero-title" style="margin-bottom: 0.75rem;">Distributed Attack Defense & Protection</h1>
+      <p class="hero-desc" style="max-width: 760px; margin: 0 auto;">
+        Real-time voting applications face adversarial vectors: bot ballot stuffing, volumetric DDoS, 6-character short-code brute force, and runaway cloud billing ("Denial of Wallet"). Here is our <b>5-Layer Defense-in-Depth Architecture</b>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <main class="section">
+    <!-- 5 Layers Grid -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem;">
+      
+      <!-- Layer 1 -->
+      <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-left: 5px solid #0284C7; border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.5rem;">🌐</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--on-surface);">Layer 1: Edge & Volumetric DDoS Mitigation (L3/L4 & L7)</h3>
+              <span style="font-size: 0.75rem; color: #0284C7; font-weight: 700; text-transform: uppercase;">Infrastructure Ingestion Protection</span>
+            </div>
+          </div>
+          <span class="pill-badge" style="background: #E0F2FE; color: #0369A1;">Absorbs Gbps Floods</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: 0.75rem;">
+          Volumetric attacks (SYN floods, UDP amplification, HTTP request storms) are absorbed at the global Anycast edge network (Google Cloud Armor / Cloudflare Edge / AWS Shield) before reaching the app's compute instances or triggering billing meters.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.75rem; font-size: 0.82rem;">
+          <div style="background: var(--surface-container-low); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--outline-variant);">
+            <b>🔥 Firebase:</b> Handled automatically by Google Global Anycast Edge & Google Cloud Armor.
+          </div>
+          <div style="background: var(--surface-container-low); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--outline-variant);">
+            <b>⚡ Supabase / Self-Hosted:</b> Put Cloudflare Enterprise / Free Reverse Proxy in front of API & WebSocket ports.
+          </div>
+        </div>
+      </div>
+
+      <!-- Layer 2 -->
+      <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-left: 5px solid #4F46E5; border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.5rem;">📱</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--on-surface);">Layer 2: Cryptographic Device Attestation (Anti-Bot & Anti-Emulator)</h3>
+              <span style="font-size: 0.75rem; color: var(--primary); font-weight: 700; text-transform: uppercase;">Hardware Proof-of-Origin</span>
+            </div>
+          </div>
+          <span class="pill-badge" style="background: #EEF2FF; color: #3730A3;">Blocks Script Farms</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: 0.75rem;">
+          To stop attackers writing simple Python <code>curl</code> scripts or launching thousands of headless emulators, LivePulse integrates <b>Hardware Device Attestation (Play Integrity / Firebase App Check)</b>. Every vote payload includes a cryptographically signed token proving it originated from a genuine, untampered physical Android device.
+        </p>
+        <div style="background: #0F172A; border-radius: 8px; padding: 0.75rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #E2E8F0;">
+          <span style="color: #94A3B8;">// Android Client Play Integrity Attestation</span><br>
+          <span style="color: #F472B6;">val</span> appCheckToken = FirebaseAppCheck.getInstance().getToken(<span style="color: #F472B6;">false</span>).await()<br>
+          <span style="color: #64748B;">// Token contains hardware cryptographic signature validated by backend servers</span>
+        </div>
+      </div>
+
+      <!-- Layer 3 -->
+      <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-left: 5px solid #8B5CF6; border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.5rem;">🔑</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--on-surface);">Layer 3: Sybil & Short-Code Brute Force Prevention</h3>
+              <span style="font-size: 0.75rem; color: #8B5CF6; font-weight: 700; text-transform: uppercase;">Rate Limiting & Idempotency Keys</span>
+            </div>
+          </div>
+          <span class="pill-badge" style="background: #F3E8FF; color: #6B21A8;">1 Vote Per Person</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: 0.75rem;">
+          6-character join codes (e.g., <code>SOC5V5</code>) have 36^6 = ~2.17 billion combinations. To prevent automated scraping or guessing:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; color: var(--on-surface-variant);">
+          <li>🔒 <b>Sliding Window Rate-Limits:</b> Max 10 short-code lookups per minute per IP / Device Token.</li>
+          <li>🆔 <b>Compound Idempotency Keys:</b> Votes use document key <code>${pollId}_${userId}</code>. 10,000 duplicated requests overwrite the exact same record rather than inflating vote counts.</li>
+        </ul>
+      </div>
+
+      <!-- Layer 4 -->
+      <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-left: 5px solid #10B981; border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.5rem;">🔒</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--on-surface);">Layer 4: Database-Level Row Security & Schema Validation</h3>
+              <span style="font-size: 0.75rem; color: #10B981; font-weight: 700; text-transform: uppercase;">Server-Side Zero Trust ACL</span>
+            </div>
+          </div>
+          <span class="pill-badge" style="background: #DCFCE7; color: #166534;">Immutable Rules</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: 0.75rem;">
+          Even if an attacker bypasses the client APK, the cloud database rejects unauthorized modifications. Only the poll creator can delete or close a poll; voters can only append their own vote document.
+        </p>
+      </div>
+
+      <!-- Layer 5 -->
+      <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-left: 5px solid #EA580C; border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.5rem;">💰</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--on-surface);">Layer 5: Financial Defense & "Denial of Wallet" Hard Caps</h3>
+              <span style="font-size: 0.75rem; color: #EA580C; font-weight: 700; text-transform: uppercase;">Budget Shields & Circuit Breakers</span>
+            </div>
+          </div>
+          <span class="pill-badge" style="background: #FFEDD5; color: #9A3412;">$0 Shock Protection</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: 0.75rem;">
+          Malicious actors often attempt "Denial of Wallet" attacks by generating billions of reads to trigger surprise cloud bills. LivePulse mitigates this with <b>Room SQLite local read caching</b>, client-side <code>debounce(300ms)</code>, and GCP / Supabase spend caps.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Cross-Provider Defense Translation Matrix Table -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); overflow-x: auto; margin-bottom: 2.5rem;">
+      <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛡️</span> Cross-Provider Defense Translation Matrix
+      </h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--outline-variant); color: var(--on-surface);">
+            <th style="padding: 0.75rem 0.5rem;">Security Layer</th>
+            <th style="padding: 0.75rem 0.5rem;">🔥 Firebase Firestore</th>
+            <th style="padding: 0.75rem 0.5rem;">⚡ Supabase / Postgres</th>
+            <th style="padding: 0.75rem 0.5rem;">☁️ AWS AppSync</th>
+            <th style="padding: 0.75rem 0.5rem;">🛠️ Self-Hosted / Ktor</th>
+          </tr>
+        </thead>
+        <tbody style="color: var(--on-surface-variant);">
+          <tr style="border-bottom: 1px solid var(--outline-variant);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">L3/L4 & L7 Volumetric DDoS</td>
+            <td style="padding: 0.75rem 0.5rem;">Google Cloud Armor / Edge PoPs</td>
+            <td style="padding: 0.75rem 0.5rem;">Cloudflare Enterprise Proxy</td>
+            <td style="padding: 0.75rem 0.5rem;">AWS Shield + AWS WAF</td>
+            <td style="padding: 0.75rem 0.5rem;">Nginx <code>limit_req</code> + Fail2Ban</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--outline-variant);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">Device Attestation</td>
+            <td style="padding: 0.75rem 0.5rem;">Firebase App Check (Play Integrity)</td>
+            <td style="padding: 0.75rem 0.5rem;">Edge Function Play Integrity verification</td>
+            <td style="padding: 0.75rem 0.5rem;">Lambda Custom Authorizer</td>
+            <td style="padding: 0.75rem 0.5rem;">Google Play Integrity API Middleware</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--outline-variant);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">Sybil & Vote Idempotency</td>
+            <td style="padding: 0.75rem 0.5rem;">Doc ID: <code>${pollId}_${userId}</code></td>
+            <td style="padding: 0.75rem 0.5rem;"><code>UNIQUE(poll_id, voter_id)</code></td>
+            <td style="padding: 0.75rem 0.5rem;">DynamoDB Partition+Sort Key</td>
+            <td style="padding: 0.75rem 0.5rem;">SQL Unique Constraint + Redis</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--outline-variant);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">Database Row Security</td>
+            <td style="padding: 0.75rem 0.5rem;"><code>firestore.rules</code> ACL</td>
+            <td style="padding: 0.75rem 0.5rem;">Postgres Row Level Security (RLS)</td>
+            <td style="padding: 0.75rem 0.5rem;">AppSync GraphQL <code>@auth</code> directives</td>
+            <td style="padding: 0.75rem 0.5rem;">Service Repository Authorization check</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--on-surface);">Financial Hard Caps</td>
+            <td style="padding: 0.75rem 0.5rem;">GCP Budget Hard Cap Alerts</td>
+            <td style="padding: 0.75rem 0.5rem;">Supabase Spend Cap Toggle</td>
+            <td style="padding: 0.75rem 0.5rem;">AWS Budget Actions</td>
+            <td style="padding: 0.75rem 0.5rem;"><b style="color:#10B981;">$5/mo Fixed VPS (100% immune)</b></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Code Comparison: Security Rules vs PostgreSQL RLS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem;">
+      
+      <!-- Firestore Rules -->
+      <div style="background: #0F172A; border-radius: var(--radius-lg); padding: 1.25rem; color: #F8FAFC;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #F59E0B;">firestore.rules</span>
+          <span style="font-size: 0.7rem; color: #94A3B8;">FIREBASE SECURITY</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.5; color: #E2E8F0; overflow-x: auto;"><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /polls/{pollId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null 
+        && request.auth.uid == resource.data.creatorId;
+
+      match /votes/{voteId} {
+        allow read: if true;
+        allow write: if request.auth != null 
+          && request.auth.uid == request.resource.data.voterId;
+      }
+    }
+  }
+}</code></pre>
+      </div>
+
+      <!-- PostgreSQL RLS -->
+      <div style="background: #0F172A; border-radius: var(--radius-lg); padding: 1.25rem; color: #F8FAFC;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #10B981;">schema.sql (Postgres RLS)</span>
+          <span style="font-size: 0.7rem; color: #94A3B8;">SUPABASE / POSTGRES</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.5; color: #E2E8F0; overflow-x: auto;"><code>ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
+
+-- 1. Public can read votes
+CREATE POLICY "Public votes are readable" 
+ON votes FOR SELECT USING (true);
+
+-- 2. Voters can only insert/update their own vote
+CREATE POLICY "Users can only cast their own vote" 
+ON votes FOR INSERT 
+WITH CHECK (auth.uid() = voter_id);
+
+-- 3. Composite unique constraint prevents Sybil ballot stuffing
+ALTER TABLE votes ADD CONSTRAINT unique_voter_per_poll 
+UNIQUE (poll_id, voter_id);</code></pre>
+      </div>
+
+    </div>
+
+    <!-- Navigation between modules -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--outline);">
+      <a href="portability.html" class="btn btn-tonal">← Backend Portability</a>
+      <a href="production.html" class="btn btn-primary">Next: Production Deployment →</a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="architecture.html">Architecture</a></li>
+      <li><a href="portability.html">Portability</a></li>
+      <li><a href="defense.html">Distributed Defense</a></li>
+      <li><a href="production.html">Production Runbook</a></li>
+    </ul>
+    <p>© 2026 LivePulse Engineering • Android Jetpack Compose M3 + Offline-First Consensus Engine</p>
+  </footer>
+
+  <script>
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      drawer.classList.toggle('open');
+    }
+
+    function closeMobileNavOnBackdrop(event) {
+      if (event.target.id === 'mobileNavDrawer') {
+        toggleMobileNav();
+      }
+    }
+  </script>
+</body>
+</html>

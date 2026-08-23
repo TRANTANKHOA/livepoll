@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Backend Portability & Cloud Independence - LivePulse Docs</title>
+  <meta name="description" content="LivePulse's pluggable backend architecture: effortlessly swap between Firebase, Supabase/PostgreSQL, AWS AppSync, or Self-Hosted Ktor." />
+  <meta name="theme-color" content="#4F46E5" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-title">LivePulse</div>
+      </a>
+
+      <!-- Desktop Navigation with Dropdowns -->
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">✨ Overview</a>
+        </li>
+        <li class="nav-item">
+          <a href="architecture.html" class="nav-link">🏛️ Architecture</a>
+        </li>
+        <li class="nav-item active">
+          <a href="portability.html" class="nav-link">🔄 Portability</a>
+        </li>
+        <li class="nav-item">
+          <a href="defense.html" class="nav-link">🛡️ Distributed Defense</a>
+        </li>
+        <li class="nav-item">
+          <a href="production.html" class="nav-link">🚀 Production</a>
+        </li>
+      </ul>
+
+      <!-- Right Action & Mobile Toggle -->
+      <div class="header-actions">
+        <a href="production.html" class="header-cta-btn">
+          📦 Deploy Guide
+        </a>
+        <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer" onclick="closeMobileNavOnBackdrop(event)">
+    <div class="mobile-nav-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--outline-variant);">
+        <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">⚡ LivePulse Docs</div>
+        <button onclick="toggleMobileNav()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">✕</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="index.html" class="dropdown-item"><span>✨</span> <span>Overview & Live Demo</span></a>
+        <a href="architecture.html" class="dropdown-item"><span>🏛️</span> <span>System Architecture</span></a>
+        <a href="portability.html" class="dropdown-item" style="background: var(--primary-container); color: var(--primary); font-weight: 700;"><span>🔄</span> <span>Backend Portability</span></a>
+        <a href="defense.html" class="dropdown-item"><span>🛡️</span> <span>Distributed Defense</span></a>
+        <a href="production.html" class="dropdown-item"><span>🚀</span> <span>Production & Deploy</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <div class="page-hero">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Docs</a> <span>›</span> <span>Portability</span>
+      </div>
+      <div class="pill-badge" style="margin-bottom: 0.75rem;">🔄 Zero Vendor Lock-in</div>
+      <h1 class="hero-title" style="margin-bottom: 0.75rem;">Backend Portability & Cloud Independence</h1>
+      <p class="hero-desc" style="max-width: 760px; margin: 0 auto;">
+        LivePulse is built with strict Clean MVVM boundaries. While Firebase Firestore provides the zero-config default, the cloud relay is fully abstracted behind Kotlin Repository interfaces—ready to swap to <b>Supabase</b>, <b>AWS</b>, or <b>Self-Hosted Ktor</b>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <main class="section">
+    <!-- Provider Selection Interactive Tabs -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-md); margin-bottom: 2.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--outline-variant); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
+            <span>🔄</span> Pluggable Cloud Sync Adapters
+          </h3>
+          <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--on-surface-variant);">
+            Click a provider below to inspect how LivePulse adapts to different backend infrastructures:
+          </p>
+        </div>
+
+        <!-- Provider Buttons -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btnProviderFirebase" onclick="switchProviderTab('firebase')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
+            🔥 Firebase (Default)
+          </button>
+          <button class="btn btn-tonal" id="btnProviderSupabase" onclick="switchProviderTab('supabase')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
+            ⚡ Supabase / Postgres
+          </button>
+          <button class="btn btn-tonal" id="btnProviderAws" onclick="switchProviderTab('aws')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
+            ☁️ AWS AppSync
+          </button>
+          <button class="btn btn-tonal" id="btnProviderCustom" onclick="switchProviderTab('custom')" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">
+            🛠️ Self-Hosted REST / WS
+          </button>
+        </div>
+      </div>
+
+      <!-- Provider Dynamic Content Card -->
+      <div id="providerDetailCard" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <!-- Left: Architecture & Explanation -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span id="providerIcon" style="font-size: 2.25rem;">🔥</span>
+            <div>
+              <h4 id="providerTitle" style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Firebase Cloud Firestore (Default)</h4>
+              <span id="providerBadge" style="font-size: 0.75rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.15); padding: 0.2rem 0.5rem; border-radius: 6px;">Zero Server Setup • Spark $0/mo</span>
+            </div>
+          </div>
+
+          <p id="providerDesc" style="font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.6; margin: 0;">
+            LivePulse uses Firestore as a serverless real-time document store. Snapshot listeners stream delta updates directly into Kotlin <code>StateFlow</code> with sub-100ms latency. No servers, Docker containers, or maintenance required.
+          </p>
+
+          <div style="background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-md); padding: 1rem;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">Key Architecture Traits</div>
+            <ul id="providerTraitsList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--on-surface);">
+              <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Bi-directional WebSocket <code>addSnapshotListener</code></li>
+              <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Google Sign-In (CredentialManager) + Meta + Apple + Guest</li>
+              <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (Instant UI response + offline queue)</li>
+              <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> 100% Free on Spark Tier (50k daily reads / 20k writes)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right: Code Snippet / Repository Adapter -->
+        <div style="background: #0F172A; border-radius: var(--radius-md); padding: 1.25rem; color: #F8FAFC; display: flex; flex-direction: column; justify-content: space-between;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+            <span id="codeFilename" style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #94A3B8;">FirestorePollRepository.kt</span>
+            <span id="codeLangTag" style="font-size: 0.7rem; font-weight: 700; color: #38BDF8;">KOTLIN ADAPTER</span>
+          </div>
+
+          <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.55; color: #E2E8F0; overflow-x: auto; flex: 1;"><code id="providerCodeSnippet"><span style="color: #64748B;">// Firebase Firestore Realtime Stream Adapter</span>
+<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">FirestorePollRepository</span>(
+    <span style="color: #F472B6;">private val</span> db: <span style="color: #38BDF8;">FirebaseFirestore</span>,
+    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
+) : <span style="color: #38BDF8;">PollRepository</span> {
+
+    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
+        <span style="color: #64748B;">// 1. Emit local Room cache instantly (0ms)</span>
+        <span style="color: #F472B6;">val</span> local = pollDao.getPollWithDetails(pollId)
+        trySend(local)
+
+        <span style="color: #64748B;">// 2. Attach WebSocket listener for remote votes</span>
+        <span style="color: #F472B6;">val</span> listener = db.collection(<span style="color: #A7F3D0;">"polls"</span>).document(pollId)
+            .addSnapshotListener { snapshot, _ -&gt;
+                snapshot?.toObject(<span style="color: #38BDF8;">PollEntity</span>::<span style="color: #F472B6;">class</span>.java)?.let { remote -&gt;
+                    pollDao.upsertPoll(remote) <span style="color: #64748B;">// Updates Room & triggers UI Flow</span>
+                }
+            }
+        awaitClose { listener.remove() }
+    }
+}</code></pre>
+          <div style="font-size: 0.75rem; color: #94A3B8; margin-top: 0.75rem; text-align: right;">
+            💡 <i>Replacing the cloud sync requires editing only this 1 repository file.</i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Pillars of Cloud Independence -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+      
+      <!-- Pillar 1: Repository Interface Abstraction -->
+      <div class="feature-card">
+        <div class="feature-icon-box" style="background: rgba(79, 70, 229, 0.15); color: var(--primary);">🛡️</div>
+        <h3>1. Strict Repository Interface Contract</h3>
+        <p>The UI (Compose) and ViewModels communicate exclusively through the <code>PollRepository</code> interface. No Firebase or Google imports leak into the UI or domain modules.</p>
+        <div style="margin-top: 0.75rem; font-size: 0.82rem; background: var(--surface-variant); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+          interface PollRepository {<br>
+          &nbsp;&nbsp;fun observePoll(id): Flow&lt;PollWithDetails?&gt;<br>
+          &nbsp;&nbsp;suspend fun castVote(optionId, persona)<br>
+          &nbsp;&nbsp;suspend fun syncPendingOfflineVotes()<br>
+          }
+        </div>
+      </div>
+
+      <!-- Pillar 2: Offline-First Room SQLite Engine -->
+      <div class="feature-card">
+        <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">💾</div>
+        <h3>2. Vendor-Neutral Local SQLite (Room)</h3>
+        <p>Local state management uses standard SQLite and Android Jetpack Room. The app remains fully functional, responsive, and queryable with zero network connectivity or cloud credentials.</p>
+        <div style="margin-top: 0.75rem; font-size: 0.82rem; background: var(--surface-variant); padding: 0.5rem 0.75rem; border-radius: 6px;">
+          <b>✓ Zero cloud locks:</b> All vote totals, participant rankings, RSVP counts, and tiebreak math execute on-device in pure Kotlin algorithms.
+        </div>
+      </div>
+
+      <!-- Pillar 3: Multi-Provider Authentication Matrix -->
+      <div class="feature-card">
+        <div class="feature-icon-box" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">👥</div>
+        <h3>3. Multi-Identity & Local Persona Support</h3>
+        <p>Authentication is decoupled from a single identity provider. Users can authenticate via Google CredentialManager, Apple Sign-In, Meta Facebook SDK, or Instant Local Guest mode.</p>
+        <div style="margin-top: 0.75rem; font-size: 0.82rem; background: var(--surface-variant); padding: 0.5rem 0.75rem; border-radius: 6px;">
+          <b>✓ In-App Persona Switcher:</b> Switch between Alex, Sarah Connor, and Marcus Aurelius without logging out to test group voting on one phone.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Backend Comparison Matrix Table -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); overflow-x: auto; margin-bottom: 2.5rem;">
+      <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem;">
+        <span>📊</span> Backend Provider Comparison Matrix
+      </h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--outline-variant); color: var(--on-surface);">
+            <th style="padding: 0.75rem 0.5rem;">Backend Option</th>
+            <th style="padding: 0.75rem 0.5rem;">Sync Protocol</th>
+            <th style="padding: 0.75rem 0.5rem;">Auth Integration</th>
+            <th style="padding: 0.75rem 0.5rem;">Offline Cache</th>
+            <th style="padding: 0.75rem 0.5rem;">Hosting Cost</th>
+            <th style="padding: 0.75rem 0.5rem;">Migration Effort</th>
+          </tr>
+        </thead>
+        <tbody style="color: var(--on-surface-variant);">
+          <tr style="border-bottom: 1px solid var(--outline-variant); background: rgba(79, 70, 229, 0.04);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--primary);">🔥 Firebase Firestore (Current)</td>
+            <td style="padding: 0.75rem 0.5rem;">TLS WebSockets (SnapshotListeners)</td>
+            <td style="padding: 0.75rem 0.5rem;">Google, Meta, Apple, Guest</td>
+            <td style="padding: 0.75rem 0.5rem;">Room SQLite (ACID)</td>
+            <td style="padding: 0.75rem 0.5rem;"><span style="color: #10B981; font-weight: 700;">$0 / month</span> (Spark Free Tier)</td>
+            <td style="padding: 0.75rem 0.5rem;"><span class="pill-badge" style="background:#DCFCE7; color:#166534;">Built-in</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--outline-variant);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700;">⚡ Supabase / PostgreSQL</td>
+            <td style="padding: 0.75rem 0.5rem;">Postgres Realtime WebSockets</td>
+            <td style="padding: 0.75rem 0.5rem;">Supabase Auth (JWT / OAuth2)</td>
+            <td style="padding: 0.75rem 0.5rem;">Room SQLite</td>
+            <td style="padding: 0.75rem 0.5rem;">Free Tier / $25 Pro / $0 Docker</td>
+            <td style="padding: 0.75rem 0.5rem;"><span class="pill-badge" style="background:#FEF3C7; color:#92400E;">1 Repository File (~1 hour)</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--outline-variant);">
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700;">☁️ AWS AppSync & DynamoDB</td>
+            <td style="padding: 0.75rem 0.5rem;">GraphQL Subscriptions</td>
+            <td style="padding: 0.75rem 0.5rem;">AWS Cognito</td>
+            <td style="padding: 0.75rem 0.5rem;">Room SQLite</td>
+            <td style="padding: 0.75rem 0.5rem;">AWS Free Tier / Pay per mutation</td>
+            <td style="padding: 0.75rem 0.5rem;"><span class="pill-badge" style="background:#FEF3C7; color:#92400E;">1 Repository File (~2 hours)</span></td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 0.5rem; font-weight: 700;">🛠️ Self-Hosted Ktor / Node / Go</td>
+            <td style="padding: 0.75rem 0.5rem;">Raw WebSockets or gRPC</td>
+            <td style="padding: 0.75rem 0.5rem;">JWT / Keycloak / LDAP / SAML</td>
+            <td style="padding: 0.75rem 0.5rem;">Room SQLite (Encrypted)</td>
+            <td style="padding: 0.75rem 0.5rem;">$5/mo VPS or Internal LAN</td>
+            <td style="padding: 0.75rem 0.5rem;"><span class="pill-badge" style="background:#FEF3C7; color:#92400E;">1 Repository File (~2 hours)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Kotlin Multiplatform (KMP) Readiness -->
+    <div style="background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%); border-radius: var(--radius-lg); padding: 1.75rem; color: #F8FAFC;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <span style="font-size: 1.5rem;">🌐</span>
+        <h3 style="margin: 0; font-size: 1.25rem; color: #FFFFFF;">Future Portability: Kotlin Multiplatform (KMP) Ready</h3>
+      </div>
+      <p style="color: #94A3B8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;">
+        Because all business algorithms (Quorum calculations, tiebreaks, RSVP counting, and short-code decoders) are written in pure Kotlin with zero Android framework dependencies, the core domain model can be exported directly to <b>iOS (Compose Multiplatform)</b> and <b>Web (Kotlin/Wasm)</b> with 90%+ code reuse.
+      </p>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <span class="pill-badge" style="background: rgba(255,255,255,0.1); color: #E2E8F0; border-color: rgba(255,255,255,0.2);">🤖 Android (Active)</span>
+        <span class="pill-badge" style="background: rgba(255,255,255,0.1); color: #E2E8F0; border-color: rgba(255,255,255,0.2);">🍎 iOS (Ready via KMP)</span>
+        <span class="pill-badge" style="background: rgba(255,255,255,0.1); color: #E2E8F0; border-color: rgba(255,255,255,0.2);">🌐 Web (Ready via Kotlin/Wasm)</span>
+      </div>
+    </div>
+
+    <!-- Navigation between modules -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--outline);">
+      <a href="architecture.html" class="btn btn-tonal">← Architecture</a>
+      <a href="defense.html" class="btn btn-primary">Next: Distributed Defense →</a>
+    </div>
+  </main>
+
+  <div class="toast" id="toastBox">
+    <span>💡</span>
+    <span id="toastMsg">Switched Provider</span>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="architecture.html">Architecture</a></li>
+      <li><a href="portability.html">Portability</a></li>
+      <li><a href="defense.html">Distributed Defense</a></li>
+      <li><a href="production.html">Production Runbook</a></li>
+    </ul>
+    <p>© 2026 LivePulse Engineering • Android Jetpack Compose M3 + Offline-First Consensus Engine</p>
+  </footer>
+
+  <script>
+    function switchProviderTab(provider) {
+      const btnFirebase = document.getElementById('btnProviderFirebase');
+      const btnSupabase = document.getElementById('btnProviderSupabase');
+      const btnAws = document.getElementById('btnProviderAws');
+      const btnCustom = document.getElementById('btnProviderCustom');
+
+      btnFirebase.className = 'btn btn-tonal';
+      btnSupabase.className = 'btn btn-tonal';
+      btnAws.className = 'btn btn-tonal';
+      btnCustom.className = 'btn btn-tonal';
+
+      const iconEl = document.getElementById('providerIcon');
+      const titleEl = document.getElementById('providerTitle');
+      const badgeEl = document.getElementById('providerBadge');
+      const descEl = document.getElementById('providerDesc');
+      const traitsListEl = document.getElementById('providerTraitsList');
+      const filenameEl = document.getElementById('codeFilename');
+      const langTagEl = document.getElementById('codeLangTag');
+      const codeSnippetEl = document.getElementById('providerCodeSnippet');
+
+      if (provider === 'firebase') {
+        btnFirebase.className = 'btn btn-primary';
+        iconEl.textContent = '🔥';
+        titleEl.textContent = 'Firebase Cloud Firestore (Default)';
+        badgeEl.textContent = 'Zero Server Setup • Spark $0/mo';
+        badgeEl.style.color = '#F59E0B';
+        badgeEl.style.background = 'rgba(245, 158, 11, 0.15)';
+        descEl.innerHTML = 'LivePulse uses Firestore as a serverless real-time document store. Snapshot listeners stream delta updates directly into Kotlin <code>StateFlow</code> with sub-100ms latency. No servers, Docker containers, or maintenance required.';
+        traitsListEl.innerHTML = `
+          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Bi-directional WebSocket <code>addSnapshotListener</code></li>
+          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Google Sign-In (CredentialManager) + Meta + Apple + Guest</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (Instant UI response + offline queue)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> 100% Free on Spark Tier (50k daily reads / 20k writes)</li>
+        `;
+        filenameEl.textContent = 'FirestorePollRepository.kt';
+        langTagEl.textContent = 'KOTLIN ADAPTER';
+        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// Firebase Firestore Realtime Stream Adapter</span>
+<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">FirestorePollRepository</span>(
+    <span style="color: #F472B6;">private val</span> db: <span style="color: #38BDF8;">FirebaseFirestore</span>,
+    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
+) : <span style="color: #38BDF8;">PollRepository</span> {
+
+    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
+        <span style="color: #64748B;">// 1. Emit local Room cache instantly (0ms)</span>
+        <span style="color: #F472B6;">val</span> local = pollDao.getPollWithDetails(pollId)
+        trySend(local)
+
+        <span style="color: #64748B;">// 2. Attach WebSocket listener for remote votes</span>
+        <span style="color: #F472B6;">val</span> listener = db.collection(<span style="color: #A7F3D0;">"polls"</span>).document(pollId)
+            .addSnapshotListener { snapshot, _ -&gt;
+                snapshot?.toObject(<span style="color: #38BDF8;">PollEntity</span>::<span style="color: #F472B6;">class</span>.java)?.let { remote -&gt;
+                    pollDao.upsertPoll(remote) <span style="color: #64748B;">// Updates Room & triggers UI Flow</span>
+                }
+            }
+        awaitClose { listener.remove() }
+    }
+}`;
+        showToast('🔥 Switched to Firebase Firestore Provider Spec');
+      } else if (provider === 'supabase') {
+        btnSupabase.className = 'btn btn-primary';
+        iconEl.textContent = '⚡';
+        titleEl.textContent = 'Supabase & PostgreSQL (Open-Source)';
+        badgeEl.textContent = 'Open-Source Postgres • Realtime CDC';
+        badgeEl.style.color = '#10B981';
+        badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        descEl.innerHTML = 'Supabase replaces Firestore with relational PostgreSQL tables and Realtime Change Data Capture (CDC). The Kotlin Supabase SDK streams postgres <code>INSERT / UPDATE</code> events straight into the repository.';
+        traitsListEl.innerHTML = `
+          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Postgres Realtime WebSockets (<code>realtime.channel</code>)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Supabase Auth (OAuth2, Magic Link, JWT Tokens)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (Matches PostgreSQL schema)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> Free tier (500MB DB) or 100% Free Self-Hosted Docker</li>
+        `;
+        filenameEl.textContent = 'SupabasePollRepository.kt';
+        langTagEl.textContent = 'KOTLIN ADAPTER';
+        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// Supabase PostgreSQL Realtime Adapter</span>
+<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">SupabasePollRepository</span>(
+    <span style="color: #F472B6;">private val</span> client: <span style="color: #38BDF8;">SupabaseClient</span>,
+    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
+) : <span style="color: #38BDF8;">PollRepository</span> {
+
+    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = channelFlow {
+        <span style="color: #64748B;">// 1. Initial Room cache load</span>
+        send(pollDao.getPollWithDetails(pollId))
+
+        <span style="color: #64748B;">// 2. Supabase Realtime channel stream</span>
+        <span style="color: #F472B6;">val</span> channel = client.realtime.channel(<span style="color: #A7F3D0;">"poll:$pollId"</span>)
+        channel.postgresChangeFlow&lt;<span style="color: #38BDF8;">PostgresAction</span>&gt;(<span style="color: #A7F3D0;">"public"</span>) {
+            table = <span style="color: #A7F3D0;">"votes"</span>
+        }.collect { change -&gt;
+            pollDao.recordVote(change.toVoteEntity())
+        }
+    }
+}`;
+        showToast('⚡ Switched to Supabase / PostgreSQL Provider Spec');
+      } else if (provider === 'aws') {
+        btnAws.className = 'btn btn-primary';
+        iconEl.textContent = '☁️';
+        titleEl.textContent = 'AWS AppSync & DynamoDB (Enterprise)';
+        badgeEl.textContent = 'GraphQL Subscriptions • AWS Cognito';
+        badgeEl.style.color = '#38BDF8';
+        badgeEl.style.background = 'rgba(56, 189, 248, 0.15)';
+        descEl.innerHTML = 'For enterprise environments on AWS, AppSync delivers managed GraphQL subscriptions over WebSockets backed by DynamoDB single-table design and AWS Cognito user authentication.';
+        traitsListEl.innerHTML = `
+          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> AWS AppSync GraphQL Subscriptions (<code>onVoteAdded</code>)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> AWS Cognito User Pools / Identity Pools</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (ACID compliant)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> AWS Free Tier (12 months) + Pay-as-you-go</li>
+        `;
+        filenameEl.textContent = 'AwsAppSyncPollRepository.kt';
+        langTagEl.textContent = 'KOTLIN ADAPTER';
+        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// AWS AppSync GraphQL Subscription Adapter</span>
+<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">AwsAppSyncPollRepository</span>(
+    <span style="color: #F472B6;">private val</span> amplify: <span style="color: #38BDF8;">RxAmplifyCategory</span>,
+    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
+) : <span style="color: #38BDF8;">PollRepository</span> {
+
+    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = callbackFlow {
+        send(pollDao.getPollWithDetails(pollId))
+
+        <span style="color: #64748B;">// Subscribe to GraphQL mutation stream</span>
+        <span style="color: #F472B6;">val</span> subscription = amplify.API.subscribe(
+            ModelSubscription.onCreate(<span style="color: #38BDF8;">Vote</span>::<span style="color: #F472B6;">class</span>.java)
+        ).subscribe { voteEvent -&gt;
+            pollDao.recordVote(voteEvent.data.toEntity())
+        }
+        awaitClose { subscription.dispose() }
+    }
+}`;
+        showToast('☁️ Switched to AWS AppSync Provider Spec');
+      } else {
+        btnCustom.className = 'btn btn-primary';
+        iconEl.textContent = '🛠️';
+        titleEl.textContent = 'Self-Hosted REST / WebSockets (Ktor / Go / Node)';
+        badgeEl.textContent = '100% Private On-Premise • Zero Cloud';
+        badgeEl.style.color = '#A855F7';
+        badgeEl.style.background = 'rgba(168, 85, 247, 0.15)';
+        descEl.innerHTML = 'Complete data sovereignty for enterprise intranets or private networks. Connect to a custom backend written in Kotlin Ktor, Go, Python FastAPI, or Node.js over standard WebSockets or gRPC.';
+        traitsListEl.innerHTML = `
+          <li style="display: flex; gap: 0.5rem;"><span>⚡</span> <b>Sync Engine:</b> Ktor HTTP Client WebSockets (<code>wss://api.mycorp.internal/ws</code>)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>🔑</span> <b>Auth Strategy:</b> Custom JWT Bearer Tokens / SAML SSO / LDAP</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💾</span> <b>Local Cache:</b> Room SQLite (On-device encrypted with SQLCipher)</li>
+          <li style="display: flex; gap: 0.5rem;"><span>💰</span> <b>Cost:</b> $0 (Existing server infrastructure or $5 VPS)</li>
+        `;
+        filenameEl.textContent = 'KtorWsPollRepository.kt';
+        langTagEl.textContent = 'KOTLIN ADAPTER';
+        codeSnippetEl.innerHTML = `<span style="color: #64748B;">// Custom Self-Hosted Ktor WebSocket Adapter</span>
+<span style="color: #F472B6;">class</span> <span style="color: #60A5FA;">KtorWsPollRepository</span>(
+    <span style="color: #F472B6;">private val</span> client: <span style="color: #38BDF8;">HttpClient</span>,
+    <span style="color: #F472B6;">private val</span> pollDao: <span style="color: #38BDF8;">PollDao</span>
+) : <span style="color: #38BDF8;">PollRepository</span> {
+
+    <span style="color: #F472B6;">override fun</span> <span style="color: #60A5FA;">observePoll</span>(pollId: <span style="color: #38BDF8;">String</span>): <span style="color: #38BDF8;">Flow</span>&lt;<span style="color: #38BDF8;">PollWithDetails?</span>&gt; = flow {
+        emit(pollDao.getPollWithDetails(pollId))
+        client.webSocket(<span style="color: #A7F3D0;">"wss://poll.internal/stream/$pollId"</span>) {
+            <span style="color: #F472B6;">for</span> (frame <span style="color: #F472B6;">in</span> incoming) {
+                <span style="color: #F472B6;">val</span> delta = Json.decodeFromString&lt;<span style="color: #38BDF8;">VoteDelta</span>&gt;((frame <span style="color: #F472B6;">as</span> Frame.Text).readText())
+                pollDao.applyVoteDelta(delta)
+                emit(pollDao.getPollWithDetails(pollId))
+            }
+        }
+    }
+}`;
+        showToast('🛠️ Switched to Self-Hosted REST / WebSocket Spec');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      drawer.classList.toggle('open');
+    }
+
+    function closeMobileNavOnBackdrop(event) {
+      if (event.target.id === 'mobileNavDrawer') {
+        toggleMobileNav();
+      }
+    }
+  </script>
+</body>
+</html>
