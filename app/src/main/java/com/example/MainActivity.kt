@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,8 +57,11 @@ class MainActivity : ComponentActivity() {
         val pollIdFromIntent = intent?.getStringExtra("EXTRA_POLL_ID")
 
         setContent {
-            MyApplicationTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
+            MyApplicationTheme(darkTheme = false) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     PulsePollApp(
                         viewModel = viewModel,
                         initialPollId = pollIdFromIntent

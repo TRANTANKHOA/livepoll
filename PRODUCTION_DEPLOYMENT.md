@@ -12,7 +12,8 @@ This guide provides end-to-end, step-by-step instructions and scripts for deploy
 5. [Step 4: Release Keystore & App Signing](#5-step-4-release-keystore--app-signing)
 6. [Step 5: Compiling Production App Bundle (.AAB) & APK](#6-step-5-compiling-production-app-bundle-aab--apk)
 7. [Step 6: Google Play Console Release Checklist](#7-step-6-google-play-console-release-checklist)
-8. [Step 7: Production Troubleshooting & Cost Safeguards](#8-step-7-production-troubleshooting--cost-safeguards)
+8. [Step 7: Chrome Streaming Web App & Browser Access Deployment](#8-step-7-chrome-streaming-web-app--browser-access-deployment)
+9. [Step 8: Production Troubleshooting & Cost Safeguards](#9-step-8-production-troubleshooting--cost-safeguards)
 
 ---
 
@@ -202,7 +203,52 @@ bash scripts/build-release.sh
 
 ---
 
-## 8. Step 7: Production Troubleshooting & Cost Safeguards
+## 8. Step 7: Chrome Streaming Web App & Browser Access Deployment
+
+Users without Android devices or without the APK installed can access **100% of native PulsePoll features directly in Google Chrome** (Desktop, Mac, Windows, Chromebook, or iOS).
+
+### 1. Cloud-Streaming Web App Architecture (Zero-Install):
+Through the cloud streaming container, the complete native Android Jetpack Compose app is executed server-side and streamed with low-latency WebRTC touch & keyboard forwarding to Chrome.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 Google Chrome Browser                       │
+│         (Desktop, Mac, Windows, Chromebook, iOS)            │
+│                                                             │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │           Streaming Android Virtual Canvas          │   │
+│   │           (Interactive Video + Touch Input)         │   │
+│   └──────────────────────────┬──────────────────────────┘   │
+└──────────────────────────────┼──────────────────────────────┘
+                               │ Low-latency WebRTC Streams & Touch Events
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│             Cloud-Hosted Android Runtime Container          │
+│   • Native Jetpack Compose M3 UI                            │
+│   • Local Room SQLite Caching Engine                        │
+│   • Firebase Cloud Firestore Real-Time Relay                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 2. Sharing Chrome Web Access with Voters:
+1. Provide voters with the **Shared Web App Preview URL** generated from Google AI Studio.
+2. Users open the URL in Chrome on any laptop, desktop, or mobile device.
+3. **Input Interaction**:
+   - Mouse clicks trigger Android touch taps.
+   - Physical keyboard typing enters 6-character poll codes (e.g. `SOC5V5`).
+   - Persona switcher allows instant multi-user simulation & quorum verification.
+
+### 3. Static Web Client / PWA Option (Firebase Hosting):
+For a dedicated HTML/JS web client connecting to the same Firestore database, deploy `/docs` directly to Firebase Hosting:
+```bash
+firebase init hosting
+# Select public directory: docs
+firebase deploy --only hosting
+```
+
+---
+
+## 9. Step 8: Production Troubleshooting & Cost Safeguards
 
 | Symptom | Probable Cause | Fix / Resolution |
 | :--- | :--- | :--- |
