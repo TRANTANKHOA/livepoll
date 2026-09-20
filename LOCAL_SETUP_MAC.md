@@ -1,6 +1,6 @@
-# 🍏 macOS Local Development Guide - PulsePoll
+# 🍏 macOS Local Development Guide - LivePulse
 
-This guide provides step-by-step instructions and automated scripts to set up, build, test, and run **PulsePoll** locally on **macOS** (both **Apple Silicon M1/M2/M3/M4** and **Intel x86_64**).
+This guide provides step-by-step instructions and automated scripts to set up, build, test, and run **LivePulse** locally on **macOS** (both **Apple Silicon M1/M2/M3/M4** and **Intel x86_64**).
 
 ---
 
@@ -16,7 +16,7 @@ chmod +x scripts/*.sh gradlew
 This script will automatically:
 1. Detect your Mac architecture (`arm64` Apple Silicon or `x86_64` Intel).
 2. Check and install **Homebrew** if missing.
-3. Install and link **OpenJDK 21**.
+3. Install and link **OpenJDK 17**.
 4. Configure your Android SDK environment variables (`ANDROID_HOME`).
 5. Ensure `adb` (Android Debug Bridge) is available in your `$PATH`.
 6. Make all developer helper scripts executable.
@@ -32,25 +32,24 @@ If you prefer setting up manually or need specific configurations:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2. Install Java (JDK 21 or JDK 17)
+### 2. Install Java (JDK 17)
 ```bash
-brew install openjdk@21
-
-# Symlink to macOS system Java VM path
-sudo ln -sfn $(brew --prefix openjdk@21)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk
+brew install openjdk@17
 ```
 
-Add Java to your shell profile (`~/.zshrc` or `~/.zprofile`):
+Homebrew's openjdk@17 is **keg-only** — add it to your shell profile (`~/.zshrc` or `~/.zprofile`):
 ```bash
-# For Apple Silicon (M1/M2/M3/M4)
-echo 'export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"' >> ~/.zshrc
-echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 21)' >> ~/.zshrc
+echo 'export JAVA_HOME=/opt/homebrew/opt/openjdk@17' >> ~/.zshrc
+echo 'export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
 
-# For Intel Macs
-# echo 'export PATH="/usr/local/opt/openjdk@21/bin:$PATH"' >> ~/.zshrc
-# echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 21)' >> ~/.zshrc
+# Intel Macs use /usr/local/opt instead of /opt/homebrew/opt
 
 source ~/.zshrc
+```
+
+Optionally symlink it into the system Java VM path (picks it up in Android Studio's Gradle JDK picker):
+```bash
+sudo ln -sfn $(brew --prefix openjdk@17)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
 ```
 
 Verify Java:
@@ -143,7 +142,7 @@ Cleans cached outputs and rebuilds from scratch:
 
 | Task | Command |
 | :--- | :--- |
-| **Stream Logcat Logs** | `adb logcat -s PulsePoll:* -v color` |
+| **Stream Logcat Logs** | `adb logcat -s GoogleAuthHelper:* SecurityDefense:* -v color` |
 | **List Connected Devices** | `adb devices` |
 | **Install APK Directly via ADB** | `adb install -r app/build/outputs/apk/debug/app-debug.apk` |
 | **Take Screenshot from Emulator** | `adb exec-out screencap -p > screenshot.png` |
@@ -162,7 +161,7 @@ Run `source ~/.zshrc`.
 ### 2. Gradle JVM Compatibility Warning
 In Android Studio:
 - Go to **Settings (⌘ + ,)** > **Build, Execution, Deployment** > **Build Tools** > **Gradle**.
-- Set **Gradle JDK** to **Embedded JDK 21** or your Homebrew OpenJDK 21.
+- Set **Gradle JDK** to your Homebrew OpenJDK 17 (`/opt/homebrew/opt/openjdk@17`).
 
 ### 3. macOS Security / Gatekeeper Warnings on Tools
 If macOS blocks execution of downloaded SDK binaries:
@@ -172,4 +171,4 @@ xattr -dr com.apple.quarantine $HOME/Library/Android/sdk
 
 ---
 
-*Happy coding on macOS! ⚡ PulsePoll Team*
+*Happy coding on macOS! ⚡ LivePulse Team*

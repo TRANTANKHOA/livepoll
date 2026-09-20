@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Clean & Rebuild (Local macOS / Unix)
+# LivePulse - Clean & Rebuild (Local macOS / Unix)
 # ==============================================================================
 
 set -e
@@ -10,7 +10,7 @@ GREEN='\033[0;32m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${CYAN}${BOLD}⚡ Cleaning & Rebuilding PulsePoll...${NC}\n"
+echo -e "${CYAN}${BOLD}⚡ Cleaning & Rebuilding LivePulse...${NC}\n"
 
 if [ -f "./gradlew" ]; then
     GRADLE_CMD="./gradlew"

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Build Debug APK (Local macOS / Unix)
+# LivePulse - Build Debug APK (Local macOS / Unix)
 # ==============================================================================
 
 set -e
@@ -10,7 +10,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${CYAN}${BOLD}⚡ Compiling PulsePoll Debug APK...${NC}\n"
+echo -e "${CYAN}${BOLD}⚡ Compiling LivePulse Debug APK...${NC}\n"
 
 if [ -f "./gradlew" ]; then
     GRADLE_CMD="./gradlew"

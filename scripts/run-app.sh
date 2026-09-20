@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Build, Install & Launch on Android Device / Mac Emulator
+# LivePulse - Build, Install & Launch on Android Device / Mac Emulator
 # ==============================================================================
 
 set -e
@@ -11,10 +11,10 @@ YELLOW='\033[1;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-PACKAGE_NAME="com.aistudio.pulsepoll.zrkxwv"
+PACKAGE_NAME="com.aistudio.pulsepoll.xqmtw"
 MAIN_ACTIVITY="com.example.MainActivity"
 
-echo -e "${CYAN}${BOLD}⚡ Installing & Running PulsePoll on Android Target...${NC}\n"
+echo -e "${CYAN}${BOLD}⚡ Installing & Running LivePulse on Android Target...${NC}\n"
 
 # Check for ADB
 if ! command -v adb >/dev/null 2>&1; then
@@ -44,7 +44,7 @@ if [ "$DEVICE_COUNT" -gt 0 ]; then
     $GRADLE_CMD installDebug
     echo -e "\n${CYAN}Launching MainActivity on device...${NC}"
     adb shell am start -n "$PACKAGE_NAME/$MAIN_ACTIVITY"
-    echo -e "\n${GREEN}${BOLD}✓ PulsePoll is now running on your device/emulator!${NC}\n"
+    echo -e "\n${GREEN}${BOLD}✓ LivePulse is now running on your device/emulator!${NC}\n"
 else
     $GRADLE_CMD assembleDebug
     echo -e "\n${GREEN}${BOLD}✓ APK built. Connect a device or start an emulator, then run ./scripts/run-app.sh again.${NC}\n"

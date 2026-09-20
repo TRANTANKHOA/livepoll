@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - macOS Local Development Setup Script
+# LivePulse - macOS Local Development Setup Script
 # Works on macOS (Apple Silicon M1/M2/M3/M4 and Intel x86_64)
 # ==============================================================================
 
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 echo -e "${CYAN}${BOLD}"
 echo "============================================================"
-echo "   ⚡ PulsePoll - macOS Environment Setup"
+echo "   ⚡ LivePulse - macOS Environment Setup"
 echo "============================================================"
 echo -e "${NC}"
 
@@ -42,7 +42,7 @@ else
     echo -e "${GREEN}✓ Homebrew is installed (${$(brew --version | head -n 1)})${NC}"
 fi
 
-# 2. Check and Install OpenJDK 21
+# 2. Check and Install OpenJDK 17
 echo -e "\n${CYAN}[2/5] Checking Java (JDK 21 / 17)...${NC}"
 JAVA_NEEDS_INSTALL=false
 
@@ -52,19 +52,19 @@ if command -v java >/dev/null 2>&1; then
     if echo "$JAVA_VER" | grep -q '21\|17'; then
         echo -e "${GREEN}✓ Java version is compatible.${NC}"
     else
-        echo -e "${YELLOW}Java version is not 17 or 21. Installing OpenJDK 21...${NC}"
+        echo -e "${YELLOW}Java version is not 17 or 21. Installing OpenJDK 17...${NC}"
         JAVA_NEEDS_INSTALL=true
     fi
 else
-    echo -e "${YELLOW}Java is not installed. Installing OpenJDK 21...${NC}"
+    echo -e "${YELLOW}Java is not installed. Installing OpenJDK 17...${NC}"
     JAVA_NEEDS_INSTALL=true
 fi
 
 if [ "$JAVA_NEEDS_INSTALL" = true ]; then
-    brew install openjdk@21
-    sudo ln -sfn $(brew --prefix openjdk@21)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk || true
-    echo 'export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"' >> ~/.zshrc
-    export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
+    brew install openjdk@17
+    sudo ln -sfn $(brew --prefix openjdk@17)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk || true
+    echo 'export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
+    export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
 fi
 
 # 3. Check / Configure Android SDK Environment

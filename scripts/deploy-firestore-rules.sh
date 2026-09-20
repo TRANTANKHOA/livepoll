@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Deploy Firestore Security Rules via Firebase CLI
+# LivePulse - Deploy Firestore Security Rules via Firebase CLI
 # ==============================================================================
 
 set -e
@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${CYAN}${BOLD}🔥 Deploying PulsePoll Firestore Security Rules...${NC}\n"
+echo -e "${CYAN}${BOLD}🔥 Deploying LivePulse Firestore Security Rules...${NC}\n"
 
 if ! command -v firebase &> /dev/null; then
     echo -e "${YELLOW}Firebase CLI is not installed.${NC}"

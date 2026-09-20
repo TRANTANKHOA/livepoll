@@ -1,6 +1,6 @@
-# 🚀 PulsePoll Production Deployment Guide
+# 🚀 LivePulse Production Deployment Guide
 
-This guide provides end-to-end, step-by-step instructions and scripts for deploying **PulsePoll** to production, configuring **Firebase Cloud Firestore**, setting up **Google Identity Services (OAuth 2.0)**, signing the release build, and publishing to the **Google Play Store**.
+This guide provides end-to-end, step-by-step instructions and scripts for deploying **LivePulse** to production, configuring **Firebase Cloud Firestore**, setting up **Google Identity Services (OAuth 2.0)**, signing the release build, and publishing to the **Google Play Store**.
 
 ---
 
@@ -23,20 +23,20 @@ Ensure you have the following installed on your development/CI machine:
 - **JDK 17 or JDK 21**: Required for Android Gradle Plugin 8.9+.
 - **Android SDK (API 35)**: Build-Tools 35.0.0 and Platform Tools.
 - **Node.js & Firebase CLI** *(Optional, for rules deployment)*: `npm install -g firebase-tools`
-- **Application ID**: `com.aistudio.pollpulse.qxrvlz` (configured in `app/build.gradle.kts`).
+- **Application ID**: `com.aistudio.pulsepoll.xqmtw` (configured in `app/build.gradle.kts`).
 
 ---
 
 ## 2. Step 1: Firebase Project & Authentication Setup
 
-PulsePoll uses Firebase for **Cloud Firestore (Multiplayer live sync)** and **Firebase Auth (Google Sign-In)** on the **Spark Free Tier ($0/month)**.
+LivePulse uses Firebase for **Cloud Firestore (Multiplayer live sync)** and **Firebase Auth (Google Sign-In)** on the **Spark Free Tier ($0/month)**.
 
 ### Manual Steps in Firebase Console:
 1. Go to the [Firebase Console](https://console.firebase.google.com/) and click **Add Project**.
-2. Name your project (e.g., `pulsepoll-production`) and select or disable Google Analytics as preferred.
+2. Name your project (e.g., `livepulse-prod`) and select or disable Google Analytics as preferred.
 3. In the project dashboard, click the **Android icon** (➕ Add app) to register an Android app:
-   - **Android package name**: `com.aistudio.pollpulse.qxrvlz` *(must match `applicationId` in `app/build.gradle.kts`)*.
-   - **App nickname**: `PulsePoll Production`.
+   - **Android package name**: `com.aistudio.pulsepoll.xqmtw` *(must match `applicationId` in `app/build.gradle.kts`)*.
+   - **App nickname**: `LivePulse Production`.
    - **Debug signing certificate SHA-1**: *(See Step 2 below)*.
 4. Download the generated **`google-services.json`** file.
 5. Move `google-services.json` into the root **`app/`** directory:
@@ -79,11 +79,11 @@ bash scripts/generate-release-keystore.sh
 ```
 Or manually generate it:
 ```bash
-keytool -genkeypair -v -keystore release.keystore -alias pulsepoll -keyalg RSA -keysize 2048 -validity 10000
+keytool -genkeypair -v -keystore release.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000
 ```
 
 ### 3. Register Fingerprints in Firebase:
-1. In Firebase Console, go to **Project Settings ➔ General ➔ Your apps ➔ PulsePoll Android**.
+1. In Firebase Console, go to **Project Settings ➔ General ➔ Your apps ➔ LivePulse Android**.
 2. Click **Add fingerprint** and paste your:
    - **Debug SHA-1**
    - **Release SHA-1**
@@ -94,7 +94,7 @@ keytool -genkeypair -v -keystore release.keystore -alias pulsepoll -keyalg RSA -
 
 ## 4. Step 3: Deploying Firestore Security Rules
 
-PulsePoll includes a pre-configured `firestore.rules` file protecting poll ownership, voting rights, and subcollections.
+LivePulse includes a pre-configured `firestore.rules` file protecting poll ownership, voting rights, and subcollections.
 
 ### Option A: Deploy via Firebase CLI (Recommended)
 ```bash
@@ -149,10 +149,10 @@ To configure Gradle to sign your release APK/AAB automatically, you can provide 
 
 ### Add to `~/.gradle/gradle.properties` (or CI Secret Store):
 ```properties
-PULSEPOLL_RELEASE_STORE_FILE=../release.keystore
-PULSEPOLL_RELEASE_KEY_ALIAS=pulsepoll
-PULSEPOLL_RELEASE_STORE_PASSWORD=pulsepoll2026
-PULSEPOLL_RELEASE_KEY_PASSWORD=pulsepoll2026
+KEYSTORE_PATH=../release.keystore
+# key alias is fixed to "upload" in app/build.gradle.kts
+STORE_PASSWORD=livepulse2026
+KEY_PASSWORD=livepulse2026
 ```
 
 ---
@@ -177,7 +177,7 @@ bash scripts/build-release.sh
 ## 7. Step 6: Google Play Console Release Checklist
 
 1. **Create Application in Google Play Console**:
-   - Application Name: **PulsePoll**
+   - Application Name: **LivePulse**
    - Default Language: **English (United States)**
    - App or Game: **App**
    - Free or Paid: **Free**
@@ -205,7 +205,7 @@ bash scripts/build-release.sh
 
 ## 8. Step 7: Chrome Streaming Web App & Browser Access Deployment
 
-Users without Android devices or without the APK installed can access **100% of native PulsePoll features directly in Google Chrome** (Desktop, Mac, Windows, Chromebook, or iOS).
+Users without Android devices or without the APK installed can access **100% of native LivePulse features directly in Google Chrome** (Desktop, Mac, Windows, Chromebook, or iOS).
 
 ### 1. Cloud-Streaming Web App Architecture (Zero-Install):
 Through the cloud streaming container, the complete native Android Jetpack Compose app is executed server-side and streamed with low-latency WebRTC touch & keyboard forwarding to Chrome.
@@ -255,8 +255,8 @@ firebase deploy --only hosting
 | **Google Sign-In Error code `10` or `12500`** | Missing or incorrect SHA-1 fingerprint in Firebase Console. | Run `bash scripts/generate-release-keystore.sh`, copy the SHA-1, add it to Firebase Console ➔ Project Settings, and replace `google-services.json`. |
 | **Firestore `PERMISSION_DENIED`** | Security rules rejected the write operation. | Deploy the official `firestore.rules` using `bash scripts/deploy-firestore-rules.sh`. |
 | **App crashes on startup with `FirebaseApp not initialized`** | `google-services.json` is missing from the `/app` root directory. | Download `google-services.json` from Firebase Console and place it in the `app/` folder. |
-| **Cost Alert Protection** | Exceeding 50,000 reads/day. | PulsePoll is engineered with a **Room-first SQLite Cache**; local reads hit device SQLite and cost $0.00. Set a budget alert in Google Cloud Billing at $1.00 for safety. |
+| **Cost Alert Protection** | Exceeding 50,000 reads/day. | LivePulse is engineered with a **Room-first SQLite Cache**; local reads hit device SQLite and cost $0.00. Set a budget alert in Google Cloud Billing at $1.00 for safety. |
 
 ---
 
-**PulsePoll is now ready for production release! 🚀**
+**LivePulse is now ready for production release! 🚀**

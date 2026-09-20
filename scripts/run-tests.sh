@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Run Test Suite (Local macOS / Unix)
+# LivePulse - Run Test Suite (Local macOS / Unix)
 # ==============================================================================
 
 set -e
@@ -10,7 +10,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${CYAN}${BOLD}⚡ Running PulsePoll Local Unit & JVM Test Suite...${NC}\n"
+echo -e "${CYAN}${BOLD}⚡ Running LivePulse Local Unit & JVM Test Suite...${NC}\n"
 
 # Use ./gradlew if present, else fallback to system gradle
 if [ -f "./gradlew" ]; then

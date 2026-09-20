@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Build Production Release Bundle (AAB) & Release APK
+# LivePulse - Build Production Release Bundle (AAB) & Release APK
 # ==============================================================================
 
 set -e
@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-echo -e "${CYAN}${BOLD}📦 Building PulsePoll Production Release Artifacts...${NC}\n"
+echo -e "${CYAN}${BOLD}📦 Building LivePulse Production Release Artifacts...${NC}\n"
 
 if [ -f "./gradlew" ]; then
     GRADLE_CMD="./gradlew"

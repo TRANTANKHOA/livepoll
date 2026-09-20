@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# PulsePoll - Production Release Keystore Generator
+# LivePulse - Production Release Keystore Generator
 # ==============================================================================
 
 set -e
@@ -12,9 +12,9 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 KEYSTORE_FILE="release.keystore"
-KEY_ALIAS="pulsepoll"
+KEY_ALIAS="upload"
 
-echo -e "${CYAN}${BOLD}🔐 PulsePoll - Generating Production Release Keystore${NC}\n"
+echo -e "${CYAN}${BOLD}🔐 LivePulse - Generating Production Release Keystore${NC}\n"
 
 if [ -f "$KEYSTORE_FILE" ]; then
     echo -e "${YELLOW}⚠️ '$KEYSTORE_FILE' already exists in the current directory.${NC}"
@@ -34,14 +34,14 @@ keytool -genkeypair \
     -keyalg RSA \
     -keysize 2048 \
     -validity 10000 \
-    -storepass "pulsepoll2026" \
-    -keypass "pulsepoll2026" \
-    -dname "CN=PulsePoll, OU=Mobile, O=PulsePoll, L=San Francisco, ST=CA, C=US"
+    -storepass "livepulse2026" \
+    -keypass "livepulse2026" \
+    -dname "CN=LivePulse, OU=Mobile, O=LivePulse, L=San Francisco, ST=CA, C=US"
 
 echo -e "\n${GREEN}${BOLD}✓ Keystore generated successfully: ${KEYSTORE_FILE}${NC}\n"
 
 echo -e "${CYAN}${BOLD}📋 Certificate Fingerprints (Required for Firebase & Google Sign-In):${NC}"
-keytool -list -v -keystore "$KEYSTORE_FILE" -alias "$KEY_ALIAS" -storepass "pulsepoll2026" | grep -E "SHA1|SHA256"
+keytool -list -v -keystore "$KEYSTORE_FILE" -alias "$KEY_ALIAS" -storepass "livepulse2026" | grep -E "SHA1|SHA256"
 
 echo -e "\n${YELLOW}${BOLD}👉 NEXT STEP:${NC}"
 echo -e "1. Copy the SHA-1 and SHA-256 fingerprints above."

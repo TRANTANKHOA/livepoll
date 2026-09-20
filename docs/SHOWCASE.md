@@ -1,6 +1,6 @@
-# 🌟 PulsePoll Feature & User Experience Showcase
+# 🌟 LivePulse Feature & User Experience Showcase
 
-A comprehensive visual walkthrough and feature breakdown of **PulsePoll** — built for social groups, sports leagues, and team events.
+A comprehensive visual walkthrough and feature breakdown of **LivePulse** — built for social groups, sports leagues, and team events.
 
 ---
 

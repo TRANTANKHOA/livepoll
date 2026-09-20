@@ -1,13 +1,13 @@
-# ⚡ PulsePoll - Real-Time Social Polling & Event Consensus for Android
+# ⚡ LivePulse - Real-Time Social Polling & Event Consensus for Android
 
-[![Live Showcase](https://img.shields.io/badge/GitHub%20Pages-Live%20Showcase-indigo.svg?style=flat-square&logo=github)](https://your-username.github.io/pulsepoll-android/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org)
+[![Live Showcase](https://img.shields.io/badge/GitHub%20Pages-Live%20Showcase-indigo.svg?style=flat-square&logo=github)](https://trantankhoa.github.io/livepoll/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-purple.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-M3-blue.svg?style=flat-square&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
 [![Material 3](https://img.shields.io/badge/Design-Material%203-indigo.svg?style=flat-square&logo=materialdesign)](https://m3.material.io)
 [![Room Database](https://img.shields.io/badge/Storage-Room%20SQLite-brightgreen.svg?style=flat-square&logo=sqlite)](https://developer.android.com/training/data-storage/room)
-[![Android Min SDK](https://img.shields.io/badge/Min%20SDK-26%2B-green.svg?style=flat-square&logo=android)](https://developer.android.com)
+[![Android Min SDK](https://img.shields.io/badge/Min%20SDK-24%2B-green.svg?style=flat-square&logo=android)](https://developer.android.com)
 
-**PulsePoll** is a modern, reactive Android application built with **Jetpack Compose** and **Material 3 (M3)** for organizing group events, deciding team plans, gathering instant feedback, and reaching group consensus with real-time analytics, RSVP headcounts, and multi-user participation.
+**LivePulse** is a modern, reactive Android application built with **Jetpack Compose** and **Material 3 (M3)** for organizing group events, deciding team plans, gathering instant feedback, and reaching group consensus with real-time analytics, RSVP headcounts, and multi-user participation.
 
 > 🌐 **Interactive GitHub Pages Showcase**: View the live web showcase and interactive phone preview at [`docs/index.html`](docs/index.html) or host via GitHub Pages.
 
@@ -62,7 +62,7 @@
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  ⚡ PulsePoll                      🔍  🔔 [👤 Alex ▼]  ⋮│
+│  ⚡ LivePulse                      🔍  🔔 [👤 Alex ▼]  ⋮│
 ├────────────────────────────────────────────────────────┤
 │  [⚡ 3 Active • 4 Polls ▼]        [🚀 Templates] [🔑 Join]│
 ├────────────────────────────────────────────────────────┤
@@ -87,7 +87,7 @@
 
 ## 🏗️ Architecture & Tech Stack
 
-PulsePoll adheres to modern Android Clean Architecture and MVVM design principles:
+LivePulse adheres to modern Android Clean Architecture and MVVM design principles:
 
 * **Language**: [Kotlin](https://kotlinlang.org/) (Coroutines, StateFlow, Serialization)
 * **UI Toolkit**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with Material 3
@@ -135,8 +135,8 @@ chmod +x scripts/*.sh gradlew
 ### Manual Build via Command Line
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/pulsepoll-android.git
-cd pulsepoll-android
+git clone https://github.com/TRANTANKHOA/livepoll.git
+cd livepoll
 
 # Run unit tests
 ./gradlew :app:testDebugUnitTest
@@ -146,6 +146,21 @@ cd pulsepoll-android
 ```
 
 The generated APK will be available in `app/build/outputs/apk/debug/app-debug.apk`.
+
+---
+
+## 📚 Documentation
+
+| Document | Purpose |
+| :--- | :--- |
+| [`docs/index.html`](docs/index.html) | Web docs hub — **live on GitHub Pages**: https://trantankhoa.github.io/livepoll/ |
+| [`docs/architecture.html`](docs/architecture.html) | System architecture: hybrid storage, auth, cost model |
+| [`docs/portability.html`](docs/portability.html) | Backend portability & cloud independence |
+| [`docs/defense.html`](docs/defense.html) | 5-layer distributed attack defense |
+| [`docs/production.html`](docs/production.html) | Production runbook (condensed web view) |
+| [`PRODUCTION_DEPLOYMENT.md`](PRODUCTION_DEPLOYMENT.md) | Canonical step-by-step production deployment guide |
+| [`LOCAL_SETUP_MAC.md`](LOCAL_SETUP_MAC.md) | macOS local development setup & troubleshooting |
+| [`docs/SHOWCASE.md`](docs/SHOWCASE.md) | Screen-by-screen feature & UX walkthrough |
 
 ---
 
