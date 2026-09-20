@@ -27,7 +27,7 @@ class GreetingScreenshotTest {
   fun greeting_screenshot() {
     composeTestRule.setContent {
       MyApplicationTheme {
-        Text("PulsePoll App", modifier = Modifier.padding(16.dp))
+        Text("LivePulse App", modifier = Modifier.padding(16.dp))
       }
     }
 
