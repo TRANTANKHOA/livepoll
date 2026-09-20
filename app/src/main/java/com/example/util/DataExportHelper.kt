@@ -86,7 +86,7 @@ object DataExportHelper {
         }
 
         sb.append("\n🔑 *Join & Vote with Code:* *${poll.code}*\n")
-        sb.append("📲 *How to Vote:* Open PulsePoll and tap *'Join with Code'* → enter *${poll.code}*\n")
+        sb.append("📲 *How to Vote:* Open LivePulse and tap *'Join with Code'* → enter *${poll.code}*\n")
         sb.append("_(Instant multi-device voting, real-time live results & RSVP attendance)_")
 
         return sb.toString()
