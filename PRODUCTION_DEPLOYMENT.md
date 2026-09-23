@@ -23,7 +23,7 @@ Ensure you have the following installed on your development/CI machine:
 - **JDK 17 or JDK 21**: Required for Android Gradle Plugin 8.9+.
 - **Android SDK (API 35)**: Build-Tools 35.0.0 and Platform Tools.
 - **Node.js & Firebase CLI** *(Optional, for rules deployment)*: `npm install -g firebase-tools`
-- **Application ID**: `com.aistudio.pulsepoll.xqmtw` (configured in `app/build.gradle.kts`).
+- **Application ID**: `com.aistudio.livepulse.xqmtw` (configured in `app/build.gradle.kts`).
 
 ---
 
@@ -35,7 +35,7 @@ LivePulse uses Firebase for **Cloud Firestore (Multiplayer live sync)** and **Fi
 1. Go to the [Firebase Console](https://console.firebase.google.com/) and click **Add Project**.
 2. Name your project (e.g., `livepulse-prod`) and select or disable Google Analytics as preferred.
 3. In the project dashboard, click the **Android icon** (➕ Add app) to register an Android app:
-   - **Android package name**: `com.aistudio.pulsepoll.xqmtw` *(must match `applicationId` in `app/build.gradle.kts`)*.
+   - **Android package name**: `com.aistudio.livepulse.xqmtw` *(must match `applicationId` in `app/build.gradle.kts`)*.
    - **App nickname**: `LivePulse Production`.
    - **Debug signing certificate SHA-1**: *(See Step 2 below)*.
 4. Download the generated **`google-services.json`** file.

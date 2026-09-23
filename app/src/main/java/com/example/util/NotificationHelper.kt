@@ -15,9 +15,9 @@ import com.example.MainActivity
 import com.example.data.local.NotificationPreferences
 
 object NotificationHelper {
-    const val CHANNEL_GROUP_POLLS = "pulsepoll_group_polls_channel"
-    const val CHANNEL_DEADLINES = "pulsepoll_deadlines_channel"
-    const val CHANNEL_VOTES = "pulsepoll_votes_channel"
+    const val CHANNEL_GROUP_POLLS = "livepulse_group_polls_channel"
+    const val CHANNEL_DEADLINES = "livepulse_deadlines_channel"
+    const val CHANNEL_VOTES = "livepulse_votes_channel"
 
     fun createNotificationChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

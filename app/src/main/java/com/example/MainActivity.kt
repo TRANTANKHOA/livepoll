@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    PulsePollApp(
+                    LivePulseApp(
                         viewModel = viewModel,
                         initialPollId = pollIdFromIntent
                     )
@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PulsePollApp(
+fun LivePulseApp(
     viewModel: PollViewModel,
     initialPollId: String? = null
 ) {

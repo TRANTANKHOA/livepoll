@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-PACKAGE_NAME="com.aistudio.pulsepoll.xqmtw"
+PACKAGE_NAME="com.aistudio.livepulse.xqmtw"
 MAIN_ACTIVITY="com.example.MainActivity"
 
 echo -e "${CYAN}${BOLD}⚡ Installing & Running LivePulse on Android Target...${NC}\n"

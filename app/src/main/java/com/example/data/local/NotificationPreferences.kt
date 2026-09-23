@@ -17,7 +17,7 @@ data class NotificationSettings(
 )
 
 class NotificationPreferences(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("pulsepoll_notif_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = context.getSharedPreferences("livepulse_notif_prefs", Context.MODE_PRIVATE)
 
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<NotificationSettings> = _settings.asStateFlow()

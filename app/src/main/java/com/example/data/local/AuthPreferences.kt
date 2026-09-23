@@ -7,7 +7,7 @@ import com.example.data.model.UserAccount
 
 class AuthPreferences(context: Context) {
     private val prefs: SharedPreferences =
-        context.getSharedPreferences("pulsepoll_auth_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("livepulse_auth_prefs", Context.MODE_PRIVATE)
 
     companion object {
         private const val KEY_USER_ID = "auth_user_id"

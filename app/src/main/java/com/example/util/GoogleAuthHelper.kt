@@ -26,7 +26,7 @@ object GoogleAuthHelper {
     private const val TAG = "GoogleAuthHelper"
 
     /** Placeholder client ID shipped in .env.example; replaced by the real value in app/.env. */
-    private const val PLACEHOLDER_WEB_CLIENT_ID = "pulsepoll-firebase-auth.apps.googleusercontent.com"
+    private const val PLACEHOLDER_WEB_CLIENT_ID = "livepulse-firebase-auth.apps.googleusercontent.com"
 
     /**
      * Signs in with Google using Jetpack CredentialManager and links to Firebase Auth.
