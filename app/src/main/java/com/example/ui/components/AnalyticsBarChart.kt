@@ -3,6 +3,7 @@ package com.example.ui.components
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -66,24 +67,19 @@ fun AnalyticsBarOptionCard(
     )
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(
-                if (isLeader && voteCount > 0) {
-                    Modifier.border(
-                        1.5.dp,
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                        RoundedCornerShape(20.dp)
-                    )
-                } else {
-                    Modifier
-                }
-            ),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isLeader && voteCount > 0) 2.5.dp else 1.5.dp
+        ),
+        border = BorderStroke(
+            width = if (isLeader && voteCount > 0) 1.5.dp else 1.dp,
+            color = if (isLeader && voteCount > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            else MaterialTheme.colorScheme.outlineVariant
+        )
     ) {
         Column(
             modifier = Modifier

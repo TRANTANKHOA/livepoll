@@ -42,8 +42,8 @@ val SurfaceLight = Color(0xFFFFFFFF)              // Pure White
 val OnSurfaceLight = Color(0xFF0F172A)             // Slate 900
 val SurfaceVariantLight = Color(0xFFF1F5F9)       // Slate 100
 val OnSurfaceVariantLight = Color(0xFF475569)      // Slate 600
-val OutlineLight = Color(0xFFE2E8F0)              // Slate 200
-val OutlineVariantLight = Color(0xFFF1F5F9)       // Slate 100
+val OutlineLight = Color(0xFF94A3B8)              // Slate 400 - prominent boundary
+val OutlineVariantLight = Color(0xFFCBD5E1)       // Slate 300 - clear crisp border
 
 // Material 3 Surface Containers (Light)
 val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
