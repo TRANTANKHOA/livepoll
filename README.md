@@ -52,6 +52,53 @@
 
 ---
 
+## 👥 Target User Personas
+
+LivePulse is built around the workflows of group organizers and their members:
+
+### 1. 🗓️ Sam — The Group Organizer
+* **Role**: Team captain / social secretary who plans the weekly game, the team lunch, and the occasional weekend trip.
+* **Core Goals**: Stop the endless group-chat debate; know *today* how many people are actually coming; hit booking quorums before reservation deadlines.
+* **Key App Touchpoints**: 1-tap templates (⚽ Soccer Pitch, 🍻 Friday Drinks, 🏕️ Camping), quorum meters, voting deadlines with countdowns, WhatsApp/CSV result exports.
+
+### 2. 🗳️ Alex — The Voting Member
+* **Role**: Regular player who attends most sessions and has an opinion about everything.
+* **Core Goals**: Vote in seconds from the phone, change a vote before the deadline, bring a +1 when a friend is in town.
+* **Key App Touchpoints**: 6-character join codes (`SOC5V5`), single- and multi-vote ballots, RSVP headcounts (Going +1 / Maybe / Decline), live leaderboards.
+
+### 3. 🎟️ Priya — The Occasional Guest
+* **Role**: Joins for one-off events — movie night, a tournament, a farewell dinner.
+* **Core Goals**: Jump into exactly one poll without wading through the group's history.
+* **Key App Touchpoints**: Join-with-code entry, share summaries pasted into group chats, persona switcher on a shared device for multi-user testing.
+
+---
+
+## 🔑 Poll Access Model
+
+| Capability | Poll Creator 👑 | Voting Participant 🗳️ |
+| :--- | :---: | :---: |
+| Create polls from 1-tap templates | ✅ | ✅ |
+| Vote (per poll's vote limits) | ✅ | ✅ |
+| RSVP with guest headcounts (+1s) | ✅ | ✅ |
+| View live results, leaderboards & voter lists | ✅ | ✅ |
+| Edit options, set deadlines & quorum thresholds | ✅ | ❌ |
+| Close a poll & trigger final notifications | ✅ | ❌ |
+| Export CSV reports & formatted share summaries | ✅ | ❌ |
+
+*Anyone holding a poll's 6-character join code can join as a voting participant; the code is the capability boundary.*
+
+---
+
+## 🚀 Team Rollout Guide (3 Sessions)
+
+| Session | Audience | Coverage |
+| :--- | :--- | :--- |
+| **1. Set Up & First Poll** | Organizers | Creating from templates, customizing options & rules, sharing the join code/summary to the group chat |
+| **2. Group Adoption** | All Members | Joining with codes, voting (single & multi-choice), RSVP headcounts, watching quorum & deadline countdowns live |
+| **3. Closeout & Bookings** | Organizers | Closing polls, reading the final leaderboard & voter roster, exporting CSV / formatted summaries for reservations |
+
+---
+
 ## 📱 UI Showcase & Architecture
 
 ### Material 3 Design System
