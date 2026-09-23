@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Production Deployment & Operations Runbook - LivePulse Docs</title>
   <meta name="description" content="Step-by-step runbook for Firebase Console setup, SHA-1 fingerprint extraction, Google Sign-In, and Android App Bundle (.aab) Play Store release." />
   <meta name="theme-color" content="#4F46E5" />
@@ -78,7 +78,7 @@
       </div>
       <div class="pill-badge" style="margin-bottom: 0.75rem;">🚀 Zero-Downtime Operations</div>
       <h1 class="hero-title" style="margin-bottom: 0.75rem;">Production Deployment & Operations Runbook</h1>
-      <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1rem;">This page is the condensed web view. The canonical, step-by-step guide lives in the repository: <a href="https://github.com/TRANTANKHOA/livepoll/blob/main/PRODUCTION_DEPLOYMENT.md" target="_blank" style="color: var(--primary); font-weight: 700;">PRODUCTION_DEPLOYMENT.md</a>.</p>
+      <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1rem;">This page is the condensed web view. The canonical, step-by-step guide lives in the repository: <a href="https://github.com/TRANTANKHOA/livepoll/blob/main/PRODUCTION_DEPLOYMENT.md" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 700;">PRODUCTION_DEPLOYMENT.md</a>.</p>
       <p class="hero-desc" style="max-width: 760px; margin: 0 auto;">
         Everything required to take LivePulse from development into Google Play Store distribution with Firebase backend setup and Google Sign-In authentication.
       </p>
@@ -99,7 +99,7 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.6;">
-        <p>1. Open <a href="https://console.firebase.google.com" target="_blank" style="color: var(--primary); font-weight: 700;">console.firebase.google.com</a> and click <b>"Add project"</b> (name it e.g. <code>livepulse-prod</code>).</p>
+        <p>1. Open <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 700;">console.firebase.google.com</a> and click <b>"Add project"</b> (name it e.g. <code>livepulse-prod</code>).</p>
         <p>2. In project settings, click the <b>Android icon</b> to register the Android app:</p>
         <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.35rem;">
           <li><b>Android package name:</b> Set to your <code>applicationId</code> from <code>app/build.gradle.kts</code>.</li>
@@ -133,15 +133,78 @@
         <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android</code></pre>
       </div>
 
-      <p style="font-size: 0.85rem; color: var(--on-surface-variant);">
-        Copy the <code>SHA1: XX:XX:XX...</code> string and paste it into your <b>Firebase Project Settings ➔ Your apps ➔ Add fingerprint</b>. Also add your Web Client ID to the AI Studio Secrets panel.
+      <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1rem;">
+        Copy the <code>SHA1: XX:XX:XX...</code> string and paste it into your <b>Firebase Project Settings ➔ Your apps ➔ Add fingerprint</b>.
+      </p>
+
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 0.5rem;">
+        Google Sign-In also needs your <b>OAuth Web Client ID</b> (Google Cloud Console ➔ APIs &amp; Services ➔ Credentials ➔ <i>Web client</i>). Put it in <code>.env</code> at the repo root — copy <code>.env.example</code> and set:
+      </p>
+
+      <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
+          <span>.ENV (REPO ROOT, GIT-IGNORED)</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>WEB_CLIENT_ID=1234567890-abcdef.apps.googleusercontent.com</code></pre>
+      </div>
+    </div>
+
+    <!-- Step 3: Release Keystore & App Signing -->
+    <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 1.5rem; background: #E0F2FE; color: #0369A1; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">3</span>
+        <div>
+          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Release Keystore & App Signing</h2>
+          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Required for a signed .aab and for Google Sign-In on release builds</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 1rem; line-height: 1.6;">
+        The debug keystore only covers local testing. Generate an upload keystore with the helper script, then register its <b>SHA-1 and SHA-256</b> in Firebase ➔ Project Settings ➔ Add fingerprint:
+      </p>
+
+      <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
+          <span>TERMINAL</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>bash scripts/generate-release-keystore.sh</code></pre>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 0.5rem;">
+        Signing secrets are read from <b>environment variables</b> (<code>System.getenv</code> in <code>app/build.gradle.kts</code>) — export them before building, and never commit them:
+      </p>
+
+      <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
+          <span>SHELL / CI ENVIRONMENT</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>export KEYSTORE_PATH=/absolute/path/to/release.keystore
+export STORE_PASSWORD='&lt;your-keystore-password&gt;'
+export KEY_PASSWORD='&lt;your-key-password&gt;'</code></pre>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-top: 1rem; margin-bottom: 0.75rem;">
+        The key alias is fixed to <code>upload</code> in <code>app/build.gradle.kts</code>.
+      </p>
+
+      <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 0.5rem;">
+        <b>Signed bundles in CI:</b> the <code>release_bundle</code> workflow job is opt-in — it stays dormant until you provide signing material. In <i>Settings ➔ Secrets and variables ➔ Actions</i> set:
+      </p>
+      <ul style="padding-left: 1.5rem; font-size: 0.85rem; color: var(--on-surface-variant); display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem;">
+        <li><code>RELEASE_ENABLED</code> = <code>true</code> (Variables tab — the non-secret on/off switch)</li>
+        <li><code>RELEASE_KEYSTORE_BASE64</code> (Secrets tab — your keystore file, base64-encoded: <code>base64 -i release.keystore -o release.keystore.b64</code>, paste the output)</li>
+        <li><code>STORE_PASSWORD</code> and <code>KEY_PASSWORD</code> (Secrets tab — must match the keystore)</li>
+      </ul>
+
+      <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 0;">
+        On the next push to <code>main</code>/<code>release/*</code> (after tests pass), the pipeline decodes the keystore, runs <code>./gradlew :app:bundleRelease</code>, and uploads the signed <code>app-release-aab</code> artifact. Play Store upload stays manual; flip <code>RELEASE_ENABLED</code> back to <code>false</code> to disable. Keep the original keystore safe and offline — losing it means you can never update the same Play Store listing.
       </p>
     </div>
 
     <!-- Step 3: Android App Bundle (.aab) Build -->
     <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-        <span style="font-size: 1.5rem; background: #DCFCE7; color: #166534; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">3</span>
+        <span style="font-size: 1.5rem; background: #DCFCE7; color: #166534; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">4</span>
         <div>
           <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Compiling Production Android App Bundle (.AAB)</h2>
           <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Google Play Store Standard Release Format</span>
@@ -149,25 +212,25 @@
       </div>
 
       <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 1rem;">
-        Google Play requires apps to be published as an <b>Android App Bundle (<code>.aab</code>)</b> for dynamic split delivery (reducing user download size by up to 60%).
+        Google Play requires new apps to be published as an <b>Android App Bundle (<code>.aab</code>)</b>; Play then generates optimized APKs for each device configuration, so users download only the code and resources their device needs.
       </p>
 
       <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC; margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
-          <span>BUILD COMMAND</span>
+          <span>BUILD COMMAND (WRAPS ./gradlew bundleRelease + assembleRelease)</span>
         </div>
-        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>gradle :app:bundleRelease</code></pre>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>bash scripts/build-release.sh</code></pre>
       </div>
 
       <p style="font-size: 0.85rem; color: var(--on-surface-variant);">
-        The output artifact will be generated at: <code>app/build/outputs/bundle/release/app-release.aab</code>.
+        The script builds both the Play bundle and a standalone QA APK. The bundle artifact is generated at: <code>app/build/outputs/bundle/release/app-release.aab</code>.
       </p>
     </div>
 
     <!-- Step 4: Google Play Store Release Checklist -->
     <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-        <span style="font-size: 1.5rem; background: #F3E8FF; color: #6B21A8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">4</span>
+        <span style="font-size: 1.5rem; background: #F3E8FF; color: #6B21A8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">5</span>
         <div>
           <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Google Play Store Pre-Launch Checklist</h2>
           <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Verify all launch standards prior to submitting</span>
@@ -192,34 +255,47 @@
 
         <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
           <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">✅ Robolectric JVM Test Suite</div>
-          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">17/17 Unit & JVM tests verified with <code>gradle :app:testDebugUnitTest</code>.</p>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">17/17 Unit & JVM tests verified with <code>./gradlew :app:testDebugUnitTest</code> (or <code>bash scripts/run-tests.sh</code>).</p>
+        </div>
+
+        <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">✅ Release Signing Configured</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">Upload keystore generated, its SHA-1/SHA-256 registered in Firebase, and <code>KEYSTORE_PATH</code>/<code>STORE_PASSWORD</code>/<code>KEY_PASSWORD</code> exported (Step 3).</p>
         </div>
       </div>
     </div>
 
-    <!-- Step 5: Chrome Streaming Web App & Browser Access -->
+    <!-- Step 6: Browser Access: Docs & Demo Hosting -->
     <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm);">
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-        <span style="font-size: 1.5rem; background: #E0E7FF; color: #3730A3; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">5</span>
+        <span style="font-size: 1.5rem; background: #E0E7FF; color: #3730A3; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">6</span>
         <div>
-          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Chrome (Streaming Web App) & Browser Access</h2>
-          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Zero-Install Multi-Platform Access (Desktop, Mac, iOS, Chromebook)</span>
+          <h2 style="margin: 0; font-size: 1.25rem; color: var(--on-surface);">Browser Access: Docs &amp; Demo Site Hosting</h2>
+          <span style="font-size: 0.8rem; color: var(--on-surface-variant);">Zero-Install Product Walkthrough on Any Device (Desktop, Mac, iOS, Chromebook)</span>
         </div>
       </div>
 
       <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 1rem; line-height: 1.6;">
-        Users without an Android phone can access <b>100% of native LivePulse features directly in Google Chrome</b>. The cloud container streams the native Jetpack Compose APK via low-latency WebRTC with interactive mouse/touch mapping and real-time Firestore synchronization.
+        The <code>docs/</code> directory is a self-contained static site — this documentation plus an <b>interactive, client-side demo</b> of the poll-joining, voting, and RSVP flows. It makes no Firebase calls; real-time voting runs in the Android app with Firestore snapshot listeners. Host it on Firebase Hosting and share the URL with voters as a zero-install walkthrough.
       </p>
+
+      <div style="background: #0F172A; border-radius: 8px; padding: 1rem; color: #F8FAFC; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 0.5rem;">
+          <span>TERMINAL (FIREBASE HOSTING)</span>
+        </div>
+        <pre style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38BDF8; overflow-x: auto;"><code>firebase init hosting   # public directory: docs
+firebase deploy --only hosting</code></pre>
+      </div>
 
       <div class="grid-2">
         <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
-          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">🌐 Instant Shared Preview URL</div>
-          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">Share the cloud-hosted preview link directly with group voters. No APK download or sideloading required.</p>
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">🌐 Zero-Install Walkthrough</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">Voters open the hosted URL in any browser and try the simulated demo — poll codes, voting, and RSVP flows — with no APK download or sideloading.</p>
         </div>
 
         <div style="background: var(--surface-container-low); padding: 1rem; border-radius: 10px; border: 1px solid var(--outline-variant);">
-          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">⚡ Full Feature & Hardware Parity</div>
-          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">Full SQLite Room database persistence, multi-user SSO simulation, RSVP calculations, and live WebSocket broadcasts.</p>
+          <div style="font-weight: 700; color: var(--on-surface); margin-bottom: 0.35rem;">📱 Live Sync Stays in the App</div>
+          <p style="font-size: 0.82rem; color: var(--on-surface-variant); margin: 0;">Real votes, Room SQLite offline caching, and multi-user live sync require the Android app — the hosted site is documentation plus a simulated demo.</p>
         </div>
       </div>
     </div>

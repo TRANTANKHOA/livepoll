@@ -9,6 +9,7 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
+import com.example.BuildConfig
 import com.example.data.model.AuthProvider
 import com.example.data.model.UserAccount
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -24,6 +25,9 @@ object GoogleAuthHelper {
 
     private const val TAG = "GoogleAuthHelper"
 
+    /** Placeholder client ID shipped in .env.example; replaced by the real value in app/.env. */
+    private const val PLACEHOLDER_WEB_CLIENT_ID = "pulsepoll-firebase-auth.apps.googleusercontent.com"
+
     /**
      * Signs in with Google using Jetpack CredentialManager and links to Firebase Auth.
      */
@@ -34,12 +38,11 @@ object GoogleAuthHelper {
         return try {
             val credentialManager = CredentialManager.create(context)
 
-            // Web client ID can be passed from BuildConfig / Secrets or default
-            val clientId = if (!webClientId.isNullOrBlank()) {
-                webClientId
-            } else {
-                // Fallback default client ID placeholder or app identifier
-                "pulsepoll-firebase-auth.apps.googleusercontent.com"
+            // Web client ID from the caller, the app/.env secret, or the placeholder default
+            val clientId = webClientId?.takeIf { it.isNotBlank() } ?: BuildConfig.WEB_CLIENT_ID
+            if (clientId == PLACEHOLDER_WEB_CLIENT_ID) {
+                Log.w(TAG, "WEB_CLIENT_ID is not configured — Google Sign-In will fail. " +
+                    "Copy .env.example to .env (repo root) and set WEB_CLIENT_ID.")
             }
 
             val googleIdOption = GetGoogleIdOption.Builder()

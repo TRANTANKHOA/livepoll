@@ -12,7 +12,7 @@ This guide provides end-to-end, step-by-step instructions and scripts for deploy
 5. [Step 4: Release Keystore & App Signing](#5-step-4-release-keystore--app-signing)
 6. [Step 5: Compiling Production App Bundle (.AAB) & APK](#6-step-5-compiling-production-app-bundle-aab--apk)
 7. [Step 6: Google Play Console Release Checklist](#7-step-6-google-play-console-release-checklist)
-8. [Step 7: Chrome Streaming Web App & Browser Access Deployment](#8-step-7-chrome-streaming-web-app--browser-access-deployment)
+8. [Step 7: Browser Access: Docs and Demo Site Hosting](#8-step-7-browser-access-docs-and-demo-site-hosting)
 9. [Step 8: Production Troubleshooting & Cost Safeguards](#9-step-8-production-troubleshooting--cost-safeguards)
 
 ---
@@ -90,6 +90,14 @@ keytool -genkeypair -v -keystore release.keystore -alias upload -keyalg RSA -key
    - **Release SHA-256**
 3. Re-download `google-services.json` and replace `app/google-services.json`.
 
+### 4. Configure the Web Client ID for Google Sign-In:
+1. In the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) ➔ **APIs & Services ➔ Credentials**, open **Web client (auto created by Google Service)** and copy its **Client ID**.
+2. Copy `.env.example` to `.env` at the **repo root** (git-ignored; the secrets Gradle plugin reads the root-level file) and set:
+   ```properties
+   WEB_CLIENT_ID=1234567890-abcdef.apps.googleusercontent.com
+   ```
+3. The app reads this value via `BuildConfig.WEB_CLIENT_ID` in `GoogleAuthHelper.kt`. Without it, Google Sign-In falls back to a placeholder ID and will fail.
+
 ---
 
 ## 4. Step 3: Deploying Firestore Security Rules
@@ -145,15 +153,45 @@ service cloud.firestore {
 
 ## 5. Step 4: Release Keystore & App Signing
 
-To configure Gradle to sign your release APK/AAB automatically, you can provide signing properties via environment variables or `gradle.properties`:
+The release signing config in `app/build.gradle.kts` reads its values from **environment variables** (`System.getenv`) — putting them in `gradle.properties` has no effect. Export them in your shell (or CI secret store) before building:
 
-### Add to `~/.gradle/gradle.properties` (or CI Secret Store):
-```properties
-KEYSTORE_PATH=../release.keystore
+```bash
 # key alias is fixed to "upload" in app/build.gradle.kts
-STORE_PASSWORD=livepulse2026
-KEY_PASSWORD=livepulse2026
+export KEYSTORE_PATH=/absolute/path/to/release.keystore
+export STORE_PASSWORD='<your-keystore-password>'
+export KEY_PASSWORD='<your-key-password>'
 ```
+
+Keep the keystore file and these values out of the repository.
+
+### Signing in CI (GitHub Actions)
+
+The `release_bundle` job in `.github/workflows/android_ci_cd.yml` produces a **signed** `.aab` on every push to `main` or `release/*` — but it stays dormant until you opt in. (The job is gated because `app/build.gradle.kts` applies the release signing config unconditionally; without a real keystore, `bundleRelease` would fail with a cryptic signing error.)
+
+If you don't have a release keystore yet, generate one with `bash scripts/generate-release-keystore.sh` (alias `upload`; the script's default password is `livepulse2026` — change it if you like, but the CI secrets below must match).
+
+Configure once in **GitHub ➔ Settings ➔ Secrets and variables ➔ Actions**:
+
+| Item | Tab | Value |
+| :--- | :--- | :--- |
+| `RELEASE_ENABLED` | Variables | `true` — the non-secret on/off switch |
+| `RELEASE_KEYSTORE_BASE64` | Secrets | your entire `release.keystore`, base64-encoded |
+| `STORE_PASSWORD` | Secrets | the keystore's store password |
+| `KEY_PASSWORD` | Secrets | the key's password |
+
+To encode the keystore on macOS:
+```bash
+base64 -i release.keystore -o release.keystore.b64
+```
+Paste the output into `RELEASE_KEYSTORE_BASE64`. Keep the original file safe and offline — if you lose it, you can never publish an update to the same Play Store listing.
+
+On the next qualifying push (after `build_and_test` passes), the workflow:
+1. Fails fast if `RELEASE_ENABLED` is `true` but `RELEASE_KEYSTORE_BASE64` is missing (deliberate guard).
+2. Decodes the keystore onto the runner.
+3. Runs `./gradlew :app:bundleRelease` with `KEYSTORE_PATH` pointing at the decoded file — producing a signed `app-release.aab`.
+4. Uploads it as the `app-release-aab` artifact (30-day retention) under the run's **Artifacts** section.
+
+Uploading to the Play Store itself stays manual (see Step 6). To disable the job again, flip `RELEASE_ENABLED` to `false` or delete the variable.
 
 ---
 
@@ -203,48 +241,23 @@ bash scripts/build-release.sh
 
 ---
 
-## 8. Step 7: Chrome Streaming Web App & Browser Access Deployment
+## 8. Step 7: Browser Access: Docs and Demo Site Hosting
 
-Users without Android devices or without the APK installed can access **100% of native LivePulse features directly in Google Chrome** (Desktop, Mac, Windows, Chromebook, or iOS).
+Users without an Android device can still explore LivePulse in the browser. The `docs/` directory is a self-contained static site — this documentation plus an interactive, client-side demo of the voting flow. It makes **no Firebase calls**; real-time voting, RSVP, and offline sync run in the Android app.
 
-### 1. Cloud-Streaming Web App Architecture (Zero-Install):
-Through the cloud streaming container, the complete native Android Jetpack Compose app is executed server-side and streamed with low-latency WebRTC touch & keyboard forwarding to Chrome.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                 Google Chrome Browser                       │
-│         (Desktop, Mac, Windows, Chromebook, iOS)            │
-│                                                             │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │           Streaming Android Virtual Canvas          │   │
-│   │           (Interactive Video + Touch Input)         │   │
-│   └──────────────────────────┬──────────────────────────┘   │
-└──────────────────────────────┼──────────────────────────────┘
-                               │ Low-latency WebRTC Streams & Touch Events
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│             Cloud-Hosted Android Runtime Container          │
-│   • Native Jetpack Compose M3 UI                            │
-│   • Local Room SQLite Caching Engine                        │
-│   • Firebase Cloud Firestore Real-Time Relay                │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 2. Sharing Chrome Web Access with Voters:
-1. Provide voters with the **Shared Web App Preview URL** generated from Google AI Studio.
-2. Users open the URL in Chrome on any laptop, desktop, or mobile device.
-3. **Input Interaction**:
-   - Mouse clicks trigger Android touch taps.
-   - Physical keyboard typing enters 6-character poll codes (e.g. `SOC5V5`).
-   - Persona switcher allows instant multi-user simulation & quorum verification.
-
-### 3. Static Web Client / PWA Option (Firebase Hosting):
-For a dedicated HTML/JS web client connecting to the same Firestore database, deploy `/docs` directly to Firebase Hosting:
+### 1. Deploy `docs/` to Firebase Hosting:
 ```bash
 firebase init hosting
-# Select public directory: docs
+# Select your Firebase project
+# Public directory: docs
+# Configure as single-page app: No
 firebase deploy --only hosting
 ```
+
+### 2. Share the Hosted URL with Voters:
+1. Voters open the URL in any browser (desktop, laptop, Chromebook, iOS) — nothing to install or sideload.
+2. The interactive demo simulates joining a poll with a 6-character poll code (e.g. `SOC5V5`), voting, and RSVP flows.
+3. To cast real votes, install the Android app and sign in — votes sync live via Firestore snapshot listeners.
 
 ---
 
@@ -252,7 +265,7 @@ firebase deploy --only hosting
 
 | Symptom | Probable Cause | Fix / Resolution |
 | :--- | :--- | :--- |
-| **Google Sign-In Error code `10` or `12500`** | Missing or incorrect SHA-1 fingerprint in Firebase Console. | Run `bash scripts/generate-release-keystore.sh`, copy the SHA-1, add it to Firebase Console ➔ Project Settings, and replace `google-services.json`. |
+| **Google Sign-In Error code `10` or `12500`** | Missing/incorrect SHA-1 fingerprint in Firebase Console, or `WEB_CLIENT_ID` not set in `.env` (repo root). | Run `bash scripts/generate-release-keystore.sh`, copy the SHA-1, add it to Firebase Console ➔ Project Settings, and replace `google-services.json`. Then set the Web Client ID in `.env` (see Step 2 §4). |
 | **Firestore `PERMISSION_DENIED`** | Security rules rejected the write operation. | Deploy the official `firestore.rules` using `bash scripts/deploy-firestore-rules.sh`. |
 | **App crashes on startup with `FirebaseApp not initialized`** | `google-services.json` is missing from the `/app` root directory. | Download `google-services.json` from Firebase Console and place it in the `app/` folder. |
 | **Cost Alert Protection** | Exceeding 50,000 reads/day. | LivePulse is engineered with a **Room-first SQLite Cache**; local reads hit device SQLite and cost $0.00. Set a budget alert in Google Cloud Billing at $1.00 for safety. |
