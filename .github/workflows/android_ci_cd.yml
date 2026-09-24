@@ -70,7 +70,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_and_test
     # Opt-in: set repo variable RELEASE_ENABLED=true plus secrets
-    # RELEASE_KEYSTORE_BASE64, STORE_PASSWORD, KEY_PASSWORD to activate.
+    # RELEASE_KEYSTORE_BASE64, STORE_PASSWORD, KEY_PASSWORD (and optionally
+    # WEB_CLIENT_ID for Google Sign-In) to activate.
     # (Key alias is fixed to "upload" in app/build.gradle.kts.)
     if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
         && vars.RELEASE_ENABLED == 'true'
@@ -99,6 +100,17 @@ jobs:
           fi
           echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
           echo "Release keystore decoded successfully."
+
+      - name: Write signing + auth secrets .env
+        env:
+          WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
+        run: |
+          if [ -n "$WEB_CLIENT_ID" ]; then
+            printf 'WEB_CLIENT_ID=%s\n' "$WEB_CLIENT_ID" > .env
+            echo "WEB_CLIENT_ID injected into .env."
+          else
+            echo "::warning::WEB_CLIENT_ID secret not set — the release bundle will ship without Google Sign-In configured."
+          fi
 
       - name: Build Production Android App Bundle (AAB)
         env:

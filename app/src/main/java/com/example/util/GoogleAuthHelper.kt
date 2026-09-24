@@ -25,24 +25,22 @@ object GoogleAuthHelper {
 
     private const val TAG = "GoogleAuthHelper"
 
-    /** Placeholder client ID shipped in .env.example; replaced by the real value in app/.env. */
-    private const val PLACEHOLDER_WEB_CLIENT_ID = "livepulse-firebase-auth.apps.googleusercontent.com"
+    /** Real OAuth client IDs look like `1234567890-abcdef.apps.googleusercontent.com`. */
+    private val REAL_CLIENT_ID_RE = Regex("""^\d+-[a-z0-9.-]+\.apps\.googleusercontent\.com$""")
 
     /**
      * Signs in with Google using Jetpack CredentialManager and links to Firebase Auth.
      */
-    suspend fun signInWithGoogle(
-        context: Context,
-        webClientId: String? = null
-    ): Result<UserAccount> {
+    suspend fun signInWithGoogle(context: Context): Result<UserAccount> {
         return try {
             val credentialManager = CredentialManager.create(context)
 
-            // Web client ID from the caller, the app/.env secret, or the placeholder default
-            val clientId = webClientId?.takeIf { it.isNotBlank() } ?: BuildConfig.WEB_CLIENT_ID
-            if (clientId == PLACEHOLDER_WEB_CLIENT_ID) {
-                Log.w(TAG, "WEB_CLIENT_ID is not configured — Google Sign-In will fail. " +
-                    "Copy .env.example to .env (repo root) and set WEB_CLIENT_ID.")
+            // Web client ID from the repo-root .env (secrets Gradle plugin -> BuildConfig)
+            val clientId = BuildConfig.WEB_CLIENT_ID.trim()
+            if (!REAL_CLIENT_ID_RE.matches(clientId)) {
+                Log.w(TAG, "WEB_CLIENT_ID is not configured or not a real client ID — " +
+                    "Google Sign-In will fail. Set it in .env at the repo root " +
+                    "(see .env.example; Google Cloud Console > Credentials > Web client).")
             }
 
             val googleIdOption = GetGoogleIdOption.Builder()

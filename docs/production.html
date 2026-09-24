@@ -188,20 +188,15 @@ export KEY_PASSWORD='&lt;your-key-password&gt;'</code></pre>
       </p>
 
       <p style="font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 0.5rem;">
-        <b>Signed bundles in CI:</b> the <code>release_bundle</code> workflow job is opt-in — it stays dormant until you provide signing material. In <i>Settings ➔ Secrets and variables ➔ Actions</i> set:
+        <b>Signed bundles in CI:</b> the <code>release_bundle</code> workflow job is opt-in — it stays dormant until you set <code>RELEASE_ENABLED</code> = <code>true</code> (Variables tab) plus the <code>RELEASE_KEYSTORE_BASE64</code>, <code>STORE_PASSWORD</code>, <code>KEY_PASSWORD</code>, and <code>WEB_CLIENT_ID</code> secrets in <i>Settings ➔ Secrets and variables ➔ Actions</i>. On the next push (after tests pass) it uploads the signed <code>app-release-aab</code> artifact; Play Store upload stays manual.
       </p>
-      <ul style="padding-left: 1.5rem; font-size: 0.85rem; color: var(--on-surface-variant); display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem;">
-        <li><code>RELEASE_ENABLED</code> = <code>true</code> (Variables tab — the non-secret on/off switch)</li>
-        <li><code>RELEASE_KEYSTORE_BASE64</code> (Secrets tab — your keystore file, base64-encoded: <code>base64 -i release.keystore -o release.keystore.b64</code>, paste the output)</li>
-        <li><code>STORE_PASSWORD</code> and <code>KEY_PASSWORD</code> (Secrets tab — must match the keystore)</li>
-      </ul>
 
       <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 0;">
-        On the next push to <code>main</code>/<code>release/*</code> (after tests pass), the pipeline decodes the keystore, runs <code>./gradlew :app:bundleRelease</code>, and uploads the signed <code>app-release-aab</code> artifact. Play Store upload stays manual; flip <code>RELEASE_ENABLED</code> back to <code>false</code> to disable. Keep the original keystore safe and offline — losing it means you can never update the same Play Store listing.
+        Keystore encoding steps and the full pipeline behavior live in the canonical guide: <b>PRODUCTION_DEPLOYMENT.md ➔ Signing in CI (GitHub Actions)</b>. Keep the original keystore safe and offline — losing it means you can never update the same Play Store listing.
       </p>
     </div>
 
-    <!-- Step 3: Android App Bundle (.aab) Build -->
+    <!-- Step 4: Android App Bundle (.aab) Build -->
     <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
         <span style="font-size: 1.5rem; background: #DCFCE7; color: #166534; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">4</span>
@@ -227,7 +222,7 @@ export KEY_PASSWORD='&lt;your-key-password&gt;'</code></pre>
       </p>
     </div>
 
-    <!-- Step 4: Google Play Store Release Checklist -->
+    <!-- Step 5: Google Play Store Release Checklist -->
     <div style="background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
         <span style="font-size: 1.5rem; background: #F3E8FF; color: #6B21A8; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800;">5</span>

@@ -96,7 +96,7 @@ keytool -genkeypair -v -keystore release.keystore -alias upload -keyalg RSA -key
    ```properties
    WEB_CLIENT_ID=1234567890-abcdef.apps.googleusercontent.com
    ```
-3. The app reads this value via `BuildConfig.WEB_CLIENT_ID` in `GoogleAuthHelper.kt`. Without it, Google Sign-In falls back to a placeholder ID and will fail.
+3. The app reads this value via `BuildConfig.WEB_CLIENT_ID` in `GoogleAuthHelper.kt`. Without it, builds ship a placeholder ID — `GoogleAuthHelper` logs a warning at sign-in time and Google Sign-In fails. A valid ID looks like `1234567890-abcdef.apps.googleusercontent.com` (numeric prefix required).
 
 ---
 
@@ -178,6 +178,7 @@ Configure once in **GitHub ➔ Settings ➔ Secrets and variables ➔ Actions**:
 | `RELEASE_KEYSTORE_BASE64` | Secrets | your entire `release.keystore`, base64-encoded |
 | `STORE_PASSWORD` | Secrets | the keystore's store password |
 | `KEY_PASSWORD` | Secrets | the key's password |
+| `WEB_CLIENT_ID` *(optional but recommended)* | Secrets | the OAuth Web Client ID — the workflow writes it into a repo-root `.env` so Google Sign-In works in the release bundle |
 
 To encode the keystore on macOS:
 ```bash
@@ -188,8 +189,9 @@ Paste the output into `RELEASE_KEYSTORE_BASE64`. Keep the original file safe and
 On the next qualifying push (after `build_and_test` passes), the workflow:
 1. Fails fast if `RELEASE_ENABLED` is `true` but `RELEASE_KEYSTORE_BASE64` is missing (deliberate guard).
 2. Decodes the keystore onto the runner.
-3. Runs `./gradlew :app:bundleRelease` with `KEYSTORE_PATH` pointing at the decoded file — producing a signed `app-release.aab`.
-4. Uploads it as the `app-release-aab` artifact (30-day retention) under the run's **Artifacts** section.
+3. Writes a repo-root `.env` from the `WEB_CLIENT_ID` secret when set (otherwise emits a warning — the bundle ships without Google Sign-In configured).
+4. Runs `./gradlew :app:bundleRelease` with `KEYSTORE_PATH` pointing at the decoded file — producing a signed `app-release.aab`.
+5. Uploads it as the `app-release-aab` artifact (30-day retention) under the run's **Artifacts** section.
 
 Uploading to the Play Store itself stays manual (see Step 6). To disable the job again, flip `RELEASE_ENABLED` to `false` or delete the variable.
 
@@ -265,7 +267,7 @@ firebase deploy --only hosting
 
 | Symptom | Probable Cause | Fix / Resolution |
 | :--- | :--- | :--- |
-| **Google Sign-In Error code `10` or `12500`** | Missing/incorrect SHA-1 fingerprint in Firebase Console, or `WEB_CLIENT_ID` not set in `.env` (repo root). | Run `bash scripts/generate-release-keystore.sh`, copy the SHA-1, add it to Firebase Console ➔ Project Settings, and replace `google-services.json`. Then set the Web Client ID in `.env` (see Step 2 §4). |
+| **Google Sign-In Error code `10` or `12500`** | Missing/incorrect SHA-1 fingerprint in Firebase Console, or `WEB_CLIENT_ID` not set/invalid in `.env` (repo root). | Run `bash scripts/generate-release-keystore.sh`, copy the SHA-1, add it to Firebase Console ➔ Project Settings, and replace `google-services.json`. Then set the Web Client ID in `.env` (see Step 2 §4). |
 | **Firestore `PERMISSION_DENIED`** | Security rules rejected the write operation. | Deploy the official `firestore.rules` using `bash scripts/deploy-firestore-rules.sh`. |
 | **App crashes on startup with `FirebaseApp not initialized`** | `google-services.json` is missing from the `/app` root directory. | Download `google-services.json` from Firebase Console and place it in the `app/` folder. |
 | **Cost Alert Protection** | Exceeding 50,000 reads/day. | LivePulse is engineered with a **Room-first SQLite Cache**; local reads hit device SQLite and cost $0.00. Set a budget alert in Google Cloud Billing at $1.00 for safety. |
