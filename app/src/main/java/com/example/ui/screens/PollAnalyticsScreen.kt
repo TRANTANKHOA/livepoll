@@ -227,13 +227,19 @@ fun PollAnalyticsScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+                // One remembered border shared by the outline-styled cards below —
+                // BorderStroke has no equals impl, so sharing it lets Compose skip
+                // cards whose content didn't change across vote emissions.
+                val outlineBorder = remember(outlineVariant) { BorderStroke(1.dp, outlineVariant) }
+
                 // Poll Banner Header
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    border = outlineBorder
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp),
@@ -340,7 +346,7 @@ fun PollAnalyticsScreen(
                                 shape = RoundedCornerShape(24.dp),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                border = outlineBorder
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -416,7 +422,7 @@ fun PollAnalyticsScreen(
                                     shape = RoundedCornerShape(18.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                    border = outlineBorder
                                 ) {
                                     Row(
                                         modifier = Modifier
@@ -509,7 +515,7 @@ fun PollAnalyticsScreen(
                                 shape = RoundedCornerShape(20.dp),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                border = outlineBorder
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -532,7 +538,7 @@ fun PollAnalyticsScreen(
                                     shape = RoundedCornerShape(18.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                    border = outlineBorder
                                 ) {
                                     Column(
                                         modifier = Modifier.padding(16.dp),
@@ -573,7 +579,7 @@ fun PollAnalyticsScreen(
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    border = outlineBorder
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp),
@@ -658,6 +664,9 @@ private fun WinnerSpotlightCard(
     timeSlot: String?,
     location: String?
 ) {
+    val primary = MaterialTheme.colorScheme.primary
+    val winnerBorder = remember(primary) { BorderStroke(1.5.dp, primary.copy(alpha = 0.5f)) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -665,7 +674,7 @@ private fun WinnerSpotlightCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+        border = winnerBorder
     ) {
         Column(
             modifier = Modifier

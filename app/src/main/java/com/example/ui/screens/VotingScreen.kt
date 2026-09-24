@@ -621,6 +621,13 @@ private fun VotingOptionCard(
     isMultiChoice: Boolean,
     onSelect: () -> Unit
 ) {
+    val primary = MaterialTheme.colorScheme.primary
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    // Remembered so selection taps recomposing every option card can skip the Card.
+    val border = remember(isSelected, primary, outlineVariant) {
+        if (isSelected) BorderStroke(2.dp, primary) else BorderStroke(1.dp, outlineVariant)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -634,10 +641,7 @@ private fun VotingOptionCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isSelected) 3.dp else 1.dp
         ),
-        border = BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-        )
+        border = border
     ) {
         Row(
             modifier = Modifier

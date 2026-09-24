@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +66,15 @@ fun AnalyticsBarOptionCard(
         label = "progressBar"
     )
 
+    val isTop = isLeader && voteCount > 0
+    val primary = MaterialTheme.colorScheme.primary
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    // BorderStroke/CardElevation have no equals impl — remember them so live vote
+    // emissions recomposing this card don't re-allocate and can actually skip.
+    val border = remember(isTop, primary, outlineVariant) {
+        if (isTop) BorderStroke(1.5.dp, primary.copy(alpha = 0.6f))
+        else BorderStroke(1.dp, outlineVariant)
+    }
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -73,13 +82,9 @@ fun AnalyticsBarOptionCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isLeader && voteCount > 0) 2.5.dp else 1.5.dp
+            defaultElevation = if (isTop) 2.5.dp else 1.5.dp
         ),
-        border = BorderStroke(
-            width = if (isLeader && voteCount > 0) 1.5.dp else 1.dp,
-            color = if (isLeader && voteCount > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            else MaterialTheme.colorScheme.outlineVariant
-        )
+        border = border
     ) {
         Column(
             modifier = Modifier
@@ -103,7 +108,7 @@ fun AnalyticsBarOptionCard(
                             .fillMaxHeight()
                             .clip(RoundedCornerShape(16.dp))
                             .background(
-                                if (isLeader && voteCount > 0)
+                                if (isTop)
                                     MaterialTheme.colorScheme.primaryContainer
                                 else
                                     MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
