@@ -29,6 +29,13 @@ object GoogleAuthHelper {
     private val REAL_CLIENT_ID_RE = Regex("""^\d+-[a-z0-9.-]+\.apps\.googleusercontent\.com$""")
 
     /**
+     * True only for a real-looking OAuth Web Client ID (numeric project prefix +
+     * `apps.googleusercontent.com` domain). Placeholders, blanks, and stale values
+     * all fail this check, so the misconfiguration warning cannot be silently defeated.
+     */
+    fun isConfiguredClientId(value: String): Boolean = REAL_CLIENT_ID_RE.matches(value.trim())
+
+    /**
      * Signs in with Google using Jetpack CredentialManager and links to Firebase Auth.
      */
     suspend fun signInWithGoogle(context: Context): Result<UserAccount> {
@@ -37,7 +44,7 @@ object GoogleAuthHelper {
 
             // Web client ID from the repo-root .env (secrets Gradle plugin -> BuildConfig)
             val clientId = BuildConfig.WEB_CLIENT_ID.trim()
-            if (!REAL_CLIENT_ID_RE.matches(clientId)) {
+            if (!isConfiguredClientId(clientId)) {
                 Log.w(TAG, "WEB_CLIENT_ID is not configured or not a real client ID — " +
                     "Google Sign-In will fail. Set it in .env at the repo root " +
                     "(see .env.example; Google Cloud Console > Credentials > Web client).")
