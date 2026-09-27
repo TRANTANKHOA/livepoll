@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -143,7 +144,9 @@ fun PollCard(
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    letterSpacing = 0.5.sp
+                                    letterSpacing = 0.5.sp,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                             if (!poll.groupName.isNullOrBlank()) {
@@ -224,7 +227,7 @@ fun PollCard(
                     onClick = onVoteClick,
                     modifier = Modifier
                         .weight(1f)
-                        .height(42.dp)
+                        .heightIn(min = 42.dp)
                         .testTag("vote_button_${poll.id}"),
                     shape = MaterialTheme.shapes.small,
                     colors = ButtonDefaults.buttonColors(
@@ -250,7 +253,7 @@ fun PollCard(
                     onClick = onAnalyticsClick,
                     shape = MaterialTheme.shapes.small,
                     modifier = Modifier
-                        .height(42.dp)
+                        .heightIn(min = 42.dp)
                         .testTag("analytics_button_${poll.id}")
                 ) {
                     Icon(

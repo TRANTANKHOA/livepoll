@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -647,7 +648,7 @@ fun PollAnalyticsScreen(
                                 val nextStatus = !poll.isClosed
                                 viewModel.togglePollStatus(poll.id, nextStatus, context, poll.title)
                             },
-                            modifier = Modifier.fillMaxWidth().height(48.dp).testTag("toggle_poll_closed_button"),
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("toggle_poll_closed_button"),
                             shape = RoundedCornerShape(14.dp)
                         ) {
                             Icon(
@@ -667,7 +668,7 @@ fun PollAnalyticsScreen(
                 ) {
                     Button(
                         onClick = { onNavigateToVote(poll.id) },
-                        modifier = Modifier.weight(1f).height(50.dp).testTag("analytics_vote_cta_button"),
+                        modifier = Modifier.weight(1f).heightIn(min = 50.dp).testTag("analytics_vote_cta_button"),
                         shape = MaterialTheme.shapes.large
                     ) {
                         Icon(imageVector = Icons.Default.HowToVote, contentDescription = null)
@@ -677,7 +678,7 @@ fun PollAnalyticsScreen(
 
                     Button(
                         onClick = { showShareDialog = true },
-                        modifier = Modifier.weight(1f).height(50.dp).testTag("analytics_share_cta_button"),
+                        modifier = Modifier.weight(1f).heightIn(min = 50.dp).testTag("analytics_share_cta_button"),
                         shape = MaterialTheme.shapes.large
                     ) {
                         Icon(imageVector = Icons.Default.Share, contentDescription = null)
@@ -758,10 +759,7 @@ private fun WinnerSpotlightCard(
             )
 
             if (!timeSlot.isNullOrBlank() || !location.isNullOrBlank()) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (!timeSlot.isNullOrBlank()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

@@ -3,6 +3,9 @@ package com.example
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.test.core.app.ApplicationProvider
@@ -336,6 +339,35 @@ class UxCatalogScreenshotTest {
         }
         composeTestRule.waitForIdle()
         composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/ux_analytics_zero_votes.png")
+    }
+
+    @Test
+    fun ux_analyticsScreen_largeFont() {
+        // Regression guard for large-font-scale phones (the user's device runs
+        // an enlarged system font): buttons must grow, not overrun.
+        org.junit.Assume.assumeTrue(com.example.BuildConfig.ENABLE_DEMO_DATA)
+        val vm = buildSeededViewModel()
+        composeTestRule.setContent {
+            val d = LocalDensity.current
+            CompositionLocalProvider(
+                LocalDensity provides Density(d.density, fontScale = 1.5f)
+            ) {
+                MyApplicationTheme {
+                    PollAnalyticsScreen(
+                        pollId = "poll_soccer_001",
+                        viewModel = vm,
+                        onNavigateBack = {},
+                        onNavigateToVote = {}
+                    )
+                }
+            }
+        }
+        composeTestRule.waitUntil(timeoutMillis = 15_000) {
+            composeTestRule.onAllNodesWithText("Vote", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/ux_analytics_largefont.png")
     }
 
     @Test

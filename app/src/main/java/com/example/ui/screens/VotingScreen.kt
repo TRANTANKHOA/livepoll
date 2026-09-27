@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -271,7 +272,9 @@ fun VotingScreen(
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         fontSize = 11.sp,
                                         letterSpacing = 0.6.sp
-                                    )
+                                    ,
+                                        maxLines = 1,
+                                        softWrap = false)
                                 }
                                 if (!poll.groupName.isNullOrBlank()) {
                                     Text(
@@ -591,7 +594,7 @@ fun VotingScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp)
+                        .heightIn(min = 54.dp)
                         .testTag("submit_vote_button"),
                     shape = MaterialTheme.shapes.large
                 ) {
@@ -606,7 +609,7 @@ fun VotingScreen(
 
                 OutlinedButton(
                     onClick = { onNavigateToAnalytics(poll.id) },
-                    modifier = Modifier.fillMaxWidth().height(50.dp).testTag("view_results_button"),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("view_results_button"),
                     shape = MaterialTheme.shapes.large
                 ) {
                     Icon(imageVector = Icons.Default.BarChart, contentDescription = null)

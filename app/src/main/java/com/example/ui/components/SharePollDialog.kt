@@ -125,7 +125,9 @@ fun SharePollDialog(
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 3.sp,
                                 fontFamily = FontFamily.Monospace
-                            )
+                            ,
+                                maxLines = 1,
+                                softWrap = false)
                         }
 
                         Text(
