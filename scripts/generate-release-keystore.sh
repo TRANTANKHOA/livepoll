@@ -14,6 +14,19 @@ NC='\033[0m'
 KEYSTORE_FILE="release.keystore"
 KEY_ALIAS="upload"
 
+# keytool from PATH, else Homebrew's keg-only JDK (macOS /usr/bin/keytool is a stub)
+KEYTOOL="$(command -v keytool || true)"
+if [ -z "$KEYTOOL" ] || ! "$KEYTOOL" -help >/dev/null 2>&1; then
+    KEYTOOL="/opt/homebrew/opt/openjdk@17/bin/keytool"
+fi
+
+# Password from env, else prompt. Never a hardcoded default.
+STORE_PASSWORD="${RELEASE_STORE_PASSWORD:-}"
+if [ -z "$STORE_PASSWORD" ]; then
+    read -sp "Keystore password: " STORE_PASSWORD
+    echo
+fi
+
 echo -e "${CYAN}${BOLD}🔐 LivePulse - Generating Production Release Keystore${NC}\n"
 
 if [ -f "$KEYSTORE_FILE" ]; then
@@ -27,21 +40,21 @@ if [ -f "$KEYSTORE_FILE" ]; then
 fi
 
 echo -e "Generating 2048-bit RSA Keystore valid for 25 years (10,000 days)..."
-keytool -genkeypair \
+"$KEYTOOL" -genkeypair \
     -v \
     -keystore "$KEYSTORE_FILE" \
     -alias "$KEY_ALIAS" \
     -keyalg RSA \
     -keysize 2048 \
     -validity 10000 \
-    -storepass "livepulse2026" \
-    -keypass "livepulse2026" \
-    -dname "CN=LivePulse, OU=Mobile, O=LivePulse, L=San Francisco, ST=CA, C=US"
+    -storepass "$STORE_PASSWORD" \
+    -keypass "$STORE_PASSWORD" \
+    -dname "CN=LivePulse, OU=Mobile, O=Plutusoft, L=Ho Chi Minh, C=VN"
 
 echo -e "\n${GREEN}${BOLD}✓ Keystore generated successfully: ${KEYSTORE_FILE}${NC}\n"
 
 echo -e "${CYAN}${BOLD}📋 Certificate Fingerprints (Required for Firebase & Google Sign-In):${NC}"
-keytool -list -v -keystore "$KEYSTORE_FILE" -alias "$KEY_ALIAS" -storepass "livepulse2026" | grep -E "SHA1|SHA256"
+"$KEYTOOL" -list -v -keystore "$KEYSTORE_FILE" -alias "$KEY_ALIAS" -storepass "$STORE_PASSWORD" | grep -E "SHA1|SHA256"
 
 echo -e "\n${YELLOW}${BOLD}👉 NEXT STEP:${NC}"
 echo -e "1. Copy the SHA-1 and SHA-256 fingerprints above."

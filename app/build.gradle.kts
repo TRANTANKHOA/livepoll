@@ -1,4 +1,5 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
+import java.util.Properties
 
 plugins {
   alias(libs.plugins.android.application)
@@ -14,7 +15,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.livepulse.xqmtw"
+    applicationId = "com.plutusoft.livepulse"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
@@ -29,12 +30,22 @@ android {
   }
 
   signingConfigs {
+    // Local signing lives in gitignored keystore.properties at the repo root;
+    // env vars (CI) override. Never in .env — the secrets plugin would bake
+    // it into BuildConfig inside the APK.
+    val keystoreProps = Properties().apply {
+      val f = rootProject.file("keystore.properties")
+      if (f.exists()) f.inputStream().use { load(it) }
+    }
     create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+      storeFile = rootProject.file(
+        System.getenv("KEYSTORE_PATH")
+          ?: keystoreProps.getProperty("storeFile")
+          ?: "release.keystore"
+      )
+      storePassword = System.getenv("STORE_PASSWORD") ?: keystoreProps.getProperty("storePassword")
+      keyAlias = keystoreProps.getProperty("keyAlias") ?: "upload"
+      keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProps.getProperty("keyPassword")
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
@@ -105,7 +116,6 @@ dependencies {
   implementation(libs.androidx.room.runtime)
   implementation(libs.coil.compose)
   implementation(libs.converter.moshi)
-  implementation(libs.firebase.ai)
   // Cloud Backend (Option A: Firestore & Google Sign-In via Credential Manager)
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.auth)
