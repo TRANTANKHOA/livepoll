@@ -206,42 +206,17 @@ fun PollListScreen(
                             ) {
                                 Text(text = "⚡", fontSize = 18.sp)
                             }
-                            Column {
-                                Text(
-                                    text = "LivePulse",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 18.sp,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                                Text(
-                                    text = "Real-Time Group Polls",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                            Text(
+                                text = "LivePulse",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 18.sp,
+                                maxLines = 1,
+                                softWrap = false,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
                         }
                     },
                     actions = {
-                        // Search Toggle Button
-                        IconButton(
-                            onClick = {
-                                showSearchInput = !showSearchInput
-                                if (!showSearchInput) {
-                                    viewModel.searchQuery.value = ""
-                                }
-                            },
-                            modifier = Modifier.testTag("search_toggle_button")
-                        ) {
-                            Icon(
-                                imageVector = if (showSearchInput) Icons.Default.Clear else Icons.Default.Search,
-                                contentDescription = "Search Polls",
-                                tint = if (showSearchInput || searchQuery.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
                         // Notifications bell with badge
                         IconButton(
                             onClick = onNotificationsClick,
@@ -299,6 +274,23 @@ fun PollListScreen(
                                 expanded = showOverflowMenu,
                                 onDismissRequest = { showOverflowMenu = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text(if (showSearchInput) "Hide Search" else "Search Polls") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = if (showSearchInput) Icons.Default.Clear else Icons.Default.Search,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showSearchInput = !showSearchInput
+                                        if (!showSearchInput) {
+                                            viewModel.searchQuery.value = ""
+                                        }
+                                    }
+                                )
                                 DropdownMenuItem(
                                     text = { Text("Ready Templates") },
                                     leadingIcon = { Icon(Icons.Default.RocketLaunch, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },

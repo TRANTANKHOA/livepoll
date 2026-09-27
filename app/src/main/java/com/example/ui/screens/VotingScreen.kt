@@ -244,7 +244,10 @@ fun VotingScreen(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            // Flexible side yields first so the deadline badge
+                            // keeps its intrinsic width at large font scales.
+                            modifier = Modifier.weight(1f, fill = false)
                         ) {
                             Box(
                                 modifier = Modifier

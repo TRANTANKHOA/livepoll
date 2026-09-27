@@ -129,7 +129,9 @@ fun DeadlineCountdownBadge(
             color = fg,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 0.3.sp
+            letterSpacing = 0.3.sp,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
