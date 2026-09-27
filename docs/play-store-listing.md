@@ -61,7 +61,11 @@ tracking.
 
 ## Graphics checklist
 
-- App icon: 512×512 PNG (existing adaptive icon → export)
-- Feature graphic: 1024×500 PNG — TODO generate
-- Phone screenshots: 2–8, 16:9 or 9:16, min 320px, max 3840px — capture from device
-  (home empty, home loaded, vote screen, live results, RSVP roster)
+All assets ready in `docs/play-assets/`:
+
+- App icon: `icon-512.png` (512×512, gradient + logo in adaptive safe zone)
+- Feature graphic: `feature-1024x500.png`
+- Screenshots (1078×2399, 9:16): `screens/ux_poll_list_demo.png`,
+  `ux_voting.png`, `ux_analytics.png`, `ux_create_poll.png`,
+  `ux_poll_list_empty.png` — rendered headless by `UxCatalogScreenshotTest`
+  (`./gradlew :app:testDebugUnitTest --tests '*UxCatalog*' -PdemoData=true`)
