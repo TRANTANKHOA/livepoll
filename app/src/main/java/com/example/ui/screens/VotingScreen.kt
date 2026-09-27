@@ -191,7 +191,7 @@ fun VotingScreen(
                     // Profile Switcher Pill
                     Surface(
                         onClick = { showUserSwitcher = true },
-                        shape = RoundedCornerShape(20.dp),
+                        shape = MaterialTheme.shapes.large,
                         color = MaterialTheme.colorScheme.primaryContainer,
                         modifier = Modifier
                             .padding(end = 8.dp)
@@ -229,7 +229,7 @@ fun VotingScreen(
             // Header Info Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -379,7 +379,7 @@ fun VotingScreen(
             // Attendance & RSVP Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -484,7 +484,7 @@ fun VotingScreen(
             // Star Rating (Optional)
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -524,7 +524,7 @@ fun VotingScreen(
             // Comments / Suggestions TextField
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -547,7 +547,7 @@ fun VotingScreen(
                         placeholder = { Text("e.g. Bringing match ball / gluten-free / running 10m late") },
                         minLines = 2,
                         modifier = Modifier.fillMaxWidth().testTag("vote_feedback_input"),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = MaterialTheme.shapes.large
                     )
                 }
             }
@@ -589,7 +589,7 @@ fun VotingScreen(
                         .fillMaxWidth()
                         .height(54.dp)
                         .testTag("submit_vote_button"),
-                    shape = RoundedCornerShape(18.dp)
+                    shape = MaterialTheme.shapes.large
                 ) {
                     Icon(imageVector = Icons.Default.Check, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -603,7 +603,7 @@ fun VotingScreen(
                 OutlinedButton(
                     onClick = { onNavigateToAnalytics(poll.id) },
                     modifier = Modifier.fillMaxWidth().height(50.dp).testTag("view_results_button"),
-                    shape = RoundedCornerShape(18.dp)
+                    shape = MaterialTheme.shapes.large
                 ) {
                     Icon(imageVector = Icons.Default.BarChart, contentDescription = null)
                     Spacer(modifier = Modifier.width(6.dp))
@@ -633,7 +633,7 @@ private fun VotingOptionCard(
             .fillMaxWidth()
             .clickable { onSelect() }
             .testTag("option_card_${option.id}"),
-        shape = RoundedCornerShape(18.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
             else MaterialTheme.colorScheme.surface

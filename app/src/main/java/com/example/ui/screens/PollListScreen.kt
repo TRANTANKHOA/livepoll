@@ -423,8 +423,8 @@ fun PollListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(bottom = 96.dp, top = 8.dp, start = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = PaddingValues(bottom = 96.dp, top = 4.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // 1. Compact Action Bar (Summary Pill & Quick Action Buttons)
             item {
@@ -467,19 +467,7 @@ fun PollListScreen(
 
                     // Quick Action Pills
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        // Templates Pill
-                        AssistChip(
-                            onClick = { showTemplatesSheet = true },
-                            label = { Text("Templates", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
-                            leadingIcon = { Text(text = "🚀", fontSize = 12.sp) },
-                            shape = MaterialTheme.shapes.medium,
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            modifier = Modifier.testTag("quick_templates_button")
-                        )
-
-                        // Join Code Pill
+                        // Join Code Pill (templates live in the overflow menu)
                         AssistChip(
                             onClick = { showJoinDialog = true },
                             label = { Text("Join", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
@@ -556,8 +544,7 @@ fun PollListScreen(
                 item {
                     EmptyPollState(
                         searchQuery = searchQuery,
-                        onCreateClick = { onCreatePollClick(null) },
-                        onOpenTemplates = { showTemplatesSheet = true }
+                        onCreateClick = { onCreatePollClick(null) }
                     )
                 }
             } else {
@@ -706,13 +693,12 @@ private fun StatMetricItem(
 @Composable
 private fun EmptyPollState(
     searchQuery: String,
-    onCreateClick: () -> Unit,
-    onOpenTemplates: () -> Unit
+    onCreateClick: () -> Unit
 ) {
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 8.dp),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -720,43 +706,32 @@ private fun EmptyPollState(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "🗳️",
-                fontSize = 36.sp
+                fontSize = 28.sp
             )
             Text(
-                text = if (searchQuery.isNotBlank()) "No polls found matching '$searchQuery'" else "No polls in this category yet",
+                text = if (searchQuery.isNotBlank()) "No polls found matching '$searchQuery'" else "No polls yet",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Create a new poll or pick a pre-configured template to get started instantly.",
+                text = "Tap New Poll to create one, or Templates in the menu to start from a preset.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(top = 4.dp)
+            Button(
+                onClick = onCreateClick,
+                shape = MaterialTheme.shapes.small
             ) {
-                Button(
-                    onClick = onOpenTemplates,
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text("🚀 Use Template", fontSize = 12.sp)
-                }
-                FilledTonalButton(
-                    onClick = onCreateClick,
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Custom Poll", fontSize = 12.sp)
-                }
+                Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Create a poll", fontSize = 12.sp, maxLines = 1, softWrap = false)
             }
         }
     }

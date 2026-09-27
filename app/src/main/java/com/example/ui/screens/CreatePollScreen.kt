@@ -247,7 +247,7 @@ fun CreatePollScreen(
             // Step 2: Target Group Selector
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -321,7 +321,7 @@ fun CreatePollScreen(
             // Step 3: Poll Info
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -384,7 +384,7 @@ fun CreatePollScreen(
             // Step 4: Voting Options with Required Attributes: Venue, Time Slot, and Duration!
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -543,7 +543,7 @@ fun CreatePollScreen(
                                             selected = isSelected,
                                             onClick = { optionsList[index] = option.copy(duration = preset) },
                                             label = { Text(preset, fontSize = 11.sp) },
-                                            shape = RoundedCornerShape(16.dp),
+                                            shape = MaterialTheme.shapes.large,
                                             colors = FilterChipDefaults.filterChipColors(
                                                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -573,7 +573,7 @@ fun CreatePollScreen(
             // Step 5: Voting Deadlines & Push Alerts
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)

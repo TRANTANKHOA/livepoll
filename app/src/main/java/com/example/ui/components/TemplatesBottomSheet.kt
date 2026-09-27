@@ -143,7 +143,7 @@ fun TemplatesBottomSheet(
                             .testTag("template_sheet_item_${template.id}"),
                         shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Row(

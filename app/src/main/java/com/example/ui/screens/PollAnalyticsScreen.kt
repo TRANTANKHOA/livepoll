@@ -24,9 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.HowToVote
 import androidx.compose.material.icons.filled.Lock
@@ -143,7 +146,8 @@ fun PollAnalyticsScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "${details.totalVotes} votes from ${details.uniqueVotersCount} participants",
+                            text = "${details.totalVotes} ${if (details.totalVotes == 1) "vote" else "votes"} from " +
+                                "${details.uniqueVotersCount} ${if (details.uniqueVotersCount == 1) "participant" else "participants"}",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -203,19 +207,22 @@ fun PollAnalyticsScreen(
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text("📊 Visual Charts", fontWeight = FontWeight.Bold) },
+                    text = { Text("Charts", fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.BarChart, contentDescription = null, modifier = Modifier.size(16.dp)) },
                     modifier = Modifier.testTag("tab_visual_charts")
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text("👥 RSVP (${details.headcountSummary.totalAttendingHeadcount})", fontWeight = FontWeight.Bold) },
+                    text = { Text("RSVP (${details.headcountSummary.totalAttendingHeadcount})", fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.Group, contentDescription = null, modifier = Modifier.size(16.dp)) },
                     modifier = Modifier.testTag("tab_rsvp_roster")
                 )
                 Tab(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    text = { Text("💬 Notes (${details.feedbackList.size})", fontWeight = FontWeight.Bold) },
+                    text = { Text("Notes (${details.feedbackList.size})", fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp)) },
                     modifier = Modifier.testTag("tab_feedback_notes")
                 )
             }
@@ -236,7 +243,7 @@ fun PollAnalyticsScreen(
                 // Poll Banner Header
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     border = outlineBorder
@@ -343,7 +350,7 @@ fun PollAnalyticsScreen(
                         if (details.averageRating != null) {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(24.dp),
+                                shape = MaterialTheme.shapes.large,
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                                 border = outlineBorder
@@ -419,9 +426,9 @@ fun PollAnalyticsScreen(
 
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(18.dp),
+                                    shape = MaterialTheme.shapes.large,
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                                     border = outlineBorder
                                 ) {
                                     Row(
@@ -512,9 +519,9 @@ fun PollAnalyticsScreen(
                         if (details.feedbackList.isEmpty()) {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(20.dp),
+                                shape = MaterialTheme.shapes.large,
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                                 border = outlineBorder
                             ) {
                                 Column(
@@ -535,9 +542,9 @@ fun PollAnalyticsScreen(
                             details.feedbackList.forEach { item ->
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(18.dp),
+                                    shape = MaterialTheme.shapes.large,
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                                     border = outlineBorder
                                 ) {
                                     Column(
@@ -576,7 +583,7 @@ fun PollAnalyticsScreen(
                 // Poll Controls & Deadline Simulation Toolbar Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     border = outlineBorder
@@ -634,7 +641,7 @@ fun PollAnalyticsScreen(
                     Button(
                         onClick = { onNavigateToVote(poll.id) },
                         modifier = Modifier.weight(1f).height(50.dp).testTag("analytics_vote_cta_button"),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = MaterialTheme.shapes.large
                     ) {
                         Icon(imageVector = Icons.Default.HowToVote, contentDescription = null)
                         Spacer(modifier = Modifier.width(6.dp))
@@ -644,7 +651,7 @@ fun PollAnalyticsScreen(
                     Button(
                         onClick = { showShareDialog = true },
                         modifier = Modifier.weight(1f).height(50.dp).testTag("analytics_share_cta_button"),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = MaterialTheme.shapes.large
                     ) {
                         Icon(imageVector = Icons.Default.Share, contentDescription = null)
                         Spacer(modifier = Modifier.width(6.dp))
@@ -669,7 +676,7 @@ private fun WinnerSpotlightCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
         ),
@@ -702,13 +709,14 @@ private fun WinnerSpotlightCard(
                 }
                 Column {
                     Text(
-                        text = "🏆 Leading Consensus Choice",
+                        text = "Leading Consensus Choice",
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 13.sp,
                         color = TopWinnerGold
                     )
                     Text(
-                        text = "$winningVoteCount votes (${String.format(Locale.US, "%.0f%%", winningPercent)} of total)",
+                        text = "$winningVoteCount ${if (winningVoteCount == 1) "vote" else "votes"} " +
+                            "(${String.format(Locale.US, "%.0f%%", winningPercent)} of total)",
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -728,19 +736,41 @@ private fun WinnerSpotlightCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (!timeSlot.isNullOrBlank()) {
-                        Text(
-                            text = "⏰ $timeSlot",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = timeSlot,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                     if (!location.isNullOrBlank()) {
-                        Text(
-                            text = "📍 $location",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = location,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

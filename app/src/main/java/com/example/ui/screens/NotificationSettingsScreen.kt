@@ -153,7 +153,7 @@ fun NotificationSettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = MaterialTheme.shapes.large,
                         colors = CardDefaults.cardColors(
                             containerColor = if (hasNotificationPermission)
                                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
@@ -220,7 +220,7 @@ fun NotificationSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -286,7 +286,7 @@ fun NotificationSettingsScreen(
                 AnimatedVisibility(visible = settings.masterPushEnabled) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = MaterialTheme.shapes.large,
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -370,7 +370,7 @@ fun NotificationSettingsScreen(
                                                 selected = isSelected,
                                                 onClick = { viewModel.updateDeadlineLeadTime(hours) },
                                                 label = { Text(label, fontSize = 11.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                                                shape = RoundedCornerShape(16.dp),
+                                                shape = MaterialTheme.shapes.large,
                                                 colors = FilterChipDefaults.filterChipColors(
                                                     selectedContainerColor = MaterialTheme.colorScheme.primary,
                                                     selectedLabelColor = MaterialTheme.colorScheme.onPrimary
@@ -425,7 +425,7 @@ fun NotificationSettingsScreen(
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
+                            shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -456,7 +456,7 @@ fun NotificationSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
