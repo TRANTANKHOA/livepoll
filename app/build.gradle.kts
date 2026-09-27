@@ -21,6 +21,11 @@ android {
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    // Demo seed data (fake polls, groups, personas) is opt-in:
+    //   ./gradlew assembleDebug -PdemoData=true
+    // Normal debug and release builds start with a clean, signed-out state.
+    buildConfigField("boolean", "ENABLE_DEMO_DATA", "${project.findProperty("demoData") == "true"}")
   }
 
   signingConfigs {

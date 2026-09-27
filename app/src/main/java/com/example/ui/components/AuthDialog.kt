@@ -1,16 +1,12 @@
 package com.example.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,22 +15,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,13 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.AuthProvider
-import com.example.data.model.UserAccount
 import com.example.ui.viewmodel.PollViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,126 +50,32 @@ fun AuthDialog(
     viewModel: PollViewModel,
     onDismiss: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val currentUser by viewModel.currentUser.collectAsState()
     val scope = rememberCoroutineScope()
 
     var isAuthenticating by remember { mutableStateOf(false) }
-    var authProviderInProgress by remember { mutableStateOf<AuthProvider?>(null) }
     var statusSuccessMessage by remember { mutableStateOf<String?>(null) }
-    var showCustomInput by remember { mutableStateOf(false) }
-    var customEmailInput by remember { mutableStateOf("") }
-    var customNameInput by remember { mutableStateOf("") }
-    var targetProviderForCustom by remember { mutableStateOf(AuthProvider.GOOGLE) }
+    var statusErrorMessage by remember { mutableStateOf<String?>(null) }
 
-    fun triggerSocialAuth(provider: AuthProvider, customEmail: String? = null, customName: String? = null) {
-        authProviderInProgress = provider
+    fun signInWithGoogle() {
         isAuthenticating = true
-
-        if (provider == AuthProvider.GOOGLE && customEmail == null && customName == null) {
-            viewModel.signInWithGoogle(context) { success, message ->
-                isAuthenticating = false
-                authProviderInProgress = null
-                if (success) {
-                    statusSuccessMessage = message
-                    scope.launch {
-                        delay(800)
-                        onDismiss()
-                    }
-                } else {
-                    // Fallback to quick simulated Google SSO profile if device has no Play Services accounts
-                    val fallbackUser = UserAccount(
-                        id = "user_google_${System.currentTimeMillis() % 10000}",
-                        name = "Alex Rivera",
-                        email = "alex.rivera@gmail.com",
-                        avatarEmoji = "😎",
-                        provider = AuthProvider.GOOGLE,
-                        isVerified = true
-                    )
-                    viewModel.setCurrentUser(fallbackUser)
-                    statusSuccessMessage = "Connected as Alex Rivera (Google SSO)"
-                    scope.launch {
-                        delay(800)
-                        onDismiss()
-                    }
-                }
-            }
-            return
-        }
-
-        if (provider == AuthProvider.FACEBOOK) {
-            viewModel.signInWithFacebook(
-                context = context,
-                fallbackName = customName,
-                fallbackEmail = customEmail
-            ) { success, message ->
-                isAuthenticating = false
-                authProviderInProgress = null
-                statusSuccessMessage = message
-                scope.launch {
-                    delay(800)
-                    onDismiss()
-                }
-            }
-            return
-        }
-
-        if (provider == AuthProvider.APPLE) {
-            viewModel.signInWithApple(
-                context = context,
-                fallbackName = customName,
-                fallbackEmail = customEmail
-            ) { success, message ->
-                isAuthenticating = false
-                authProviderInProgress = null
-                statusSuccessMessage = message
-                scope.launch {
-                    delay(800)
-                    onDismiss()
-                }
-            }
-            return
-        }
-
-        scope.launch {
-            delay(500) // Smooth auth handshake
-            val (name, email, emoji) = when (provider) {
-                AuthProvider.GOOGLE -> Triple(
-                    customName?.ifBlank { null } ?: "Alex Rivera",
-                    customEmail?.ifBlank { null } ?: "alex.rivera@gmail.com",
-                    "😎"
-                )
-                AuthProvider.FACEBOOK -> Triple(
-                    customName?.ifBlank { null } ?: "Alex R. (Facebook)",
-                    customEmail?.ifBlank { null } ?: "alex.social@facebook.com",
-                    "🥳"
-                )
-                AuthProvider.APPLE -> Triple(
-                    customName?.ifBlank { null } ?: "Alex R.",
-                    customEmail?.ifBlank { null } ?: "alex.privaterelay@appleid.com",
-                    "🍏"
-                )
-                AuthProvider.GUEST -> Triple(
-                    customName?.ifBlank { null } ?: "Guest Participant",
-                    null,
-                    "👤"
-                )
-            }
-
-            val newUser = UserAccount(
-                id = "user_${provider.name.lowercase()}_${System.currentTimeMillis() % 10000}",
-                name = name,
-                email = email,
-                avatarEmoji = emoji,
-                provider = provider,
-                isVerified = provider != AuthProvider.GUEST
-            )
-            viewModel.setCurrentUser(newUser)
+        statusErrorMessage = null
+        viewModel.signInWithGoogle(context) { success, message ->
             isAuthenticating = false
-            authProviderInProgress = null
-            statusSuccessMessage = "Successfully authenticated with ${provider.displayName}!"
-            delay(800)
-            onDismiss()
+            if (success) {
+                statusSuccessMessage = message
+                scope.launch {
+                    delay(800)
+                    onDismiss()
+                }
+            } else {
+                // Real failure: surface it. Never fabricate an account.
+                statusErrorMessage = message.ifBlank {
+                    "Google Sign-In failed. Check that WEB_CLIENT_ID (.env) and the " +
+                        "app's SHA-1 fingerprint are configured in Firebase."
+                }
+            }
         }
     }
 
@@ -203,12 +94,12 @@ fun AuthDialog(
                     ProviderBadge(provider = currentUser.provider, size = 26.dp)
                     Column {
                         Text(
-                            text = if (currentUser.provider == AuthProvider.GUEST) "Sign In / Connect" else "Account & Authentication",
+                            text = if (currentUser.provider == AuthProvider.GUEST) "Sign In" else "Account",
                             fontWeight = FontWeight.Bold,
                             fontSize = 17.sp
                         )
                         Text(
-                            text = "Google • Facebook • Apple",
+                            text = "Google Sign-In",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -232,7 +123,7 @@ fun AuthDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Current User Status Card
+                // Current account summary
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
@@ -268,7 +159,7 @@ fun AuthDialog(
                                 )
                                 if (currentUser.isVerified) {
                                     Icon(
-                                        imageVector = Icons.Default.VerifiedUser,
+                                        imageVector = Icons.Default.CheckCircle,
                                         contentDescription = "Verified",
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(14.dp)
@@ -276,7 +167,7 @@ fun AuthDialog(
                                 }
                             }
                             Text(
-                                text = currentUser.email ?: "Guest Mode (No email connected)",
+                                text = currentUser.email?.ifBlank { null } ?: "Guest mode (no account)",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -290,259 +181,113 @@ fun AuthDialog(
                     }
                 }
 
-                if (isAuthenticating) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                when {
+                    isAuthenticating -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 20.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                            Text(
-                                text = "Authenticating with ${authProviderInProgress?.displayName}...",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                                Text(
+                                    text = "Opening Google Sign-In…",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
-                } else if (statusSuccessMessage != null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
-                            .padding(10.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = statusSuccessMessage!!,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+
+                    statusSuccessMessage != null -> {
+                        StatusBanner(
+                            message = statusSuccessMessage!!,
+                            container = MaterialTheme.colorScheme.primaryContainer,
+                            content = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                } else {
-                    Text(
-                        text = "Sign in to sync your votes, link your attendee identity, and access group polls across devices:",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
 
-                    // 1. Google Sign-In Button
-                    Surface(
-                        onClick = { triggerSocialAuth(AuthProvider.GOOGLE) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFDADCE0)),
-                        shadowElevation = 1.dp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("sign_in_google_button")
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            GoogleLogoIcon(size = 22.dp)
-                            Text(
-                                text = if (currentUser.provider == AuthProvider.GOOGLE) "Active: Google Account" else "Continue with Google",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp,
-                                color = Color(0xFF3C4043),
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (currentUser.provider == AuthProvider.GOOGLE) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Active",
-                                    tint = Color(0xFF34A853),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    // 2. Facebook Sign-In Button
-                    Surface(
-                        onClick = { triggerSocialAuth(AuthProvider.FACEBOOK) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF1877F2),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("sign_in_facebook_button")
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            FacebookLogoIcon(size = 22.dp)
-                            Text(
-                                text = if (currentUser.provider == AuthProvider.FACEBOOK) "Active: Facebook Account" else "Continue with Facebook",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp,
-                                color = Color.White,
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (currentUser.provider == AuthProvider.FACEBOOK) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Active",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    // 3. Apple Sign-In Button
-                    Surface(
-                        onClick = { triggerSocialAuth(AuthProvider.APPLE) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.Black,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("sign_in_apple_button")
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            AppleLogoIcon(size = 22.dp, tint = Color.Black)
-                            Text(
-                                text = if (currentUser.provider == AuthProvider.APPLE) "Active: Apple ID" else "Sign in with Apple",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp,
-                                color = Color.White,
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (currentUser.provider == AuthProvider.APPLE) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Active",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    // Custom Account / Email simulation option
-                    AnimatedVisibility(visible = showCustomInput) {
+                    statusErrorMessage != null -> {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                                .padding(10.dp)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = "Custom Account Sign-in (${targetProviderForCustom.displayName})",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                            StatusBanner(
+                                message = statusErrorMessage!!,
+                                container = MaterialTheme.colorScheme.errorContainer,
+                                content = MaterialTheme.colorScheme.onErrorContainer
                             )
-                            OutlinedTextField(
-                                value = customNameInput,
-                                onValueChange = { customNameInput = it },
-                                label = { Text("Display Name") },
-                                placeholder = { Text("e.g. Alex Rivera") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth().testTag("custom_auth_name_input")
-                            )
-                            OutlinedTextField(
-                                value = customEmailInput,
-                                onValueChange = { customEmailInput = it },
-                                label = { Text("Email Address") },
-                                placeholder = { Text("user@example.com") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth().testTag("custom_auth_email_input")
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            TextButton(
+                                onClick = { signInWithGoogle() },
+                                modifier = Modifier.align(Alignment.End)
                             ) {
-                                Button(
-                                    onClick = {
-                                        triggerSocialAuth(
-                                            targetProviderForCustom,
-                                            customEmail = customEmailInput,
-                                            customName = customNameInput
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f).testTag("custom_auth_submit_button")
-                                ) {
-                                    Text("Sign In", fontSize = 12.sp)
-                                }
-                                OutlinedButton(
-                                    onClick = { showCustomInput = false },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Cancel", fontSize = 12.sp)
-                                }
+                                Text("Try Again", fontSize = 12.sp)
                             }
                         }
                     }
 
-                    if (!showCustomInput) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                    else -> {
+                        Text(
+                            text = "Sign in to sync your votes and access group polls across devices:",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        // Google Sign-In (the only configured provider)
+                        Surface(
+                            onClick = { signInWithGoogle() },
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.White,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFDADCE0)),
+                            shadowElevation = 1.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("sign_in_google_button")
                         ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                GoogleLogoIcon(size = 22.dp)
+                                Text(
+                                    text = if (currentUser.provider == AuthProvider.GOOGLE) "Switch Google Account" else "Continue with Google",
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF3C4043),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (currentUser.provider == AuthProvider.GOOGLE) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Active",
+                                        tint = Color(0xFF34A853),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        if (currentUser.provider != AuthProvider.GUEST) {
                             TextButton(
                                 onClick = {
-                                    showCustomInput = true
-                                    targetProviderForCustom = AuthProvider.GOOGLE
+                                    viewModel.logoutUser(context)
+                                    onDismiss()
                                 },
-                                modifier = Modifier.testTag("custom_email_login_prompt")
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .testTag("sign_out_button")
                             ) {
-                                Icon(imageVector = Icons.Default.Link, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Icon(imageVector = Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Custom Email / Test Account", fontSize = 11.sp)
-                            }
-
-                            if (currentUser.provider != AuthProvider.GUEST) {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.setCurrentUser(
-                                            UserAccount(
-                                                id = "user_guest",
-                                                name = "Guest Voter",
-                                                email = null,
-                                                avatarEmoji = "👤",
-                                                provider = AuthProvider.GUEST,
-                                                isVerified = false
-                                            )
-                                        )
-                                        onDismiss()
-                                    },
-                                    modifier = Modifier.testTag("sign_out_button")
-                                ) {
-                                    Icon(imageVector = Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Sign Out", fontSize = 11.sp, color = MaterialTheme.colorScheme.error)
-                                }
+                                Text("Sign Out", fontSize = 11.sp, color = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
@@ -558,4 +303,29 @@ fun AuthDialog(
             }
         }
     )
+}
+
+@Composable
+private fun StatusBanner(message: String, container: Color, content: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(container, RoundedCornerShape(8.dp))
+            .padding(10.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = content,
+            modifier = Modifier.size(18.dp)
+        )
+        Text(
+            text = message,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = content
+        )
+    }
 }

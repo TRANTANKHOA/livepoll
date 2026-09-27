@@ -246,6 +246,8 @@ class PollRepository(
     }
 
     suspend fun ensureSeeded() {
+        // Demo groups/polls/personas are opt-in: ./gradlew assembleDebug -PdemoData=true
+        if (!com.example.BuildConfig.ENABLE_DEMO_DATA) return
         if (groupDao.getGroupsCount() == 0) {
             seedGroups()
         }

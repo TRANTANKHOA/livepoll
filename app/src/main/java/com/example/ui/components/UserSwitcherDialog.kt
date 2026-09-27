@@ -1,32 +1,26 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,7 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,14 +43,6 @@ import com.example.data.model.AuthProvider
 import com.example.data.model.UserAccount
 import com.example.ui.viewmodel.PollViewModel
 
-data class DemoProfile(
-    val id: String,
-    val name: String,
-    val email: String,
-    val avatarEmoji: String,
-    val provider: AuthProvider
-)
-
 @Composable
 fun UserSwitcherDialog(
     viewModel: PollViewModel,
@@ -64,15 +50,7 @@ fun UserSwitcherDialog(
     onDismiss: () -> Unit
 ) {
     val currentUser by viewModel.currentUser.collectAsState()
-
-    val profiles = listOf(
-        DemoProfile("user_google_alex", "Alex Rivera (You)", "alex.rivera@gmail.com", "😎", AuthProvider.GOOGLE),
-        DemoProfile("user_fb_sarah", "Sarah Jenkins", "sarah.j@facebook.com", "🍹", AuthProvider.FACEBOOK),
-        DemoProfile("user_apple_marcus", "Marcus Chen", "marcus@appleid.com", "⚽", AuthProvider.APPLE),
-        DemoProfile("voter_leo", "Leo Hernandez", "leo.h@gmail.com", "🎯", AuthProvider.GOOGLE),
-        DemoProfile("voter_emma", "Emma Watson", "emma.w@icloud.com", "✨", AuthProvider.APPLE),
-        DemoProfile("voter_david", "David Miller", "david.m@facebook.com", "🚀", AuthProvider.FACEBOOK)
-    )
+    val context = LocalContext.current
 
     var customName by remember { mutableStateOf("") }
     var isAddingCustom by remember { mutableStateOf(false) }
@@ -87,12 +65,12 @@ fun UserSwitcherDialog(
                 ProviderBadge(provider = currentUser.provider, size = 26.dp)
                 Column {
                     Text(
-                        text = "Participant Account & Identity",
+                        text = "Account",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp
                     )
                     Text(
-                        text = "Google • Facebook • Apple SSO",
+                        text = "Google Sign-In or join as a guest",
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -104,7 +82,74 @@ fun UserSwitcherDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Quick Social Sign In CTA Card
+                // Current account
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = currentUser.avatarEmoji, fontSize = 16.sp)
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = currentUser.name,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (currentUser.isVerified) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Verified",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = currentUser.email?.ifBlank { null }
+                                    ?: "Guest — votes stay on this device",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (currentUser.provider != AuthProvider.GUEST) {
+                            TextButton(
+                                onClick = {
+                                    viewModel.logoutUser(context)
+                                    onDismiss()
+                                },
+                                modifier = Modifier.testTag("switcher_sign_out_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Logout,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Sign in with Google (the only configured provider)
                 Surface(
                     onClick = {
                         onDismiss()
@@ -120,27 +165,23 @@ fun UserSwitcherDialog(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            GoogleLogoIcon(size = 18.dp)
-                            FacebookLogoIcon(size = 18.dp)
-                            AppleLogoIcon(size = 18.dp)
-                        }
+                        GoogleLogoIcon(size = 18.dp)
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Sign in / Manage SSO",
+                                text = "Sign in with Google",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = "Google, Facebook or Apple account",
+                                text = "Sync votes across devices",
                                 fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Text(
-                            text = "Manage ›",
-                            fontSize = 11.sp,
+                            text = "›",
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -149,93 +190,24 @@ fun UserSwitcherDialog(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                Text(
-                    text = "Or switch attendee profile to test quorum, multi-user consensus & live votes:",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                profiles.forEach { profile ->
-                    val isSelected = currentUser.id == profile.id
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                            )
-                            .clickable {
-                                viewModel.setCurrentUser(
-                                    UserAccount(
-                                        id = profile.id,
-                                        name = profile.name,
-                                        email = profile.email,
-                                        avatarEmoji = profile.avatarEmoji,
-                                        provider = profile.provider,
-                                        isVerified = true
-                                    )
-                                )
-                                onDismiss()
-                            }
-                            .padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(text = profile.avatarEmoji, fontSize = 18.sp)
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = profile.name,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        fontSize = 13.sp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                                    )
-                                    ProviderBadge(provider = profile.provider, size = 12.dp)
-                                }
-                                Text(
-                                    text = profile.email,
-                                    fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Selected",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-
+                // Join with a display name (local guest identity, no fabricated email)
                 if (isAddingCustom) {
                     OutlinedTextField(
                         value = customName,
                         onValueChange = { customName = it },
-                        label = { Text("Enter Attendee Name") },
+                        label = { Text("Display name") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth().testTag("custom_voter_name_input")
                     )
                     Button(
                         onClick = {
                             if (customName.isNotBlank()) {
-                                val newId = "user_" + customName.trim().lowercase().replace(" ", "_")
+                                val name = customName.trim()
                                 viewModel.setCurrentUser(
                                     UserAccount(
-                                        id = newId,
-                                        name = customName.trim(),
-                                        email = "${customName.trim().lowercase().replace(" ", "")}@domain.com",
+                                        id = "guest_" + name.lowercase().replace(Regex("[^a-z0-9]"), "_"),
+                                        name = name,
+                                        email = "",
                                         avatarEmoji = "👤",
                                         provider = AuthProvider.GUEST,
                                         isVerified = false
@@ -246,7 +218,7 @@ fun UserSwitcherDialog(
                         },
                         modifier = Modifier.fillMaxWidth().testTag("add_custom_voter_confirm_button")
                     ) {
-                        Text("Switch to ${customName.ifBlank { "Custom Attendee" }}")
+                        Text("Join as \"$customName\"")
                     }
                 } else {
                     TextButton(
@@ -255,7 +227,7 @@ fun UserSwitcherDialog(
                     ) {
                         Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Add Custom Friend / Voter Name", fontSize = 12.sp)
+                        Text("Join with a display name", fontSize = 12.sp)
                     }
                 }
             }

@@ -20,17 +20,19 @@ class AuthPreferences(context: Context) {
     }
 
     fun getCurrentUser(): UserAccount {
-        val id = prefs.getString(KEY_USER_ID, "user_google_alex") ?: "user_google_alex"
-        val name = prefs.getString(KEY_USER_NAME, "Alex Rivera") ?: "Alex Rivera"
-        val email = prefs.getString(KEY_USER_EMAIL, "alex.rivera@gmail.com")
-        val avatar = prefs.getString(KEY_USER_AVATAR, "😎") ?: "😎"
-        val providerStr = prefs.getString(KEY_AUTH_PROVIDER, AuthProvider.GOOGLE.name) ?: AuthProvider.GOOGLE.name
+        // No stored account -> genuine Guest. Never fabricate a signed-in Google user:
+        // a fresh install must land in a signed-out state so real sign-in is reachable.
+        val id = prefs.getString(KEY_USER_ID, null) ?: return guestUser()
+        val name = prefs.getString(KEY_USER_NAME, null) ?: return guestUser()
+        val email = prefs.getString(KEY_USER_EMAIL, "") ?: ""
+        val avatar = prefs.getString(KEY_USER_AVATAR, "👤") ?: "👤"
+        val providerStr = prefs.getString(KEY_AUTH_PROVIDER, AuthProvider.GUEST.name) ?: AuthProvider.GUEST.name
         val provider = try {
             AuthProvider.valueOf(providerStr)
         } catch (e: Exception) {
-            AuthProvider.GOOGLE
+            AuthProvider.GUEST
         }
-        val isVerified = prefs.getBoolean(KEY_IS_VERIFIED, true)
+        val isVerified = prefs.getBoolean(KEY_IS_VERIFIED, false)
         val loggedInTime = prefs.getLong(KEY_LOGGED_IN_TIME, System.currentTimeMillis())
 
         return UserAccount(
@@ -44,6 +46,17 @@ class AuthPreferences(context: Context) {
             loggedInTimestamp = loggedInTime
         )
     }
+
+    private fun guestUser() = UserAccount(
+        id = "guest_local",
+        name = "Guest",
+        email = "",
+        avatarEmoji = "👤",
+        provider = AuthProvider.GUEST,
+        isVerified = false,
+        linkedProviders = emptyList(),
+        loggedInTimestamp = 0L
+    )
 
     fun saveUser(user: UserAccount) {
         prefs.edit()
