@@ -31,19 +31,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Badge
@@ -71,6 +67,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -88,6 +85,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.local.entity.PollEntity
@@ -102,7 +100,6 @@ import com.example.ui.components.ProviderBadge
 import com.example.ui.components.SharePollDialog
 import com.example.ui.components.TemplatesBottomSheet
 import com.example.ui.components.UserSwitcherDialog
-import com.example.ui.components.WebAccessDialog
 import com.example.ui.theme.PrimaryLight
 import com.example.ui.theme.SecondaryLight
 import com.example.ui.theme.StatusActive
@@ -135,10 +132,8 @@ fun PollListScreen(
     var showUserSwitcher by remember { mutableStateOf(false) }
     var showAuthDialog by remember { mutableStateOf(false) }
     var showJoinDialog by remember { mutableStateOf(false) }
-    var showWebAccessDialog by remember { mutableStateOf(false) }
     var showTemplatesSheet by remember { mutableStateOf(false) }
     var showSearchInput by remember { mutableStateOf(false) }
-    var showInsightsExpanded by remember { mutableStateOf(false) }
     var showOverflowMenu by remember { mutableStateOf(false) }
     var sharingPollDetails by remember { mutableStateOf<PollWithDetails?>(null) }
 
@@ -165,12 +160,6 @@ fun PollListScreen(
                 onVotePollClick(pollId)
             },
             onDismiss = { showJoinDialog = false }
-        )
-    }
-
-    if (showWebAccessDialog) {
-        WebAccessDialog(
-            onDismiss = { showWebAccessDialog = false }
         )
     }
 
@@ -221,12 +210,16 @@ fun PollListScreen(
                                 Text(
                                     text = "LivePulse",
                                     fontWeight = FontWeight.ExtraBold,
-                                    style = MaterialTheme.typography.titleLarge
+                                    fontSize = 18.sp,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                                 Text(
-                                    text = "Social Polls & Real-Time Voting",
+                                    text = "Real-Time Group Polls",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -271,7 +264,7 @@ fun PollListScreen(
                             }
                         }
 
-                        // Profile / Social SSO Avatar Pill
+                        // Profile / Social SSO Avatar Pill (compact: emoji + provider badge)
                         Surface(
                             onClick = { showUserSwitcher = true },
                             shape = MaterialTheme.shapes.extraLarge,
@@ -281,18 +274,12 @@ fun PollListScreen(
                                 .testTag("user_switcher_pill")
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text(text = currentUser.avatarEmoji, fontSize = 13.sp)
-                                ProviderBadge(provider = currentUser.provider, size = 13.dp)
-                                Text(
-                                    text = currentUser.name.split(" ").firstOrNull() ?: currentVoterName,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                Text(text = currentUser.avatarEmoji, fontSize = 14.sp)
+                                ProviderBadge(provider = currentUser.provider, size = 14.dp)
                             }
                         }
 
@@ -313,7 +300,7 @@ fun PollListScreen(
                                 onDismissRequest = { showOverflowMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("🚀 Ready Templates") },
+                                    text = { Text("Ready Templates") },
                                     leadingIcon = { Icon(Icons.Default.RocketLaunch, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                                     onClick = {
                                         showOverflowMenu = false
@@ -321,7 +308,7 @@ fun PollListScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("🔑 Join with Code") },
+                                    text = { Text("Join with Code") },
                                     leadingIcon = { Icon(Icons.Default.QrCode, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                                     onClick = {
                                         showOverflowMenu = false
@@ -329,16 +316,7 @@ fun PollListScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("📱 Multi-User Guide") },
-                                    leadingIcon = { Icon(Icons.Default.Language, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        showWebAccessDialog = true
-                                    }
-                                )
-                                HorizontalDivider()
-                                DropdownMenuItem(
-                                    text = { Text("👤 Account & SSO (${currentUser.provider.displayName})") },
+                                    text = { Text("Account (${currentUser.provider.displayName})") },
                                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                                     onClick = {
                                         showOverflowMenu = false
@@ -404,7 +382,7 @@ fun PollListScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { onCreatePollClick(null) },
+                onClick = { showTemplatesSheet = true },
                 icon = { Icon(imageVector = Icons.Default.Add, contentDescription = null) },
                 text = { Text("New Poll", fontWeight = FontWeight.Bold) },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -426,126 +404,89 @@ fun PollListScreen(
             contentPadding = PaddingValues(bottom = 96.dp, top = 4.dp, start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // 1. Compact Action Bar (Summary Pill & Quick Action Buttons)
+            // 1. Quick Actions (counts live on the filter chips below)
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    // Insights Toggle Pill
-                    val now = System.currentTimeMillis()
-                    val activeCount = allPolls.count { !it.isClosed && (it.deadlineTimestamp == null || now <= it.deadlineTimestamp) }
-
                     AssistChip(
-                        onClick = { showInsightsExpanded = !showInsightsExpanded },
-                        label = {
-                            Text(
-                                text = "$activeCount Active • ${allPolls.size} Polls",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        },
+                        onClick = { showJoinDialog = true },
+                        label = { Text("Join", fontSize = 12.sp, fontWeight = FontWeight.Medium) },
                         leadingIcon = {
-                            Text(text = "⚡", fontSize = 12.sp)
-                        },
-                        trailingIcon = {
                             Icon(
-                                imageVector = if (showInsightsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                imageVector = Icons.Default.QrCode,
                                 contentDescription = null,
-                                modifier = Modifier.size(14.dp)
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
                             )
                         },
                         shape = MaterialTheme.shapes.medium,
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (showInsightsExpanded) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
+                            containerColor = MaterialTheme.colorScheme.surface
                         ),
-                        modifier = Modifier.testTag("insights_toggle_pill")
-                    )
-
-                    // Quick Action Pills
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        // Join Code Pill (templates live in the overflow menu)
-                        AssistChip(
-                            onClick = { showJoinDialog = true },
-                            label = { Text("Join", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.QrCode,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(13.dp)
-                                )
-                            },
-                            shape = MaterialTheme.shapes.medium,
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            modifier = Modifier.testTag("quick_join_code_button")
-                        )
-                    }
-                }
-            }
-
-            // 2. Collapsible Live Stats & Insights Card
-            item {
-                AnimatedVisibility(
-                    visible = showInsightsExpanded,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    StatsOverviewHeader(
-                        allPolls = allPolls,
-                        onClose = { showInsightsExpanded = false }
+                        modifier = Modifier.testTag("quick_join_code_button")
                     )
                 }
             }
 
-            // 3. Category Filter Chips
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(vertical = 2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    val now = System.currentTimeMillis()
-                    val filters = listOf(
-                        "ALL" to ("All (" + allPolls.size + ")"),
-                        "ACTIVE" to ("⚡ Active (" + allPolls.count { !it.isClosed && (it.deadlineTimestamp == null || now <= it.deadlineTimestamp) } + ")"),
-                        "SOCCER" to "⚽ Soccer",
-                        "DRINKS" to "🍻 Drinks",
-                        "FOOD" to "🍕 Food",
-                        "EVENT" to "🎉 Events",
-                        "CLOSED" to "🔒 Closed"
-                    )
-
-                    filters.forEach { (key, label) ->
-                        FilterChip(
-                            selected = activeFilter == key,
-                            onClick = { viewModel.activeFilter.value = key },
-                            label = { Text(label, fontSize = 11.sp, fontWeight = if (activeFilter == key) FontWeight.Bold else FontWeight.Normal) },
-                            shape = MaterialTheme.shapes.large,
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            modifier = Modifier.testTag("filter_chip_$key")
-                        )
-                    }
-                }
-            }
-
-            // 4. Poll Cards or Empty State (Directly focused and accessible)
-            if (filteredPolls.isEmpty()) {
+            // 3. Category Filter Chips (derived from actual poll categories)
+            if (allPolls.isNotEmpty()) {
                 item {
-                    EmptyPollState(
-                        searchQuery = searchQuery,
-                        onCreateClick = { onCreatePollClick(null) }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        val now = System.currentTimeMillis()
+                        val activeCount = allPolls.count { !it.isClosed && (it.deadlineTimestamp == null || now <= it.deadlineTimestamp) }
+                        val closedCount = allPolls.count { it.isClosed || (it.deadlineTimestamp != null && now > it.deadlineTimestamp) }
+                        val filters = buildList<Pair<String, String>> {
+                            add("ALL" to "All (${allPolls.size})")
+                            add("ACTIVE" to "⚡ Active ($activeCount)")
+                            allPolls.distinctBy { it.category }.forEach { poll ->
+                                val count = allPolls.count { it.category == poll.category }
+                                add(poll.category to "${poll.categoryIcon} ${categoryLabel(poll.category)} ($count)")
+                            }
+                            if (closedCount > 0) add("CLOSED" to "🔒 Closed ($closedCount)")
+                        }
+
+                        filters.forEach { (key, label) ->
+                            FilterChip(
+                                selected = activeFilter == key,
+                                onClick = { viewModel.activeFilter.value = key },
+                                label = { Text(label, fontSize = 11.sp, fontWeight = if (activeFilter == key) FontWeight.Bold else FontWeight.Normal) },
+                                shape = MaterialTheme.shapes.large,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                modifier = Modifier.testTag("filter_chip_$key")
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 4. Poll Cards, Template Gallery (first run), or Search Empty State
+            if (filteredPolls.isEmpty()) {
+                if (searchQuery.isNotBlank()) {
+                    item {
+                        EmptyPollState(searchQuery = searchQuery)
+                    }
+                } else {
+                    item {
+                        TemplateGalleryEmptyState(
+                            onTemplateClick = { template ->
+                                onCreatePollClick(template)
+                            },
+                            onBlankClick = { onCreatePollClick(null) }
+                        )
+                    }
                 }
             } else {
                 items(filteredPolls, key = { it.id }) { poll ->
@@ -570,131 +511,7 @@ fun PollListScreen(
 }
 
 @Composable
-private fun StatsOverviewHeader(
-    allPolls: List<PollEntity>,
-    onClose: () -> Unit
-) {
-    val now = System.currentTimeMillis()
-    val activeCount = allPolls.count { !it.isClosed && (it.deadlineTimestamp == null || now <= it.deadlineTimestamp) }
-    val deadlinesCount = allPolls.count { !it.isClosed && it.deadlineTimestamp != null && now <= it.deadlineTimestamp && (it.deadlineTimestamp - now) <= 12 * 3600 * 1000L }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.TrendingUp,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "Live Voting Summary",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                IconButton(
-                    onClick = onClose,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.ExpandLess, contentDescription = "Collapse", modifier = Modifier.size(16.dp))
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StatMetricItem(
-                    label = "Active Polls",
-                    value = "$activeCount",
-                    icon = "⚡",
-                    color = StatusActive
-                )
-                Box(
-                    modifier = Modifier
-                        .height(28.dp)
-                        .width(1.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
-                )
-                StatMetricItem(
-                    label = "Closing Today",
-                    value = "$deadlinesCount",
-                    icon = "⏰",
-                    color = SecondaryLight
-                )
-                Box(
-                    modifier = Modifier
-                        .height(28.dp)
-                        .width(1.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
-                )
-                StatMetricItem(
-                    label = "Total Polls",
-                    value = "${allPolls.size}",
-                    icon = "📊",
-                    color = TertiaryLight
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatMetricItem(
-    label: String,
-    value: String,
-    icon: String,
-    color: Color
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(text = icon, fontSize = 12.sp)
-            Text(
-                text = value,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        Text(
-            text = label,
-            fontSize = 10.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun EmptyPollState(
-    searchQuery: String,
-    onCreateClick: () -> Unit
-) {
+private fun EmptyPollState(searchQuery: String) {
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -711,28 +528,121 @@ private fun EmptyPollState(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "🗳️",
+                text = "🔍",
                 fontSize = 28.sp
             )
             Text(
-                text = if (searchQuery.isNotBlank()) "No polls found matching '$searchQuery'" else "No polls yet",
+                text = "No polls found matching '$searchQuery'",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Tap New Poll to create one, or Templates in the menu to start from a preset.",
+                text = "Try a different search, or clear it to see all polls.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-            Button(
-                onClick = onCreateClick,
-                shape = MaterialTheme.shapes.small
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Create a poll", fontSize = 12.sp, maxLines = 1, softWrap = false)
-            }
         }
     }
+}
+
+@Composable
+private fun TemplateGalleryEmptyState(
+    onTemplateClick: (PollTemplate) -> Unit,
+    onBlankClick: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(text = "🗳️", fontSize = 34.sp)
+            Text(
+                text = "What are you deciding?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+            Text(
+                text = "Pick a template, share the code, and watch votes land live.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+
+        PollTemplates.templates.forEach { template ->
+            Card(
+                onClick = { onTemplateClick(template) },
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("empty_template_item_${template.id}")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = template.categoryIcon, fontSize = 22.sp)
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = template.title.removePrefix("${template.categoryIcon} "),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = buildString {
+                                append("${template.defaultOptions.size} options ready")
+                                template.defaultDeadlineHours?.let { append(" • ${it}h deadline") }
+                            },
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+
+        TextButton(
+            onClick = onBlankClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("empty_state_blank_button")
+        ) {
+            Text("Or start from a blank poll", fontSize = 13.sp)
+        }
+    }
+}
+
+private fun categoryLabel(category: String): String = when (category) {
+    "SOCCER" -> "Soccer"
+    "DRINKS" -> "Drinks"
+    "FOOD" -> "Food"
+    "EVENT" -> "Events"
+    "FEEDBACK" -> "Feedback"
+    "DECISION" -> "Votes"
+    else -> category.lowercase().replaceFirstChar { it.uppercase() }
 }

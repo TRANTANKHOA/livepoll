@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
         val pollIdFromIntent = intent?.getStringExtra("EXTRA_POLL_ID")
 
         setContent {
-            MyApplicationTheme(darkTheme = false) {
+            MyApplicationTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -129,7 +129,9 @@ fun LivePulseApp(
                 initialTemplate = template,
                 onNavigateBack = { navController.popBackStack() },
                 onPollCreated = { newPollId ->
-                    navController.navigate("analytics_poll/$newPollId") {
+                    // Land on results with the share-the-code dialog open:
+                    // sharing immediately is the whole growth loop.
+                    navController.navigate("analytics_poll/$newPollId?share=true") {
                         popUpTo("poll_list")
                     }
                 }
@@ -156,15 +158,22 @@ fun LivePulseApp(
         }
 
         composable(
-            route = "analytics_poll/{pollId}",
+            route = "analytics_poll/{pollId}?share={share}",
             arguments = listOf(
-                navArgument("pollId") { type = NavType.StringType }
+                navArgument("pollId") { type = NavType.StringType },
+                navArgument("share") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
             )
         ) { backStackEntry ->
             val pollId = backStackEntry.arguments?.getString("pollId") ?: ""
+            val autoOpenShare = backStackEntry.arguments?.getString("share") == "true"
             PollAnalyticsScreen(
                 pollId = pollId,
                 viewModel = viewModel,
+                autoOpenShare = autoOpenShare,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToVote = { targetPollId ->
                     navController.navigate("vote_poll/$targetPollId")

@@ -64,7 +64,7 @@ fun JoinCodeDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Enter the 6-character poll code shared by your friend or organizer (e.g. SOC5V5, PUB777, LUN909):",
+                    text = "Enter the 6-character code shared by the poll's organizer:",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -72,11 +72,11 @@ fun JoinCodeDialog(
                 OutlinedTextField(
                     value = codeInput,
                     onValueChange = {
-                        codeInput = it.uppercase().take(10)
+                        codeInput = it.uppercase().take(6)
                         errorMessage = null
                     },
-                    label = { Text("6-Digit Code") },
-                    placeholder = { Text("e.g. SOC5V5") },
+                    label = { Text("Poll Code") },
+                    placeholder = { Text("e.g. DRK777") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -91,12 +91,6 @@ fun JoinCodeDialog(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-
-                Text(
-                    text = "💡 Quick sample codes: SOC5V5 (Soccer), PUB777 (Drinks), LUN909 (Lunch)",
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
         },
         confirmButton = {

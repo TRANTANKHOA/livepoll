@@ -48,7 +48,9 @@ class PollViewModel(
     }
 
     val isCloudAvailable = MutableStateFlow(repository.firestoreService.isCloudAvailable())
-    val cloudSyncStatus = MutableStateFlow<String>("🟢 Ready")
+    val cloudSyncStatus = MutableStateFlow(
+        if (repository.firestoreService.isCloudAvailable()) "🟢 Ready" else "⚪ Offline — votes stay on this device"
+    )
 
     private var activeCloudListener: com.google.firebase.firestore.ListenerRegistration? = null
 
@@ -148,11 +150,7 @@ class PollViewModel(
                 "ALL" -> true
                 "ACTIVE" -> isActive
                 "CLOSED" -> poll.isClosed || isExpired
-                "SOCCER" -> poll.category == "SOCCER"
-                "DRINKS" -> poll.category == "DRINKS"
-                "FOOD" -> poll.category == "FOOD"
-                "EVENT" -> poll.category == "EVENT" || poll.category == "FEEDBACK"
-                else -> true
+                else -> poll.category == filter
             }
 
             matchesQuery && matchesFilter
@@ -459,37 +457,6 @@ class PollViewModel(
                 message = "Only $leadHours hours remaining to cast your vote on '$title'. Tap to pick your venue & time!",
                 channelId = NotificationHelper.CHANNEL_DEADLINES,
                 pollId = samplePoll?.id ?: "poll_drinks_002",
-                bypassUserPrefs = false
-            )
-        }
-    }
-
-    fun simulateDeadlinePushAlert(details: PollWithDetails, context: Context) {
-        viewModelScope.launch {
-            val poll = details.poll
-            val leadHours = notificationSettings.value.deadlineLeadTimeHours
-            val notifTitle = "⏰ Voting Deadline Alert: ${poll.title}"
-            val leadingOption = details.winningOption?.text ?: "your favorite venue"
-            val notifMsg = "Voting closes soon! Current leading venue: '$leadingOption'. Cast your vote before time runs out."
-
-            val notif = NotificationEntity(
-                id = UUID.randomUUID().toString(),
-                pollId = poll.id,
-                pollTitle = poll.title,
-                title = "⏰ Approaching Deadline ($leadHours hrs)",
-                message = notifMsg,
-                type = "DEADLINE_WARNING",
-                timestamp = System.currentTimeMillis()
-            )
-            repository.insertNotification(notif)
-
-            NotificationHelper.showNotification(
-                context = context,
-                notificationId = (poll.id + "_simulated_deadline").hashCode(),
-                title = notifTitle,
-                message = notifMsg,
-                channelId = NotificationHelper.CHANNEL_DEADLINES,
-                pollId = poll.id,
                 bypassUserPrefs = false
             )
         }

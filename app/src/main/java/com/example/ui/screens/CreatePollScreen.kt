@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
@@ -76,9 +77,10 @@ data class EditableOption(
     var text: String = "",
     var venueAddress: String = "",
     var dateTimeSlot: String = "",
-    var duration: String = "90 mins",
+    var duration: String = "",
     var subtitle: String = "",
-    var priceRating: String = ""
+    var priceRating: String = "",
+    var showAttributes: Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,20 +97,20 @@ fun CreatePollScreen(
     val allGroups by viewModel.allGroups.collectAsState()
 
     var title by remember { mutableStateOf(initialTemplate?.title ?: "") }
-    var category by remember { mutableStateOf(initialTemplate?.category ?: "SOCCER") }
-    var categoryIcon by remember { mutableStateOf(initialTemplate?.categoryIcon ?: "⚽") }
+    var category by remember { mutableStateOf(initialTemplate?.category ?: "DECISION") }
+    var categoryIcon by remember { mutableStateOf(initialTemplate?.categoryIcon ?: "🎯") }
     var description by remember { mutableStateOf(initialTemplate?.description ?: "") }
     var creatorName by remember { mutableStateOf(currentVoterName) }
 
-    var selectedGroupId by remember { mutableStateOf<String?>(initialTemplate?.defaultGroupId ?: "group_soccer") }
-    var selectedGroupName by remember { mutableStateOf<String?>(initialTemplate?.defaultGroupName ?: "Weekend Soccer Squad ⚽") }
+    var selectedGroupId by remember { mutableStateOf(initialTemplate?.defaultGroupId) }
+    var selectedGroupName by remember { mutableStateOf(initialTemplate?.defaultGroupName) }
     var groupDropdownExpanded by remember { mutableStateOf(false) }
 
-    var allowMultiple by remember { mutableStateOf(initialTemplate?.allowMultipleChoices ?: true) }
+    var allowMultiple by remember { mutableStateOf(initialTemplate?.allowMultipleChoices ?: false) }
     var allowCustom by remember { mutableStateOf(initialTemplate?.allowCustomOptions ?: true) }
     var isAnonymous by remember { mutableStateOf(initialTemplate?.isAnonymous ?: false) }
     var deadlineHours by remember { mutableStateOf(initialTemplate?.defaultDeadlineHours ?: 6) }
-    var targetHeadcountText by remember { mutableStateOf(initialTemplate?.defaultTargetHeadcount?.toString() ?: "10") }
+    var targetHeadcountText by remember { mutableStateOf(initialTemplate?.defaultTargetHeadcount?.toString() ?: "") }
     var generalLocation by remember { mutableStateOf("") }
 
     val optionsList = remember {
@@ -122,31 +124,14 @@ fun CreatePollScreen(
                             dateTimeSlot = opt.dateTimeSlot ?: "",
                             duration = opt.duration ?: "90 mins",
                             subtitle = opt.subtitle ?: "",
-                            priceRating = opt.priceRating ?: ""
+                            priceRating = opt.priceRating ?: "",
+                            showAttributes = opt.venueAddress != null || opt.dateTimeSlot != null || opt.duration != null
                         )
                     )
                 }
             } else {
-                add(
-                    EditableOption(
-                        text = "Riverside Turf Arena (Pitch 2)",
-                        venueAddress = "240 River Road Field, South Park",
-                        dateTimeSlot = "Saturday 4:00 PM - 5:30 PM",
-                        duration = "90 mins",
-                        subtitle = "Turf grass, floodlights",
-                        priceRating = "$12 / player"
-                    )
-                )
-                add(
-                    EditableOption(
-                        text = "Central Park Community Pitch",
-                        venueAddress = "Central Park Field 4",
-                        dateTimeSlot = "Saturday 5:30 PM - 7:00 PM",
-                        duration = "90 mins",
-                        subtitle = "Natural grass, public access",
-                        priceRating = "Free"
-                    )
-                )
+                add(EditableOption())
+                add(EditableOption())
             }
         }
     }
@@ -154,11 +139,11 @@ fun CreatePollScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val categoryPresets = listOf(
+        Triple("DECISION", "🎯", "Quick Vote"),
         Triple("SOCCER", "⚽", "Soccer Game"),
         Triple("DRINKS", "🍻", "Social Drinks"),
         Triple("FOOD", "🍕", "Team Lunch"),
         Triple("EVENT", "🎉", "Group Outing"),
-        Triple("DECISION", "🎯", "Quick Vote"),
         Triple("FEEDBACK", "⭐", "Feedback")
     )
 
@@ -198,7 +183,7 @@ fun CreatePollScreen(
             // Step 1: Category Selector Chips
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "1. Category & Type",
+                    text = "Category",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -220,9 +205,6 @@ fun CreatePollScreen(
                                 .clickable {
                                     category = catKey
                                     categoryIcon = emoji
-                                    if (title.isBlank()) {
-                                        title = "$emoji "
-                                    }
                                 }
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             contentAlignment = Alignment.Center
@@ -262,7 +244,7 @@ fun CreatePollScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Group, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Text(
-                            text = "2. Target Group (Sends Push Notification to Members)",
+                            text = "Group (optional)",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleSmall
                         )
@@ -331,7 +313,7 @@ fun CreatePollScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "3. Poll Details",
+                        text = "Details",
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleSmall
                     )
@@ -343,7 +325,7 @@ fun CreatePollScreen(
                             errorMessage = null
                         },
                         label = { Text("Poll Question / Event Title *") },
-                        placeholder = { Text("e.g. Saturday 5v5 Soccer: Pitch Venue & Kickoff Time") },
+                        placeholder = { Text("e.g. Where should we have team lunch on Friday?") },
                         modifier = Modifier.fillMaxWidth().testTag("poll_title_input"),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -352,7 +334,7 @@ fun CreatePollScreen(
                         value = description,
                         onValueChange = { description = it },
                         label = { Text("Description / Notes (Optional)") },
-                        placeholder = { Text("e.g. Vote on preferred venue, pitch and kickoff time!") },
+                        placeholder = { Text("Add context that helps people decide") },
                         minLines = 2,
                         modifier = Modifier.fillMaxWidth().testTag("poll_description_input"),
                         shape = RoundedCornerShape(12.dp)
@@ -398,29 +380,16 @@ fun CreatePollScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column {
-                            Text(
-                                text = "4. Voting Options (${optionsList.size})",
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = "Attributes: Venue 📍, Time 🕒, and Duration ⏱️",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                    Text(
+                        text = "Options (${optionsList.size})",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall
+                    )
 
                         OutlinedButton(
                             onClick = {
                                 optionsList.add(
-                                    EditableOption(
-                                        text = "Option ${optionsList.size + 1}",
-                                        venueAddress = "Venue Address",
-                                        dateTimeSlot = "Saturday 5:00 PM",
-                                        duration = "90 mins"
-                                    )
+                                    EditableOption(text = "Option ${optionsList.size + 1}")
                                 )
                             },
                             shape = RoundedCornerShape(8.dp)
@@ -474,22 +443,24 @@ fun CreatePollScreen(
                                     optionsList[index] = option.copy(text = it)
                                     errorMessage = null
                                 },
-                                label = { Text("Option Title / Venue Name *") },
-                                placeholder = { Text("e.g. Riverside Turf Arena (Pitch 2)") },
+                                label = { Text("Option Title *") },
+                                placeholder = { Text("e.g. Luigi's Pizzeria, Saturday 7 PM") },
                                 singleLine = true,
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.fillMaxWidth().testTag("option_text_input_$index")
                             )
 
-                            // 2. Venue Address (Required)
+                            // Optional attributes live behind a disclosure so
+                            // the blank form stays one screen short.
+                            if (option.showAttributes) {
                             OutlinedTextField(
                                 value = option.venueAddress,
                                 onValueChange = {
                                     optionsList[index] = option.copy(venueAddress = it)
                                     errorMessage = null
                                 },
-                                label = { Text("Venue Location / Address *") },
-                                placeholder = { Text("e.g. 240 River Road Field, South Park") },
+                                label = { Text("Venue / Address (optional)") },
+                                placeholder = { Text("e.g. 42 Main Street") },
                                 leadingIcon = {
                                     Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, tint = SecondaryLight, modifier = Modifier.size(16.dp))
                                 },
@@ -498,15 +469,15 @@ fun CreatePollScreen(
                                 modifier = Modifier.fillMaxWidth().testTag("option_venue_input_$index")
                             )
 
-                            // 3. Date & Time Slot (Required)
+                            // 3. Date & Time Slot (optional)
                             OutlinedTextField(
                                 value = option.dateTimeSlot,
                                 onValueChange = {
                                     optionsList[index] = option.copy(dateTimeSlot = it)
                                     errorMessage = null
                                 },
-                                label = { Text("Date & Kickoff / Start Time *") },
-                                placeholder = { Text("e.g. Saturday 4:00 PM - 5:30 PM") },
+                                label = { Text("Date & Time (optional)") },
+                                placeholder = { Text("e.g. Saturday 4:00 PM") },
                                 leadingIcon = {
                                     Icon(imageVector = Icons.Default.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                                 },
@@ -515,7 +486,7 @@ fun CreatePollScreen(
                                 modifier = Modifier.fillMaxWidth().testTag("option_time_input_$index")
                             )
 
-                            // 4. Duration (Required) with convenient preset selector chips
+                            // Duration with convenient preset selector chips
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -523,7 +494,7 @@ fun CreatePollScreen(
                                 ) {
                                     Icon(imageVector = Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                                     Text(
-                                        text = "Duration *",
+                                        text = "Duration",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -565,6 +536,26 @@ fun CreatePollScreen(
                                     modifier = Modifier.fillMaxWidth().testTag("option_duration_input_$index")
                                 )
                             }
+                            } else {
+                                TextButton(
+                                    onClick = {
+                                        optionsList[index] = option.copy(showAttributes = true)
+                                    },
+                                    modifier = Modifier.testTag("option_details_toggle_$index")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Add venue, time & duration (optional)",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -588,7 +579,7 @@ fun CreatePollScreen(
                     ) {
                         Icon(imageVector = Icons.Default.HourglassTop, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Text(
-                            text = "5. Voting Deadline & Notifications",
+                            text = "Deadline & Notifications",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleSmall
                         )
@@ -695,32 +686,15 @@ fun CreatePollScreen(
                         return@Button
                     }
 
-                    // Validate required attributes for each option (Venue, Time, Duration)
-                    for (i in validOptions.indices) {
-                        val opt = validOptions[i]
-                        if (opt.venueAddress.isBlank()) {
-                            errorMessage = "Option #${i + 1} (${opt.text}) requires a Venue Location / Address"
-                            return@Button
-                        }
-                        if (opt.dateTimeSlot.isBlank()) {
-                            errorMessage = "Option #${i + 1} (${opt.text}) requires a Date & Time Slot"
-                            return@Button
-                        }
-                        if (opt.duration.isBlank()) {
-                            errorMessage = "Option #${i + 1} (${opt.text}) requires a Duration"
-                            return@Button
-                        }
-                    }
-
                     val entityOptions = validOptions.mapIndexed { idx, opt ->
                         PollOptionEntity(
                             id = opt.id,
                             pollId = "",
                             text = opt.text.trim(),
                             subtitle = opt.subtitle.trim().takeIf { it.isNotBlank() },
-                            dateTimeSlot = opt.dateTimeSlot.trim(),
-                            venueAddress = opt.venueAddress.trim(),
-                            duration = opt.duration.trim(),
+                            dateTimeSlot = opt.dateTimeSlot.trim().takeIf { it.isNotBlank() },
+                            venueAddress = opt.venueAddress.trim().takeIf { it.isNotBlank() },
+                            duration = opt.duration.trim().takeIf { it.isNotBlank() },
                             priceRating = opt.priceRating.trim().takeIf { it.isNotBlank() },
                             displayOrder = idx + 1
                         )
@@ -757,7 +731,7 @@ fun CreatePollScreen(
             ) {
                 Icon(imageVector = Icons.Default.RocketLaunch, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Publish & Alert Group", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text("Create Poll", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
         }
     }

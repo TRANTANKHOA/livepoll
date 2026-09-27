@@ -232,6 +232,46 @@ class UxCatalogScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w411dp-h914dp-night", sdk = [34])
+    fun ux_pollListScreen_dark() {
+        val vm = buildSparseViewModel()
+        composeTestRule.setContent {
+            MyApplicationTheme {
+                PollListScreen(
+                    viewModel = vm,
+                    onCreatePollClick = {},
+                    onVotePollClick = {},
+                    onAnalyticsPollClick = {},
+                    onNotificationsClick = {}
+                )
+            }
+        }
+        composeTestRule.waitUntil(timeoutMillis = 15_000) { vm.allPolls.value.isNotEmpty() }
+        composeTestRule.waitForIdle()
+        composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/ux_poll_list_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-normal-long-notround-any-420dpi-keyshidden-nonav", sdk = [34])
+    fun ux_pollListScreen_narrow() {
+        val vm = buildSparseViewModel()
+        composeTestRule.setContent {
+            MyApplicationTheme {
+                PollListScreen(
+                    viewModel = vm,
+                    onCreatePollClick = {},
+                    onVotePollClick = {},
+                    onAnalyticsPollClick = {},
+                    onNotificationsClick = {}
+                )
+            }
+        }
+        composeTestRule.waitUntil(timeoutMillis = 15_000) { vm.allPolls.value.isNotEmpty() }
+        composeTestRule.waitForIdle()
+        composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/ux_poll_list_narrow.png")
+    }
+
+    @Test
     fun ux_votingScreen_sparse() {
         val vm = buildSparseViewModel()
         composeTestRule.setContent {
@@ -252,6 +292,29 @@ class UxCatalogScreenshotTest {
         }
         composeTestRule.waitForIdle()
         composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/ux_voting_sparse.png")
+    }
+
+    @Test
+    fun ux_votingScreen_partialAttributes() {
+        val vm = buildSparseViewModel()
+        composeTestRule.setContent {
+            MyApplicationTheme {
+                VotingScreen(
+                    pollId = "poll_partial",
+                    viewModel = vm,
+                    onNavigateBack = {},
+                    onNavigateToAnalytics = {}
+                )
+            }
+        }
+        composeTestRule.waitUntil(timeoutMillis = 15_000) {
+            composeTestRule.onAllNodesWithText("Submit Vote", substring = true)
+                .fetchSemanticsNodes().isNotEmpty() ||
+                composeTestRule.onAllNodesWithText("Update My Response", substring = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/ux_voting_partial.png")
     }
 
     @Test

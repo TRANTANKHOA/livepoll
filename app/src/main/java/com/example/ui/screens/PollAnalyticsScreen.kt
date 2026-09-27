@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -34,7 +33,6 @@ import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.HowToVote
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -53,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -93,6 +92,7 @@ fun PollAnalyticsScreen(
     viewModel: PollViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToVote: (String) -> Unit,
+    autoOpenShare: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -101,8 +101,17 @@ fun PollAnalyticsScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     var showShareDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
+    var autoShareConsumed by remember { mutableStateOf(false) }
 
     val details = pollDetails
+
+    // Post-create flow: open the share-the-code dialog once details arrive.
+    LaunchedEffect(autoOpenShare, details) {
+        if (autoOpenShare && !autoShareConsumed && details != null) {
+            showShareDialog = true
+            autoShareConsumed = true
+        }
+    }
 
     if (showShareDialog && details != null) {
         SharePollDialog(
@@ -330,20 +339,51 @@ fun PollAnalyticsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                        details.options.forEach { option ->
-                            val voteCount = details.getOptionVoteCount(option.id)
-                            val percent = details.getOptionVotePercent(option.id)
-                            val isLeader = winningOption?.id == option.id && voteCount > 0
-                            val voters = details.getOptionVoters(option.id)
+                        if (details.totalVotes == 0) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.large,
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                border = outlineBorder
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(text = "🗳️", fontSize = 30.sp)
+                                    Text(
+                                        text = "No votes yet",
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = "Share the code ${poll.code} with your group — results appear here the moment votes land.",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else {
+                            details.options.forEach { option ->
+                                val voteCount = details.getOptionVoteCount(option.id)
+                                val percent = details.getOptionVotePercent(option.id)
+                                val isLeader = winningOption?.id == option.id && voteCount > 0
+                                val voters = details.getOptionVoters(option.id)
 
-                            AnalyticsBarOptionCard(
-                                option = option,
-                                voteCount = voteCount,
-                                votePercent = percent,
-                                totalVotes = details.totalVotes,
-                                isLeader = isLeader,
-                                voters = voters
-                            )
+                                AnalyticsBarOptionCard(
+                                    option = option,
+                                    voteCount = voteCount,
+                                    votePercent = percent,
+                                    totalVotes = details.totalVotes,
+                                    isLeader = isLeader,
+                                    voters = voters
+                                )
+                            }
                         }
 
                         // Average Rating Box if available
@@ -600,20 +640,6 @@ fun PollAnalyticsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                        // Simulate Push Deadline Alert Button
-                        OutlinedButton(
-                            onClick = {
-                                viewModel.simulateDeadlinePushAlert(details, context)
-                                Toast.makeText(context, "⏰ Deadline push alert notification dispatched!", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.fillMaxWidth().height(48.dp).testTag("simulate_deadline_alert_button"),
-                            shape = RoundedCornerShape(14.dp)
-                        ) {
-                            Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Simulate Deadline Push Alert", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
-                        }
-
                         // Close / Re-open Poll Toggle Button
                         OutlinedButton(
                             onClick = {
@@ -655,7 +681,7 @@ fun PollAnalyticsScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Share, contentDescription = null)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Share Results", fontWeight = FontWeight.Bold)
+                        Text(if (details.totalVotes > 0) "Share Results" else "Share Poll", fontWeight = FontWeight.Bold)
                     }
                 }
             }

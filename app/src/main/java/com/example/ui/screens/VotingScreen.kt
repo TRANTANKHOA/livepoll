@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.local.entity.PollOptionEntity
@@ -91,8 +92,6 @@ fun VotingScreen(
     val pollDetails by viewModel.getPollDetails(pollId).collectAsState(initial = null)
     val currentUser by viewModel.currentUser.collectAsState()
     val currentVoterName by viewModel.currentVoterName.collectAsState()
-    val cloudStatus by viewModel.cloudSyncStatus.collectAsState()
-
     androidx.compose.runtime.LaunchedEffect(pollId) {
         viewModel.attachPollCloudListener(pollId)
     }
@@ -376,7 +375,8 @@ fun VotingScreen(
                 }
             }
 
-            // Attendance & RSVP Section
+            // Attendance & RSVP Section (only for events / headcount-tracked polls)
+            if (details.poll.targetHeadcount != null || details.poll.category == "EVENT") {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.large,
@@ -479,6 +479,7 @@ fun VotingScreen(
                         }
                     }
                 }
+            }
             }
 
             // Star Rating (Optional)
@@ -646,7 +647,7 @@ private fun VotingOptionCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -683,7 +684,8 @@ private fun VotingOptionCard(
                     if (!option.dateTimeSlot.isNullOrBlank()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.weight(1f, fill = false)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Schedule,
@@ -695,7 +697,9 @@ private fun VotingOptionCard(
                                 text = option.dateTimeSlot,
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -710,27 +714,30 @@ private fun VotingOptionCard(
                                 text = "⏱️ ${option.duration}",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
                             )
                         }
                     }
-                    if (!option.venueAddress.isNullOrBlank()) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = null,
-                                tint = SecondaryLight,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = option.venueAddress,
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                }
+                if (!option.venueAddress.isNullOrBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = SecondaryLight,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = option.venueAddress,
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }

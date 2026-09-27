@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -43,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -176,44 +175,40 @@ fun PollCard(
             if (details != null) {
                 val leader = details.winningOption
                 val votes = details.totalVotes
-                val voters = details.uniqueVotersCount
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                    if (votes == 0) {
                         Text(
-                            text = "$votes ${if (votes == 1) "vote" else "votes"} • " +
-                                "$voters ${if (voters == 1) "voter" else "voters"}",
+                            text = "No votes yet — be the first",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (leader != null && votes > 0) {
-                            val percent = details.getOptionVotePercent(leader.id)
-                            Text(
-                                text = String.format(java.util.Locale.US, "%.0f%% ", percent) +
-                                    leader.text,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(start = 12.dp)
-                            )
-                        }
-                    }
-                    if (leader != null && votes > 0) {
-                        LinearProgressIndicator(
-                            progress = { (details.getOptionVotePercent(leader.id) / 100f).coerceIn(0f, 1f) },
+                    } else if (leader != null) {
+                        Text(
+                            text = String.format(java.util.Locale.US, "%.0f%% ", details.getOptionVotePercent(leader.id)) +
+                                leader.text,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        // Plain bar: M3's LinearProgressIndicator draws a stray
+                        // stop-indicator dot at the track's end.
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp)),
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            strokeCap = StrokeCap.Round
-                        )
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth((details.getOptionVotePercent(leader.id) / 100f).coerceIn(0f, 1f))
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                            )
+                        }
                     }
                 }
             }
@@ -267,7 +262,7 @@ fun PollCard(
                     Text(text = "Results", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
 
-                // Share Button (Tonal Icon Button)
+                // Share Button (Tonal Icon Button — the growth action deserves weight)
                 FilledTonalIconButton(
                     onClick = onShareClick,
                     shape = MaterialTheme.shapes.small,
@@ -275,8 +270,8 @@ fun PollCard(
                         .size(42.dp)
                         .testTag("share_button_${poll.id}"),
                     colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
                     Icon(
