@@ -58,9 +58,12 @@ fun SharePollDialog(
     var copiedMessage by remember { mutableStateOf<String?>(null) }
 
     val poll = pollDetails.poll
-    val shareText = remember(pollDetails) {
-        DataExportHelper.generateShareableSummary(pollDetails)
-    }
+    val voteUrl = "https://trantankhoa.github.io/livepoll/vote.html?code=${poll.code}"
+    // Chat-first share message: three lines, no results dump — details live
+    // behind the link.
+    val shortShareText = "${poll.categoryIcon} ${poll.title}\n" +
+        "Vote: $voteUrl\n" +
+        "Or use code ${poll.code} in the LivePulse app"
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -126,7 +129,7 @@ fun SharePollDialog(
                         }
 
                         Text(
-                            text = "Participants can enter this code in the app to vote",
+                            text = "Enter this code in the app, or share the web link — voting works in any browser",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -159,7 +162,7 @@ fun SharePollDialog(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Text(
-                                        text = "Voters enter code '${poll.code}' in the app or live preview to vote immediately",
+                                        text = "Voters enter code '${poll.code}' in the app, or open the web link to vote in any browser",
                                         fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -197,14 +200,14 @@ fun SharePollDialog(
 
                     OutlinedButton(
                         onClick = {
-                            clipboardManager.setText(AnnotatedString(shareText))
-                            copiedMessage = "Full poll summary copied to clipboard!"
+                            clipboardManager.setText(AnnotatedString(shortShareText))
+                            copiedMessage = "Message copied to clipboard!"
                         },
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Copy Summary", fontSize = 11.sp)
+                        Text("Copy Message", fontSize = 11.sp)
                     }
                 }
             }
@@ -214,7 +217,7 @@ fun SharePollDialog(
                 onClick = {
                     DataExportHelper.shareText(
                         context = context,
-                        text = shareText,
+                        text = shortShareText,
                         title = "Vote: ${poll.title}"
                     )
                     onDismiss()

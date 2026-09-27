@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>LivePulse — Vote in your browser</title>
+<style>
+  :root {
+    --primary: #4F46E5; --on-primary: #FFFFFF;
+    --primary-container: #E0E7FF; --on-primary-container: #312E81;
+    --bg: #F8FAFC; --surface: #FFFFFF; --surface-var: #F1F5F9;
+    --text: #0F172A; --muted: #64748B; --border: #E2E8F0;
+    --green: #059669; --green-bg: #D1FAE5; --amber: #B45309; --amber-bg: #FEF3C7;
+    --danger: #B91C1C; --danger-bg: #FEE2E2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #818CF8; --on-primary: #1E1B4B;
+      --primary-container: #3730A3; --on-primary-container: #E0E7FF;
+      --bg: #0B1120; --surface: #1E293B; --surface-var: #273449;
+      --text: #F1F5F9; --muted: #94A3B8; --border: #334155;
+      --green: #34D399; --green-bg: #064E3B; --amber: #FBBF24; --amber-bg: #451A03;
+      --danger: #F87171; --danger-bg: #450A0A;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: -apple-system, 'Roboto', 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px 48px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .brand .logo {
+    width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+    background: linear-gradient(135deg, #4F46E5, #0284C7); font-size: 22px; color: #fff;
+  }
+  .brand h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .card {
+    width: 100%; max-width: 520px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+    margin-bottom: 14px;
+  }
+  .hidden { display: none !important; }
+  .poll-head { display: flex; align-items: center; gap: 12px; }
+  .icon-tile {
+    width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+    background: var(--primary-container); display: grid; place-items: center; font-size: 24px;
+  }
+  .head-meta { flex: 1; min-width: 0; }
+  .head-meta .name { font-weight: 700; }
+  .chip {
+    display: inline-block; background: var(--primary); color: var(--on-primary);
+    font-weight: 700; font-size: 12px; letter-spacing: 2px; font-family: monospace;
+    border-radius: 8px; padding: 4px 10px; margin-top: 4px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    border-radius: 999px; padding: 5px 11px; font-size: 12px; font-weight: 700;
+  }
+  .badge.green { background: var(--green-bg); color: var(--green); }
+  .badge.amber { background: var(--amber-bg); color: var(--amber); }
+  .badge.gray  { background: var(--surface-var); color: var(--muted); }
+  h2.title { font-size: 22px; font-weight: 700; margin: 14px 0 4px; }
+  .desc { color: var(--muted); font-size: 14px; line-height: 1.45; margin-bottom: 4px; }
+  .byline { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .byline b { color: var(--primary); }
+  .section-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--muted);
+    text-transform: uppercase; margin: 18px 0 10px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .option {
+    display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px; margin-bottom: 10px; cursor: pointer; font: inherit; color: var(--text);
+  }
+  .option:active { transform: scale(0.99); }
+  .option.selected { border-color: var(--primary); background: var(--primary-container); }
+  .option input { margin-top: 3px; accent-color: var(--primary); width: 18px; height: 18px; }
+  .option .opt-body { flex: 1; min-width: 0; }
+  .option .opt-title { font-weight: 700; font-size: 15px; }
+  .option .opt-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .option .opt-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .opt-meta span {
+    font-size: 11px; background: var(--surface-var); color: var(--muted);
+    border-radius: 999px; padding: 2px 8px;
+  }
+  .option .opt-price { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .field {
+    width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font: inherit; font-size: 15px;
+  }
+  .field:focus { outline: 2px solid var(--primary); border-color: transparent; }
+  label.lbl { display: block; font-size: 12.5px; color: var(--muted); margin: 12px 0 6px; }
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 12px; cursor: pointer;
+    font: inherit; font-size: 15px; font-weight: 700; margin-top: 14px;
+    background: var(--primary); color: var(--on-primary);
+  }
+  .btn.secondary { background: var(--surface-var); color: var(--text); }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .rsvp-grid { display: flex; gap: 10px; }
+  .rsvp-chip {
+    flex: 1; padding: 12px 6px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer; font: inherit;
+    font-size: 13px; font-weight: 600; text-align: center;
+  }
+  .rsvp-chip.selected { border-color: var(--primary); background: var(--primary-container); color: var(--on-primary-container); }
+  .result { margin-bottom: 14px; }
+  .result .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .result .name { font-weight: 700; font-size: 14px; }
+  .result .pct { font-weight: 800; font-size: 14px; color: var(--primary); }
+  .result .count { font-size: 11.5px; color: var(--muted); margin: 2px 0 6px; }
+  .bar { height: 6px; border-radius: 3px; background: var(--surface-var); overflow: hidden; }
+  .bar > div { height: 100%; border-radius: 3px; background: var(--primary); transition: width 0.6s ease; }
+  .result .voters { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .tag {
+    display: inline-block; background: var(--primary); color: var(--on-primary);
+    font-size: 9.5px; font-weight: 800; letter-spacing: 0.5px;
+    border-radius: 999px; padding: 2px 7px; margin-left: 6px; vertical-align: 2px;
+  }
+  .quorum { font-size: 12.5px; color: var(--muted); margin: 4px 0 2px; }
+  .error { background: var(--danger-bg); color: var(--danger); border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-top: 10px; }
+  .spinner {
+    width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary);
+    border-radius: 50%; margin: 30px auto; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .foot { max-width: 520px; width: 100%; text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .foot a { color: var(--primary); font-weight: 600; text-decoration: none; }
+  .code-input { text-transform: uppercase; letter-spacing: 6px; font-weight: 800; text-align: center; font-size: 22px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <div class="logo">⚡</div>
+  <h1>LivePulse</h1>
+</div>
+
+<!-- 1. Join by code -->
+<section id="joinView" class="card">
+  <h2 class="title">Enter a poll code</h2>
+  <p class="desc">Got a 6-character code from a friend or organizer? Open their live poll right here — no install needed.</p>
+  <label class="lbl" for="codeField">Poll code</label>
+  <input id="codeField" class="field code-input" maxlength="6" placeholder="e.g. DRK777" autocomplete="off">
+  <button id="joinBtn" class="btn">Open Poll</button>
+  <div id="joinError" class="error hidden"></div>
+</section>
+
+<!-- 2. Loading -->
+<div id="loadingView" class="spinner hidden"></div>
+
+<!-- 3. Poll: vote + live results -->
+<section id="pollView" class="hidden" style="width:100%; max-width:520px;">
+  <div class="card">
+    <div class="poll-head">
+      <div class="icon-tile" id="pIcon">📊</div>
+      <div class="head-meta">
+        <div class="name" id="pGroup"></div>
+        <span class="chip" id="pCode"></span>
+      </div>
+      <span id="pBadge" class="badge green"></span>
+    </div>
+    <h2 class="title" id="pTitle"></h2>
+    <p class="desc" id="pDesc"></p>
+    <div class="byline" id="pByline"></div>
+  </div>
+
+  <div class="card" id="voteCard">
+    <div class="section-label">
+      <span id="voteLabel">Preferred choice</span>
+      <a href="#" id="toggleResults" style="font-size:12px; color:var(--primary); font-weight:600; text-decoration:none;">View results</a>
+    </div>
+    <div id="optionsList"></div>
+    <label class="lbl" for="nameField">Your name <span id="nameHint">(shown with your vote)</span></label>
+    <input id="nameField" class="field" maxlength="40" placeholder="e.g. Alex">
+    <div id="rsvpBlock" class="hidden">
+      <div class="section-label" style="margin-top:16px;"><span>RSVP &amp; headcount</span></div>
+      <div class="rsvp-grid">
+        <button class="rsvp-chip selected" data-rsvp="GOING">✓ Going</button>
+        <button class="rsvp-chip" data-rsvp="MAYBE">? Maybe</button>
+        <button class="rsvp-chip" data-rsvp="CANT_GO">✕ Can't go</button>
+      </div>
+      <div class="quorum" id="guestRow" style="margin-top:10px;">
+        Bringing guests?
+        <span id="guestBtns"></span>
+      </div>
+    </div>
+    <div id="voteError" class="error hidden"></div>
+    <button id="submitBtn" class="btn">Submit Vote</button>
+    <button id="resultsBtn" class="btn secondary hidden">Back to results</button>
+  </div>
+
+  <div class="card" id="resultsCard">
+    <div class="section-label"><span>Live results</span><span id="totalVotes" style="text-transform:none;"></span></div>
+    <div id="resultsList"></div>
+    <div class="quorum" id="quorumLine"></div>
+    <button id="changeVoteBtn" class="btn secondary hidden">Change my vote</button>
+  </div>
+</section>
+
+<div class="foot">
+  Live results update in real time · Code works in the Android app too<br>
+  <a href="index.html">Get the LivePulse app →</a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDocs, onSnapshot, query, where, limit,
+  setDoc, updateDoc, arrayUnion, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Firebase web config — same project the Android app publishes to.
+const firebaseConfig = {
+  apiKey: "AIzaSyDefmWpKP7LojuNQC0GMTnxQAxjvRgycxM",
+  authDomain: "livepulse-prod.firebaseapp.com",
+  projectId: "livepulse-prod",
+  storageBucket: "livepulse-prod.firebasestorage.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+let poll = null, pollRef = null, votes = [], unsubPoll = null, unsubVotes = null;
+let selected = new Set(), rsvp = "GOING", guests = 0, hasVoted = false;
+
+const voterId = (() => {
+  let id = localStorage.getItem("lp_voter_id");
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem("lp_voter_id", id); }
+  return id;
+})();
+$("nameField").value = localStorage.getItem("lp_voter_name") || "";
+
+// ---- helpers ----
+function show(view) {
+  for (const v of ["joinView", "loadingView", "pollView"]) $(v).classList.add("hidden");
+  $(view).classList.remove("hidden");
+}
+function deadlineState(p) {
+  if (p.isClosed) return ["gray", "Closed"];
+  if (!p.deadlineTimestamp) return ["green", "Open (no deadline)"];
+  const diff = p.deadlineTimestamp - Date.now();
+  if (diff <= 0) return ["gray", "Closed"];
+  if (diff <= 3600e3) return ["amber", `Ends in ${Math.floor(diff / 60e3)}m`];
+  const h = Math.floor(diff / 3600e3);
+  return h < 24 ? ["green", `Ends in ${h}h ${Math.floor((diff % 3600e3) / 60e3)}m`]
+                : ["green", `Ends in ${Math.floor(h / 24)}d ${h % 24}h`];
+}
+function isVotingOpen() {
+  return poll && !poll.isClosed && (!poll.deadlineTimestamp || poll.deadlineTimestamp > Date.now());
+}
+
+// ---- join by code ----
+async function joinByCode(rawCode) {
+  const code = (rawCode || "").trim().toUpperCase();
+  if (!code) { $("joinError").textContent = "Please enter a code."; $("joinError").classList.remove("hidden"); return; }
+  $("joinError").classList.add("hidden");
+  show("loadingView");
+  try {
+    const q = query(collection(db, "polls"), where("code", "==", code), limit(1));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      $("joinError").textContent = `No poll found with code '${code}'. Check the spelling and try again.`;
+      $("joinError").classList.remove("hidden");
+      show("joinView");
+      return;
+    }
+    openPoll(snap.docs[0].id, code);
+  } catch (e) {
+    $("joinError").textContent = e.code === "permission-denied"
+      ? "Access denied by Firestore rules." : "Could not reach the poll service. Check your connection.";
+    $("joinError").classList.remove("hidden");
+    show("joinView");
+  }
+}
+
+// ---- open + live-listen ----
+function openPoll(pollId, code) {
+  if (unsubPoll) unsubPoll();
+  if (unsubVotes) unsubVotes();
+  pollRef = doc(db, "polls", pollId);
+  try { history.replaceState(null, "", `?code=${code}`); } catch (_) { /* file:// */ }
+  unsubPoll = onSnapshot(pollRef, snapDoc => {
+    if (!snapDoc.exists()) return;
+    poll = snapDoc.data();
+    poll.id = snapDoc.id;
+    renderPollShell();
+    renderResults();
+  }, err => {
+    $("joinError").textContent = "Could not load this poll: " + err.code;
+    $("joinError").classList.remove("hidden");
+    show("joinView");
+  });
+  unsubVotes = onSnapshot(collection(pollRef, "votes"), snap => {
+    votes = snap.docs.map(d => d.data());
+    renderResults();
+    if (hasVoted) renderResultsView();
+  });
+}
+
+function renderPollShell() {
+  $("pIcon").textContent = poll.categoryIcon || "📊";
+  $("pCode").textContent = poll.code || "";
+  $("pGroup").textContent = poll.groupName || "LivePulse poll";
+  const [cls, label] = deadlineState(poll);
+  const b = $("pBadge"); b.className = "badge " + cls; b.textContent = label;
+  $("pTitle").textContent = poll.title || "Untitled poll";
+  $("pDesc").textContent = poll.description || "";
+  $("pByline").innerHTML = `Created by <b>${esc(poll.creatorName || "organizer")}</b>` +
+    (poll.allowMultipleChoices ? " &nbsp;·&nbsp; <b>Multi-selection allowed</b>" : "");
+  $("voteLabel").textContent = poll.allowMultipleChoices ? "Preferred choices (pick any)" : "Preferred choice (pick one)";
+
+  const open = isVotingOpen();
+  const rsvpRelevant = (poll.targetHeadcount > 0) || poll.category === "EVENT";
+  $("rsvpBlock").classList.toggle("hidden", !(open && rsvpRelevant));
+  $("voteCard").classList.toggle("hidden", !open);
+  $("changeVoteBtn").classList.toggle("hidden", !open || !hasVoted);
+  $("submitBtn").classList.toggle("hidden", !open || hasVoted);
+  renderOptions();
+}
+
+function renderOptions() {
+  const opts = (poll.options || []).slice().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+  $("optionsList").innerHTML = "";
+  opts.forEach(o => {
+    const wrap = document.createElement("button");
+    wrap.type = "button";
+    wrap.className = "option" + (selected.has(o.id) ? " selected" : "");
+    const meta = [
+      o.dateTimeSlot, o.venueAddress, o.duration ? "⏱ " + o.duration : null
+    ].filter(Boolean).map(m => `<span>${esc(m)}</span>`).join("");
+    wrap.innerHTML = `
+      <input type="${poll.allowMultipleChoices ? "checkbox" : "radio"}" ${selected.has(o.id) ? "checked" : ""} tabindex="-1">
+      <div class="opt-body">
+        <div class="opt-title">${esc(o.text)}</div>
+        ${o.subtitle ? `<div class="opt-sub">${esc(o.subtitle)}</div>` : ""}
+        ${meta ? `<div class="opt-meta">${meta}</div>` : ""}
+      </div>
+      ${o.priceRating ? `<div class="opt-price">${esc(o.priceRating)}</div>` : ""}`;
+    wrap.addEventListener("click", () => {
+      if (!poll.allowMultipleChoices) selected.clear();
+      selected.has(o.id) ? selected.delete(o.id) : selected.add(o.id);
+      renderOptions();
+    });
+    $("optionsList").appendChild(wrap);
+  });
+  if (poll.allowCustomOptions && isVotingOpen()) {
+    const sugg = document.createElement("button");
+    sugg.type = "button";
+    sugg.className = "option"; sugg.style.justifyContent = "center"; sugg.style.color = "var(--primary)";
+    sugg.textContent = "＋ Suggest another option";
+    sugg.addEventListener("click", suggestOption);
+    $("optionsList").appendChild(sugg);
+  }
+}
+
+async function suggestOption() {
+  const text = prompt("Your suggested option:");
+  if (!text || !text.trim()) return;
+  try {
+    await updateDoc(pollRef, {
+      options: arrayUnion({
+        id: crypto.randomUUID(), text: text.trim().substring(0, 60),
+        addedBy: $("nameField").value.trim() || "Web guest", displayOrder: (poll.options || []).length + 1
+      })
+    });
+  } catch (e) { alert("Could not add the option: " + e.code); }
+}
+
+// ---- results ----
+function renderResults() {
+  const opts = (poll?.options || []).slice().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+  const total = votes.length;
+  $("totalVotes").textContent = `${total} vote${total === 1 ? "" : "s"}`;
+  const tally = {};
+  const votersByOpt = {};
+  opts.forEach(o => { tally[o.id] = 0; votersByOpt[o.id] = new Set(); });
+  votes.forEach(v => {
+    if (tally[v.optionId] !== undefined) { tally[v.optionId]++; votersByOpt[v.optionId].add(v.voterId); }
+  });
+  const leader = opts.filter(o => tally[o.id] > 0).sort((a, b) => tally[b.id] - tally[a.id])[0];
+  $("resultsList").innerHTML = opts.map(o => {
+    const n = tally[o.id], pct = total ? Math.round(n / total * 100) : 0;
+    const isTop = leader && leader.id === o.id && n > 0;
+    const vs = [...votersByOpt[o.id]].length
+      ? `<div class="voters">${[...votersByOpt[o.id]].length} voter${[...votersByOpt[o.id]].length === 1 ? "" : "s"}</div>` : "";
+    return `<div class="result">
+      <div class="row"><span class="name">${esc(o.text)}${isTop ? '<span class="tag">TOP</span>' : ""}</span><span class="pct">${pct}%</span></div>
+      <div class="count">${n} vote${n === 1 ? "" : "s"}${total ? ` (of ${total})` : ""}</div>
+      <div class="bar"><div style="width:${pct}%"></div></div>${vs}
+    </div>`;
+  }).join("");
+  const going = votes.filter(v => v.rsvpStatus === "GOING").reduce((s, v) => s + 1 + (v.plusGuests || 0), 0);
+  $("quorumLine").textContent = (poll?.targetHeadcount > 0)
+    ? `Headcount: ${going} going (+1s included) · target ${poll.targetHeadcount}` : "";
+}
+
+function renderResultsView() {
+  $("resultsCard").classList.remove("hidden");
+  $("voteCard").classList.add("hidden");
+}
+
+$("toggleResults").addEventListener("click", e => {
+  e.preventDefault();
+  renderResultsView();
+  $("resultsBtn").classList.remove("hidden");
+});
+$("resultsBtn").addEventListener("click", () => {
+  $("resultsCard").classList.add("hidden");
+  $("voteCard").classList.remove("hidden");
+  $("resultsBtn").classList.add("hidden");
+});
+$("changeVoteBtn").addEventListener("click", () => {
+  hasVoted = false;
+  $("voteCard").classList.remove("hidden");
+  $("changeVoteBtn").classList.add("hidden");
+  $("submitBtn").classList.remove("hidden");
+});
+
+// ---- RSVP chips ----
+document.querySelectorAll(".rsvp-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".rsvp-chip").forEach(c => c.classList.remove("selected"));
+    chip.classList.add("selected");
+    rsvp = chip.dataset.rsvp;
+  });
+});
+[0, 1, 2, 3].forEach(n => {
+  const b = document.createElement("button");
+  b.className = "rsvp-chip"; b.style.cssText = "margin-left:4px; padding:8px 12px; flex:none;";
+  b.textContent = n === 0 ? "0" : `+${n}`;
+  if (n === 0) b.classList.add("selected");
+  b.addEventListener("click", () => {
+    [...$("guestBtns").children].forEach(c => c.classList.remove("selected"));
+    b.classList.add("selected"); guests = n;
+  });
+  $("guestBtns").appendChild(b);
+});
+
+// ---- submit ----
+$("submitBtn").addEventListener("click", async () => {
+  const err = $("voteError");
+  if (!selected.size) { err.textContent = "Pick an option first."; err.classList.remove("hidden"); return; }
+  const name = $("nameField").value.trim() || "Guest";
+  localStorage.setItem("lp_voter_name", name);
+  err.classList.add("hidden");
+  $("submitBtn").disabled = true;
+  try {
+    const now = Date.now();
+    const includeRsvp = !$("rsvpBlock").classList.contains("hidden");
+    for (const optionId of selected) {
+      await setDoc(doc(db, "polls", poll.id, "votes", `${voterId}_${optionId}`), {
+        id: `${voterId}_${optionId}`, pollId: poll.id, optionId,
+        voterId, voterName: name, timestamp: now,
+        ...(includeRsvp ? { rsvpStatus: rsvp, plusGuests: guests } : {})
+      });
+    }
+    hasVoted = true;
+    selected.clear();
+    renderPollShell();
+    renderResultsView();
+  } catch (e) {
+    err.textContent = e.code === "permission-denied"
+      ? "Voting is not permitted for this poll." : "Vote failed: " + e.code;
+    err.classList.remove("hidden");
+  }
+  $("submitBtn").disabled = false;
+});
+
+// ---- entry ----
+$("joinBtn").addEventListener("click", () => joinByCode($("codeField").value));
+$("codeField").addEventListener("keydown", e => { if (e.key === "Enter") joinByCode($("codeField").value); });
+const urlCode = new URLSearchParams(location.search).get("code")?.toUpperCase() || "";
+if (urlCode) {
+  $("codeField").value = urlCode;
+  joinByCode(urlCode);
+}
+setInterval(() => { if (poll && !$("pollView").classList.contains("hidden")) renderPollShell(); }, 30000);
+</script>
+</body>
+</html>
