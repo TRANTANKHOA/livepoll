@@ -1,5 +1,24 @@
 {
   "firestore": {
     "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": "docs",
+    "ignore": [
+      "play-assets",
+      "play-store-listing.md",
+      "SHOWCASE.md"
+    ],
+    "headers": [
+      {
+        "source": "/vote.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ]
   }
 }

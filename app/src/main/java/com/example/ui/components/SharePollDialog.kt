@@ -58,7 +58,7 @@ fun SharePollDialog(
     var copiedMessage by remember { mutableStateOf<String?>(null) }
 
     val poll = pollDetails.poll
-    val voteUrl = "https://trantankhoa.github.io/livepoll/vote.html?code=${poll.code}"
+    val voteUrl = "https://livepulse-prod.web.app/vote.html?code=${poll.code}"
     // Chat-first share message: three lines, no results dump — details live
     // behind the link.
     val shortShareText = "${poll.categoryIcon} ${poll.title}\n" +
