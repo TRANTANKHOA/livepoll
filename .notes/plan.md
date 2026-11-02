@@ -36,7 +36,7 @@ secret locations are named, values are not.
 Everything gitignored is NOT in the clone. Copy these from the old machine
 (`~/plutusoft/livepoll/`) to the same paths on the new one:
 
-- `release.keystore` — **the** signing key. Lose it = can never update the app. Back it up somewhere durable too (password manager attachment / safe storage).
+- `release.keystore` — **the** signing key. Losing it is survivable (Play App Signing enrolled → Google support can reset the upload key in days) but painful: keep a copy in the password manager as a file attachment, not just on disk.
 - `keystore.properties` — store/key passwords (also in password manager).
 - `.env` — `WEB_CLIENT_ID=…` (root-level, read by secrets-gradle-plugin).
 - `app/google-services.json` — Firebase config (current copy has both app entries; re-downloadable from Firebase console if lost).
