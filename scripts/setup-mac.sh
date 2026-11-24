@@ -39,7 +39,7 @@ if ! command -v brew >/dev/null 2>&1; then
         eval "$(/usr/local/bin/brew shellenv)"
     fi
 else
-    echo -e "${GREEN}✓ Homebrew is installed (${$(brew --version | head -n 1)})${NC}"
+    echo -e "${GREEN}✓ Homebrew is installed ($(brew --version | head -n 1))${NC}"
 fi
 
 # 2. Check and Install OpenJDK 17
