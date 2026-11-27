@@ -45,10 +45,40 @@ known_bugs:
     fix: Added show("pollView") in the openPoll onSnapshot callback (docs/vote.html).
     status: FIXED and committed (609cd72, 2026-11-26) — deploy to Firebase Hosting PENDING;
       prod join-by-code stays broken until firebase deploy runs (WEB-01 guards this).
+  - id: KB-07
+    severity: critical (app-killing) / high (data divergence)
+    summary: >-
+      Two coupled defects around suggested options: (a) app-side addOptionToPoll was
+      Room-only — suggested options never reached the cloud poll doc; (b) a cloud
+      vote referencing a web-suggested optionId CRASHED every Android client watching
+      the poll (SQLiteConstraintException FK violation in the unguarded
+      attachLiveCloudSync coroutine) — found by SYNC-06, 2026-11-28.
+    fix: >-
+      publishOptionToCloud (arrayUnion) added to addOptionToPoll;
+      attachLiveCloudSync reconciles unknown optionIds (fetchPollOptionsFromCloud +
+      upsert) before insertVotes and guards the whole sync in try/catch.
+    verification: SYNC-06 re-run PASS on emulator (app showed the web-suggested
+      option 100% / RSVP 1, no crash); APP-09's own UI pass blocked by automation
+      traps (see its entry) — needs manual pass.
+    status: FIXED and verified via SYNC-06 re-run 2026-11-28 — commit pending
 # =============================================================================
 # Hard-won automation lessons (adb + uiautomator against this Compose app)
 # =============================================================================
 automation_notes:
+  stylus_overlay: >-
+    Android 16 emulator pops a system "Try out your stylus" handwriting overlay
+    over the LOWER HALF of text-entry dialogs — it eats taps aimed at buttons
+    underneath (Cancel looked broken) and reroutes typed text into its own input
+    box, making app fields look broken. Symptom: typed text "lands" somewhere but
+    the target EditText stays empty, or taps on visible buttons do nothing.
+    Dismiss it first (tap its Cancel / Next), then re-dump and interact.
+  date_field_injection_immune: >-
+    The Suggest dialog's "Date & Kickoff / Start Time" field rejects ALL
+    programmatic input even with clean focus and no overlay: adb input text, the
+    MCP type tool, and raw keyevents (13 44 41 = "6pm") all leave it empty while
+    sibling text fields accept the same injections. Cannot complete that dialog
+    programmatically — validation blocks submit ("Please enter the date/time
+    slot"). Manual pass required for APP-09-style flows.
   ime_covering_fields: >-
     The soft keyboard covers the bottom ~800 px. Taps/swipes aimed at covered
     fields land ON THE KEYS — a swipe starting on the keyboard TYPES into the

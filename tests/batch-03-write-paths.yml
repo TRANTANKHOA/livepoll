@@ -21,10 +21,21 @@ tests:
     expected:
       - New option appears in the app's option list (Room insert)
       - Cloud poll doc options array GROWS by one (arrayUnion or equivalent)
-    result: not_yet_run
-    suspicion: >-
-      Recon 2026-11-27: repository.addOptionToPoll only calls pollOptionDao.insertOption
-      — no FirestoreService call anywhere. Likely local-only (bug candidate).
+    result: >-
+      suspicion CONFIRMED as KB-07 (fixed 2026-11-28: publishOptionToCloud arrayUnion
+      added to addOptionToPoll). UI-path verification BLOCKED by two compounding
+      automation traps (2026-11-28, poll KXHFC7): (1) an Android system stylus-
+      handwriting overlay ("Try out your stylus") periodically covers the dialog's
+      lower half, swallowing Cancel taps and rerouting typed text into its own
+      input box — dismiss it before interacting (see automation_notes); (2) even
+      with the overlay dismissed, the required "Date & Kickoff / Start Time" field
+      rejects ALL programmatic input — adb input text, MCP type tool, and raw
+      keyevents (13 44 41) all leave it empty while fields 1-2 accept text
+      identically. App validation correctly blocks submission without the date
+      ("Please enter the date/time slot") — so the dialog cannot be completed
+      programmatically. Fix is code-verified; the identical merge-write pattern
+      (publishPollStatusToCloud, KB-06) is e2e-verified. Needs a manual UI pass.
+    bug_ref: KB-07
   - id: APP-10
     title: Poll deletion (repository-level inspection)
     area: android-app
@@ -40,7 +51,6 @@ tests:
     result: inspection recorded 2026-11-27 (no runtime execution possible)
 
   # ---------------- Web vote client (docs/vote.html) ------------------------
-# ---------------- Web vote client (docs/vote.html) ------------------------
   - id: WEB-06
     title: "＋ Suggest another option (web) reaches cloud + renders"
     area: web-client
@@ -50,7 +60,11 @@ tests:
     expected:
       - Web renders the new option immediately (poll-doc onSnapshot)
       - Cloud options array GROWS by one (updateDoc arrayUnion)
-    result: not_yet_run
+    result: >-
+      pass (2026-11-28, emulator poll KXHFC7): prompt() stubbed (automation context
+      auto-dismisses JS dialogs — see automation_notes), suggested "Rooftop Bar
+      Downtown"; web rendered it instantly (4→5 options) and the cloud options array
+      grew to 5 with addedBy "Web voter".
   - id: WEB-07
     title: RSVP change to "Maybe" drops voter from going headcount
     area: web-client
@@ -59,10 +73,14 @@ tests:
     expected:
       - Headcount drops (only GOING voters counted) but total votes unchanged
       - App RSVP tab reflects the same voter set
-    result: not_yet_run
+    result: >-
+      pass (2026-11-28, poll KXHFC7): GOING→MAYBE via Change-my-vote; web headcount
+      dropped "1 going"→"0 going" with total unchanged (1 vote); app RSVP tab live-
+      updated RSVP (1)→RSVP (0). NOTE: the change flow opens with NO options
+      pre-selected — the voter must re-pick their whole selection from memory
+      (multi-select UX defect candidate, not fixed).
 
   # ---------------- Cross-platform sync ------------------------------------
-# ---------------- Cross-platform sync ------------------------------------
   - id: SYNC-06
     title: Web-suggested option voted on web — app renders the vote coherently
     area: sync
@@ -73,10 +91,16 @@ tests:
       - App learns the new option (poll-doc sync) and tallies the vote under it
       - If app never learns the option, the vote must still be counted in totals,
         not silently dropped nor crash the screen (dangling optionId handling)
-    result: not_yet_run
-    suspicion: >-
-      Recon 2026-11-27: app attaches only a votes listener; nothing re-reads the
-      poll doc after join. Web-suggested options likely never appear in the app,
-      and votes for them may render inconsistently (bug candidate).
+    result: >-
+      FAIL first run (2026-11-28, poll KXHFC7) — app CRASHED with
+      SQLiteConstraintException FOREIGN KEY constraint failed: the cloud vote
+      referenced the web-suggested optionId that Room didn't know, and the votes
+      table FK (optionId → poll_options) rejected it inside the unguarded
+      attachLiveCloudSync coroutine. Any web user voting on their own suggestion
+      killed every Android client watching the poll. PASS on re-run after KB-07 fix:
+      attachLiveCloudSync now reconciles unknown optionIds (fetchPollOptionsFromCloud
+      + upsert) before insertVotes and guards the whole sync in try/catch; app showed
+      "Rooftop Bar Downtown" 100% / RSVP (1), no crash.
+    bug_ref: KB-07
 
   # ---------------- Environment / infrastructure ---------------------------

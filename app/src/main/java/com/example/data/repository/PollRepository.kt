@@ -95,15 +95,31 @@ class PollRepository(
      * Attaches live cloud snapshot sync to keep votes updated in real-time across devices.
      * Cloud state is mirrored: each voter present in the snapshot has their previous
      * Room rows cleared first, so a changed ballot replaces (not adds to) earlier votes.
+     * Options referenced by cloud votes but unknown locally (web-suggested ones) are
+     * fetched from the cloud poll doc and upserted BEFORE the vote insert — otherwise
+     * the votes FK on optionId crashes the app (KB-07).
      */
     fun attachLiveCloudSync(pollId: String, scope: CoroutineScope): ListenerRegistration? {
         return firestoreService.attachLiveVotesListener(pollId) { cloudVotes ->
             scope.launch(Dispatchers.IO) {
                 if (cloudVotes.isNotEmpty()) {
-                    cloudVotes.map { it.voterId }.distinct().forEach { voterId ->
-                        voteDao.clearUserVotesForPoll(pollId, voterId)
+                    try {
+                        val knownOptionIds = pollOptionDao.getOptionsForPollList(pollId).map { it.id }.toSet()
+                        val missing = cloudVotes.map { it.optionId }.distinct().filter { it !in knownOptionIds }
+                        if (missing.isNotEmpty()) {
+                            val cloudOptions = firestoreService.fetchPollOptionsFromCloud(pollId)
+                            val upserts = cloudOptions.filter { it.id in missing.toSet() }
+                            if (upserts.isNotEmpty()) pollOptionDao.insertOptions(upserts)
+                        }
+                        cloudVotes.map { it.voterId }.distinct().forEach { voterId ->
+                            voteDao.clearUserVotesForPoll(pollId, voterId)
+                        }
+                        voteDao.insertVotes(cloudVotes)
+                    } catch (e: Exception) {
+                        // A malformed cloud vote must never take the app down; the
+                        // next snapshot re-triggers reconciliation (KB-07 hardening)
+                        android.util.Log.e("PollRepository", "Cloud vote sync failed: ${e.message}", e)
                     }
-                    voteDao.insertVotes(cloudVotes)
                 }
             }
         }
@@ -172,6 +188,9 @@ class PollRepository(
 
     suspend fun addOptionToPoll(option: PollOptionEntity) {
         pollOptionDao.insertOption(option)
+        // Suggested options must reach the cloud poll doc, or web joiners never
+        // see them and votes cast on the web side trip our FK constraint (KB-07)
+        firestoreService.publishOptionToCloud(option.pollId, option)
     }
 
     suspend fun togglePollStatus(pollId: String, isClosed: Boolean) {

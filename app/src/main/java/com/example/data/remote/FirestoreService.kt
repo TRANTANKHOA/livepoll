@@ -191,6 +191,71 @@ class FirestoreService {
      * Records a vote into Firestore collection `polls/{pollId}/votes`.
      */
     /**
+     * Appends a suggested option to the cloud poll doc's options array (KB-07):
+     * the web client renders options from the poll doc, so app-side suggestions
+     * must land there too — Room-only inserts are invisible to web joiners.
+     */
+    suspend fun publishOptionToCloud(pollId: String, option: PollOptionEntity): Boolean {
+        val firestore = db ?: return false
+        return try {
+            val optionData = mapOf(
+                "id" to option.id,
+                "pollId" to option.pollId,
+                "text" to option.text,
+                "subtitle" to (option.subtitle ?: ""),
+                "dateTimeSlot" to (option.dateTimeSlot ?: ""),
+                "venueAddress" to (option.venueAddress ?: ""),
+                "duration" to (option.duration ?: ""),
+                "priceRating" to (option.priceRating ?: ""),
+                "addedBy" to (option.addedBy ?: ""),
+                "displayOrder" to option.displayOrder
+            )
+            firestore.collection("polls")
+                .document(pollId)
+                .update("options", FieldValue.arrayUnion(optionData))
+                .await()
+            Log.d(tag, "Appended option ${option.id} to cloud poll $pollId")
+            true
+        } catch (e: Exception) {
+            Log.e(tag, "Error appending option to cloud: ${e.message}", e)
+            false
+        }
+    }
+
+    /**
+     * Fetches the cloud poll doc's current options (KB-07): the live-votes
+     * listener reconciles unknown optionIds against this before writing votes,
+     * so web-suggested options reach Room instead of tripping the FK constraint.
+     */
+    suspend fun fetchPollOptionsFromCloud(pollId: String): List<PollOptionEntity> {
+        val firestore = db ?: return emptyList()
+        return try {
+            val doc = firestore.collection("polls").document(pollId).get().await()
+            val raw = doc.get("options") as? List<*> ?: return emptyList()
+            raw.mapNotNull { item ->
+                val map = item as? Map<*, *> ?: return@mapNotNull null
+                val id = map["id"] as? String ?: return@mapNotNull null
+                val text = map["text"] as? String ?: return@mapNotNull null
+                PollOptionEntity(
+                    id = id,
+                    pollId = pollId,
+                    text = text,
+                    subtitle = map["subtitle"] as? String ?: "",
+                    dateTimeSlot = map["dateTimeSlot"] as? String ?: "",
+                    venueAddress = map["venueAddress"] as? String ?: "",
+                    duration = map["duration"] as? String ?: "",
+                    priceRating = map["priceRating"] as? String ?: "",
+                    addedBy = map["addedBy"] as? String ?: "",
+                    displayOrder = (map["displayOrder"] as? Long)?.toInt() ?: 99
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Error fetching cloud poll options: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    /**
      * Syncs a poll's open/closed state to the cloud doc (KB-06): other devices
      * and the web client learn about manual close/re-open via onSnapshot.
      * Uses merge so only isClosed/cloudSyncedAt change.
