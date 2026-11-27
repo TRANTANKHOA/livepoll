@@ -148,9 +148,15 @@ tests:
     title: Change my vote (web)
     area: web-client
     steps:
-      - After voting, tap "Change my vote" → adjust selection → resubmit
-    expected: vote doc updated in place (voterId_optionId keyed), results re-render
-    result: not_yet_run   # button observed 2026-11-26, flow not exercised
+      - After voting, tap "Change my vote" → adjust selection to a different option → resubmit
+      - REST: list polls/<uuid>/votes; count docs for the same voterId
+    expected:
+      - Old vote doc REPLACED — same voterId contributes exactly one vote
+      - Results re-render without inflating the total
+    result: FAIL (2026-11-27, poll FANZ82) — changed Highland→Riverside; total went 1→2
+      votes; BOTH docs remain in Firestore (voterId 081b9d9d…_f0454b8e… stale +
+      081b9d9d…_45c0dee8… new). Double-count confirmed.
+    bug_ref: KB-04
 
   # ---------------- Cross-platform sync ------------------------------------
   - id: SYNC-01
@@ -162,8 +168,7 @@ tests:
     expected:
       - App distribution live-updates with the web voter's option and correct %
       - RSVP counter incremented — all without leaving the results screen
-    result: 'pass (2026-11-26 with VotingScreen-first workaround; re-verified 2026-11-27 after KB-02 fix: poll FANZ82, web vote appeared on results screen with no VotingScreen visit)'
-    bug_ref: KB-02   # FIXED 2026-11-27 — PollAnalyticsScreen attaches attachPollCloudListener in LaunchedEffect
+    result: 'pass (2026-11-26 with VotingScreen-first workaround; re-verified 2026-11-27 after the results-screen listener fix in PollAnalyticsScreen: poll FANZ82, web vote appeared on results screen with no VotingScreen visit)'
 
   - id: SYNC-02
     title: App vote appears on web without reload (app → Firestore → web)
@@ -218,21 +223,26 @@ known_bugs:
       its "hidden" class; show() is only ever called with loadingView/joinView.
       Data loads correctly — display is the only failure.
     fix: Added show("pollView") in the openPoll onSnapshot callback (docs/vote.html).
-    status: FIXED locally 2026-11-26 — NOT committed, NOT deployed to Firebase Hosting
-  - id: KB-02
-    severity: high (organizer sees stale results)
-    summary: Results/Analytics screen never attaches the live cloud listener
+    status: FIXED and committed (609cd72, 2026-11-26) — deploy to Firebase Hosting PENDING;
+      prod join-by-code stays broken until firebase deploy runs (WEB-01 guards this).
+  - id: KB-04
+    severity: high (vote integrity — totals inflate on every vote change, both clients)
+    summary: Changing a vote leaves the old vote doc in Firestore — votes double-count
     detail: >-
-      attachPollCloudListener was called only in VotingScreen.kt. Web votes
-      didn't appear on the results screen until the voting screen was visited.
-    fix: PollAnalyticsScreen now calls viewModel.attachPollCloudListener(pollId) in LaunchedEffect (2026-11-27)
-    verification: 'poll FANZ82 — app parked on results screen, web vote cast, screen live-updated (RSVP 1, Highland 100%)'
-    status: FIXED and verified 2026-11-27 — committed
-  - id: KB-03
-    severity: low (dev tooling)
-    summary: scripts/setup-mac.sh line 42 bad substitution `${$(...)}` kills setup under set -e
-    fix: changed to `$(brew --version | head -n 1)`
-    status: FIXED locally 2026-11-22 — NOT committed
+      WEB-03 evidence (2026-11-27, poll FANZ82): after changing Highland→Riverside the
+      total showed 2 votes for 1 voter; both docs persisted
+      (081b9d9d…_f0454b8e… and 081b9d9d…_45c0dee8…). Web client never deletes the
+      previous selection (vote.html changeVoteBtn only resets hasVoted). Android is
+      correct LOCALLY (castVotes clears via voteDao.clearUserVotesForPoll) but its
+      recordVoteToCloud only set()s new docs — old cloud docs are never deleted, so
+      results-only devices/web see stale + new votes. Complication: firestore.rules
+      allow delete requires isAuthenticated(), which web voters are not — a web-side
+      fix alone is impossible without a rules change.
+    fix: 'none yet — needs a design decision: (a) per-voter vote doc with selections
+      array (overwrite in place; schema change both clients must read), or (b) relax
+      delete rules for vote docs (security trade-off: unauthenticated deletes),
+      or (c) server-side cleanup (Cloud Function on write).'
+    status: OPEN (found by WEB-03, 2026-11-27)
 
 # =============================================================================
 # Hard-won automation lessons (adb + uiautomator against this Compose app)
