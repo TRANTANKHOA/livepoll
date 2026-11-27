@@ -1,0 +1,167 @@
+# =============================================================================
+# LivePulse E2E — Batch 1 — Core Session Flows
+# ============================================================================
+# Original 2026-11-22..26 sessions: guest-mode app flows, web client,
+# cross-platform sync, plus the infra checks they surfaced.
+# Shared context (environment, prerequisites, known_bugs, automation_notes,
+# fixtures) lives in tests/common.yml. Conventions and coordinates there too.
+
+version: 1
+suite: livepulse-e2e-batch-01
+
+tests:
+# ---------------- Android app (Guest mode — no sign-in required) ----------
+  - id: APP-01
+    title: Cold launch & process health
+    area: android-app
+    steps:
+      - Boot AVD (command above). If "System UI isn't responding" ANR appears, tap **Wait** (never "Close app").
+      - adb shell am start -n com.plutusoft.livepulse/com.example.MainActivity
+      - adb shell pidof com.plutusoft.livepulse
+      - adb logcat -d -s FirebaseApp:V AndroidRuntime:E
+    expected:
+      - Process alive; MainActivity top-resumed (dumpsys activity activities | grep topResumed)
+      - 'Logcat line from OUR pid: "Device unlocked: initializing all Firebase APIs for app [DEFAULT]"'
+      - No AndroidRuntime FATAL/crash for our pid
+      - ("failed to initialize because no default options" from a *different* pid is a system process — ignore)
+    result: pass (2026-11-26, pid 5321)
+    baseline: cold start 2148 ms, PSS ~130 MB (emulator, 2026-11-25)
+  - id: APP-02
+    title: Create poll from template (quick create) + cloud publish
+    area: android-app
+    steps:
+      - Home → bottom-right create button (resolve via dump; ~[701,2148][1038,2295])
+      - 'Template sheet → tap "Use ➔" on "⚽ Weekend 5v5 Soccer: Match Time & Pitch"'
+      - Form opens pre-filled → scroll (gutter swipes, x≈1040) to "Create Poll" → tap
+    expected:
+      - 'Share dialog renders: "Share Poll with Friends" + 6-char join code'
+      - 'adb logcat -d | grep FirestoreService -> shows "Successfully published poll <uuid> (<CODE>) to Cloud Firestore"'
+      - REST confirms doc exists under polls/<uuid>
+    result: pass (2026-11-26, poll N2X2TJ)
+    gotcha: >-
+      If the share dialog does NOT render, DO NOT re-tap blindly — the poll may
+      still have been created (4 duplicate "Team Lunch Spot" polls, codes
+      K4CM9Y/W7MFKZ/5U4EKE/RVCYBX, were born this way while the emulator UI was
+      wedged). Check logcat/Room first, then investigate UI state.
+  - id: APP-03
+    title: Create blank poll with custom title + options (form fill)
+    area: android-app
+    steps:
+      - Create → "Blank Custom Poll"
+      - "Fill title: tap field → verify focused=true in dump → adb shell input text 'Text%sWith%sSpaces' (%s = space)"
+      - "Fill Option #1 and #2 the same way. BEFORE each: close IME (adb shell input keyevent 4),
+        scroll with gutter swipes only, tap field, VERIFY focus moved, then type."
+      - Tap "Create Poll"
+    expected:
+      - 'Validation fires when incomplete: "Please provide at least 2 voting options"'
+      - 'With title + 2 options: share dialog with new code (see APP-02 expectations)'
+    result: pass (HJ55K7 "Coffee or Tea" 2026-11-25; "Team Lunch Spot" series 2026-11-26)
+  - id: APP-04
+    title: Cast vote as Guest (in-app)
+    area: android-app
+    steps:
+      - Poll results screen → "Cast Vote"
+      - Tap an option → scroll to "Submit Vote & View Results" → tap
+    expected:
+      - 'Results update: option shows N votes, TOP badge, percentage'
+      - 'Single-vote case: "1 vote (100% of total)", "Leading Consensus Choice"'
+      - 'Logcat: "Successfully uploaded vote <pollid>_<voterid>_<uuid> to Cloud Firestore"'
+    result: pass (HJ55K7 Coffee 100% 2026-11-25; N2X2TJ Riverside 2026-11-26)
+  - id: APP-05
+    title: Results / Analytics screen rendering
+    area: android-app
+    steps:
+      - Open poll from home list → observe results screen
+    expected:
+      - 'Tabs: Charts / RSVP (n) / Notes (n); VOTE DISTRIBUTION with per-option % and vote counts'
+      - Headcount summary when targetHeadcount > 0; deadline badge ("Ends in Xh Ym" / "Expired")
+      - Expired polls auto-file under the "Closed (n)" home tab
+    result: pass (2026-11-25/26)
+# ---------------- Web vote client (docs/vote.html) ------------------------
+  - id: WEB-01
+    title: 'Join by code renders the poll  (REGRESSION: guards KB-01)'
+    area: web-client
+    steps:
+      - 'Serve docs/ locally: cd docs && python3 -m http.server 8901'
+      - Open http://127.0.0.1:8901/vote.html
+      - Fill "Poll code" with a live 6-char code → "Open Poll"  (or vote.html?code=XXXXXX auto-join)
+    expected:
+      - 'Within ~2-3 s the poll view is VISIBLE: icon, code, deadline badge, title,
+        options with venue/time/price, live results, headcount'
+      - 'NOT an eternal spinner: spinner + empty body = KB-01 regression'
+    result: pass (local fixed copy, 2026-11-26) / KNOWN-FAIL on prod until KB-01 is deployed
+    bug_ref: KB-01
+  - id: WEB-02
+    title: Web vote submission (with name + RSVP)
+    area: web-client
+    steps:
+      - 'On an open, multi-select poll: click an option button (checkbox)'
+      - Fill "Your name" → click "✓ Going" (RSVP) → "Submit Vote"
+    expected:
+      - 'View switches to results: chosen option TOP 100%, "1 vote (of 1)", "1 voter"'
+      - 'Headcount line: "1 going (+1s included) · target N"'
+      - '"Change my vote" button appears'
+      - 'REST: polls/<uuid>/votes contains doc with voterName, rsvpStatus: GOING'
+    result: pass (2026-11-26, voter "Khoa (web", poll N2X2TJ)
+  - id: WEB-03
+    title: Change my vote (web)
+    area: web-client
+    steps:
+      - After voting, tap "Change my vote" → adjust selection to a different option → resubmit
+      - REST: list polls/<uuid>/votes; count docs for the same voterId
+    expected:
+      - Old vote doc REPLACED — same voterId contributes exactly one vote
+      - Results re-render without inflating the total
+    result: 'FAIL (2026-11-27, poll FANZ82 — original finding); PASS on re-run same
+      day (emulator battery, poll A5MY5M, ballot fix live): changed Highland→Riverside,
+      total stayed 1 vote, exactly one ballot doc remained.'
+    bug_ref: KB-04
+# ---------------- Cross-platform sync ------------------------------------
+  - id: SYNC-01
+    title: Web vote appears in Android app (web → Firestore → app)
+    area: sync
+    steps:
+      - Complete WEB-02 from the browser
+      - On the emulator, keep the app on the poll's RESULTS screen (no VotingScreen visit)
+    expected:
+      - App distribution live-updates with the web voter's option and correct %
+      - RSVP counter incremented — all without leaving the results screen
+    result: 'pass (2026-11-26 with VotingScreen-first workaround; re-verified 2026-11-27 after the results-screen listener fix in PollAnalyticsScreen: poll FANZ82, web vote appeared on results screen with no VotingScreen visit)'
+  - id: SYNC-02
+    title: App vote appears on web without reload (app → Firestore → web)
+    area: sync
+    steps:
+      - Complete APP-04 on the emulator
+      - Watch the already-open web tab (onSnapshot live listener) — do NOT reload
+    expected:
+      - 'Web results update within seconds: total votes +1, percentages re-ranked, TOP badge moves'
+    result: 'pass (2026-11-26: web showed "2 votes", Riverside TOP 50% after app vote)'
+  - id: SYNC-03
+    title: Firestore publish/persist verification (REST)
+    area: sync
+    steps:
+      - 'curl -s $rest_base/polls?pageSize=10 — list polls (code, title, deadlineTimestamp, isClosed)'
+      - 'curl -s $rest_base/polls/<uuid>/votes — list vote docs'
+      - 'runQuery structured query for code equality (endpoint: documents:runQuery, NOT documents/polls:runQuery)'
+    expected: poll + votes present; fields match what the clients wrote
+    result: pass (2026-11-26)
+  - id: INFRA-01
+    title: Emulator DNS health (run FIRST)
+    area: infra
+    steps:
+      - adb shell ping -c 1 -W 3 firestore.googleapis.com
+    expected: >-
+      resolves + replies. If "unknown host": DNS has died (observed after ~2 days uptime;
+      raw 8.8.8.8 ping still works). Restart the AVD with -dns-server 8.8.8.8 (data persists).
+    result: conditional (died 2026-11-26, cured by restart)
+  - id: INFRA-02
+    title: Silent cloud-failure check (local-first masking)
+    area: infra
+    steps:
+      - After any create/vote, grep logcat for FirestoreService lines
+    expected: >-
+      App is local-first: Room writes succeed even when Firestore is unreachable,
+      so cloud failures are SILENT in the UI. The logcat FirestoreService lines
+      are the only confirmation that a publish/upload landed. Never trust the UI
+      alone for cloud-sync assertions.
+    result: informational

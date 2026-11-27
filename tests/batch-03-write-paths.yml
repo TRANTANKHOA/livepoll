@@ -1,0 +1,82 @@
+# =============================================================================
+# LivePulse E2E — Batch 3 — Write Paths Hunt (suggest-option, RSVP, deletion)
+# ============================================================================
+# Hunting bugs in the untested write paths: option suggestions from
+# both clients, dangling-option votes, RSVP status changes, and the latent
+# poll-deletion design defect. Fixture: fresh open poll in the local emulator.
+# Shared context (environment, prerequisites, known_bugs, automation_notes,
+# fixtures) lives in tests/common.yml. Conventions and coordinates there too.
+
+version: 1
+suite: livepulse-e2e-batch-03
+
+tests:
+# ---------------- Android app (Guest mode — no sign-in required) ----------
+  - id: APP-09
+    title: Suggest Option from VotingScreen reaches the cloud
+    area: android-app
+    steps:
+      - 'VotingScreen → "Suggest Option" → submit a new option text'
+      - REST: read the poll doc — options array length before vs after
+    expected:
+      - New option appears in the app's option list (Room insert)
+      - Cloud poll doc options array GROWS by one (arrayUnion or equivalent)
+    result: not_yet_run
+    suspicion: >-
+      Recon 2026-11-27: repository.addOptionToPoll only calls pollOptionDao.insertOption
+      — no FirestoreService call anywhere. Likely local-only (bug candidate).
+  - id: APP-10
+    title: Poll deletion (repository-level inspection)
+    area: android-app
+    detail: >-
+      deletePoll exists in ViewModel + repository but NO screen calls it (verified
+      by grep). By construction it can only clear Room — FirestoreService has no
+      delete function at all, and the rules require an authenticated creator
+      (publishPollToCloud never writes creatorId, so even signed-in creators could
+      not delete). A UI delete wired as-is would orphan the cloud doc permanently —
+      joiners would keep voting on a "deleted" poll. Latent design defect; fixing
+      needs a decision (remove deletePoll, or tombstone + rules change).
+    expected: no reachable UI path today; cloud orphan if ever wired as-is
+    result: inspection recorded 2026-11-27 (no runtime execution possible)
+
+  # ---------------- Web vote client (docs/vote.html) ------------------------
+# ---------------- Web vote client (docs/vote.html) ------------------------
+  - id: WEB-06
+    title: "＋ Suggest another option (web) reaches cloud + renders"
+    area: web-client
+    steps:
+      - On an allowCustomOptions poll, tap "＋ Suggest another option" → enter text
+      - REST: read the poll doc — options array length before vs after
+    expected:
+      - Web renders the new option immediately (poll-doc onSnapshot)
+      - Cloud options array GROWS by one (updateDoc arrayUnion)
+    result: not_yet_run
+  - id: WEB-07
+    title: RSVP change to "Maybe" drops voter from going headcount
+    area: web-client
+    steps:
+      - Vote as GOING → note headcount → Change my vote → pick "? Maybe" → Submit
+    expected:
+      - Headcount drops (only GOING voters counted) but total votes unchanged
+      - App RSVP tab reflects the same voter set
+    result: not_yet_run
+
+  # ---------------- Cross-platform sync ------------------------------------
+# ---------------- Cross-platform sync ------------------------------------
+  - id: SYNC-06
+    title: Web-suggested option voted on web — app renders the vote coherently
+    area: sync
+    steps:
+      - Complete WEB-06, then vote on the web-suggested option
+      - Watch the app's results screen — do NOT rejoin
+    expected:
+      - App learns the new option (poll-doc sync) and tallies the vote under it
+      - If app never learns the option, the vote must still be counted in totals,
+        not silently dropped nor crash the screen (dangling optionId handling)
+    result: not_yet_run
+    suspicion: >-
+      Recon 2026-11-27: app attaches only a votes listener; nothing re-reads the
+      poll doc after join. Web-suggested options likely never appear in the app,
+      and votes for them may render inconsistently (bug candidate).
+
+  # ---------------- Environment / infrastructure ---------------------------

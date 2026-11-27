@@ -1,0 +1,91 @@
+# =============================================================================
+# LivePulse — E2E Regression Test Suite (manual/automation checklist)
+# =============================================================================
+# Shared context for all e2e test batches in this directory.
+# Batches: batch-01-core-session.yml, batch-02-ballot-battery.yml,
+# batch-03-write-paths.yml. Conventions:
+#   - "dump" = `adb exec-out uiautomator dump /dev/tty` (parse text/bounds/focused)
+#   - Coordinates are for Pixel 8 AVD @ 1080x2400 (420dpi); resolve fresh each run.
+# =============================================================================
+
+version: 1
+suite: livepulse-e2e-regression
+recorded: 2026-11-26
+last_full_run: 2026-11-26
+environment:
+  android:
+    toolchain: headless brew SDK (/opt/homebrew/share/android-commandlinetools), JDK 17 keg-only
+    avd: livepoll_play36            # Pixel 8, Android 16, google_apis_playstore arm64-v8a
+    avd_note: >-
+      Play-certified image is REQUIRED for Google-account flows; the plain
+      google_apis image dead-ends account-add in a WebView (err 50135).
+    launch: emulator -avd livepoll_play36 -no-snapshot-load -dns-server 8.8.8.8
+    app_package: com.plutusoft.livepulse
+    launch_component: com.plutusoft.livepulse/com.example.MainActivity   # namespace com.example != applicationId
+  web:
+    local: cd docs && python3 -m http.server 8901   # then http://127.0.0.1:8901/vote.html
+    prod: https://livepulse-prod.web.app/vote.html
+  backend:
+    project: livepulse-prod
+    rest_base: https://firestore.googleapis.com/v1/projects/livepulse-prod/databases/(default)/documents
+prerequisites:
+  - app/google-services.json  # ANDROID app config: client_info.android_client_info.package_name == com.plutusoft.livepulse
+  - .env at repo root with real numeric WEB_CLIENT_ID (see .env.example)
+  - debug.keystore at repo root; its SHA-1 registered in Firebase console fingerprints
+  - Emulator booted AND DNS resolving (see INFRA-01 before anything else)
+  - 'App installed: adb install -r app/build/outputs/apk/debug/app-debug.apk'
+known_bugs:
+  - id: KB-01
+    severity: critical (web client unusable for joiners)
+    summary: docs/vote.html never calls show("pollView") — join-by-code spins forever
+    detail: >-
+      The poll onSnapshot callback renders into #pollView but nothing removes
+      its "hidden" class; show() is only ever called with loadingView/joinView.
+      Data loads correctly — display is the only failure.
+    fix: Added show("pollView") in the openPoll onSnapshot callback (docs/vote.html).
+    status: FIXED and committed (609cd72, 2026-11-26) — deploy to Firebase Hosting PENDING;
+      prod join-by-code stays broken until firebase deploy runs (WEB-01 guards this).
+# =============================================================================
+# Hard-won automation lessons (adb + uiautomator against this Compose app)
+# =============================================================================
+automation_notes:
+  ime_covering_fields: >-
+    The soft keyboard covers the bottom ~800 px. Taps/swipes aimed at covered
+    fields land ON THE KEYS — a swipe starting on the keyboard TYPES into the
+    focused field (observed: stray "by" typed into an option). Close the IME
+    (adb shell input keyevent 4) and re-scroll before touching bottom fields.
+  focus_verification: >-
+    ALWAYS uiautomator-dump and check focused="true" on the target EditText
+    BEFORE adb shell input text — text goes to whatever is focused, silently.
+    (Observed: three fields' worth of text concatenated into the title field.)
+    Repeated DEL clears a focused field: adb shell input keyevent 67 67 67 ...
+  scrolling: >-
+    Scroll with gutter swipes (x≈1040, never x<1000) so they can't touch
+    fields or keys. The create form re-settles layout after IME close — re-dump
+    after every scroll/keyboard transition; stale coordinates miss.
+  space_encoding: adb shell input text uses %s for spaces; special chars may need %<hex>.
+  invisible_clicks: >-
+    A tap that "does nothing" may have worked — the create-form share dialog
+    failed to render while the emulator was wedged (4 duplicate polls created).
+    Verify effects via logcat/Firestore, not only via screen state.
+  mcp_quirks: >-
+    android-emulator MCP build_and_run / start_emulator time out at a 30 s
+    harness cap but KEEP WORKING in the background — verify with adb devices /
+    pgrep qemu instead of retrying. launch_app uses monkey and errored;
+    use `adb shell am start -n com.plutusoft.livepulse/com.example.MainActivity`.
+    ux-review cli.py: capture is interactive (needs keypresses); dump and perf
+    are non-interactive. evaluate() in the browser cannot do dynamic import() —
+    inject a <script type=module> into the page for SDK-level probes.
+
+# =============================================================================
+fixtures:
+  live_example:
+    code: N2X2TJ
+    title: "⚽ Weekend 5v5 Soccer: Match Time & Pitch"
+    uuid: 44192bc8-2f7b-4060-b1bb-8bf2c73988da
+    created: 2026-11-26 (deadline 6h — expired by re-run time; re-create via APP-02)
+    votes: Riverside Turf Arena (Guest, app), Central Park Community Pitch (Khoa (web), GOING +1)
+  note: >-
+    All other polls in livepulse-prod (HJ55K7, 6SB22T, W8VKJD, MFMNQU,
+    K4CM9Y, W7MFKZ, 5U4EKE, RVCYBX) have expired deadlines — create a fresh
+    fixture with APP-02 before running WEB-*/SYNC-* suites.

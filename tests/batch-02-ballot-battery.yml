@@ -1,0 +1,129 @@
+# =============================================================================
+# LivePulse E2E — Batch 2 — Ballot Battery (KB-04/05/06 verification)
+# ============================================================================
+# 2026-11-27 Firestore-emulator loop: per-voter ballot schema,
+# change-vote integrity both directions, close-voting cloud sync. Found and
+# fixed KB-05 (web headcount dedupe) and KB-06 (close/re-open cloud sync).
+# Shared context (environment, prerequisites, known_bugs, automation_notes,
+# fixtures) lives in tests/common.yml. Conventions and coordinates there too.
+
+version: 1
+suite: livepulse-e2e-batch-02
+
+tests:
+# ---------------- Android app (Guest mode — no sign-in required) ----------
+  - id: APP-06
+    title: Change vote from the app ("Update Vote") — ballot overwrite
+    area: android-app
+    steps:
+      - Results screen → Cast/Update Vote → pick a different option → Submit
+      - REST: list polls/<uuid>/votes — count docs for the voter
+    expected:
+      - Exactly ONE votes/{voterId} ballot doc in Firestore — no stale per-option docs
+      - Total vote count unchanged for this voter's swap (KB-04 regression guard)
+    result: 'pass (2026-11-27, emulator battery, poll A5MY5M): app changed Metro→Highland;
+      "uploaded ballot guest_local (1 selections)"; emulator held exactly 2 ballot
+      docs (one per voter), total stayed 2 votes / 2 participants'
+  - id: APP-07
+    title: Join poll by code in the app (home "Join" button)
+    area: android-app
+    steps:
+      - Home → "Join" (top-right) → enter the poll's 6-char code
+    expected: lands on the poll (results or voting screen); cloud-first lookup
+      finds polls created on other devices (repository checks Firestore before Room)
+    result: 'pass (2026-11-27, emulator battery): after adb pm clear (empty Room) +
+      fresh join by code A5MY5M, poll rendered with all 4 options, and cloud ballots
+      arrived too (3 votes / 2 participants, RSVP 2) — cloud-first lookup confirmed'
+  - id: APP-08
+    title: Close Voting Now → web reflects Closed live
+    area: android-app
+    steps:
+      - Results screen → "Close Voting Now"
+      - Watch the open web tab — do NOT reload
+    expected:
+      - App marks poll closed (badge "Closed", voting controls hidden)
+      - Cloud isClosed flips; web live-updates to "Closed" badge and hides the
+        vote card via onSnapshot — no reload
+    result: 'pass (2026-11-27, emulator battery): Close tap → "Synced poll … status to
+      cloud (isClosed=true)"; web (untouched tab) showed badge "Closed", vote card
+      hidden, results preserved. NOTE first run pre-fix left Room/cloud divergent
+      (local closed, cloud open) — fixed same day (KB-06)'
+# ---------------- Web vote client (docs/vote.html) ------------------------
+  - id: WEB-04
+    title: Multi-select ballot — two options tallied, swap to one
+    area: web-client
+    steps:
+      - On a multi-select poll, check TWO options → Submit
+      - Change my vote → check ONE option (different from either) → Submit
+    expected:
+      - First submission tallies both selections
+      - After the swap exactly one selection counts — the whole ballot is replaced
+    result: 'pass (2026-11-27, emulator battery): two selections tallied; later swap to
+      a single selection replaced the ballot. Found KB-05 along the way — headcount
+      over-counted multi-selection voters (fixed same day, verified via reload).'
+  - id: WEB-05
+    title: Returning voter after page reload sees "Change my vote"
+    area: web-client
+    steps:
+      - Vote in a session → hard-reload the page (same browser, same localStorage)
+    expected: results view with "Change my vote" visible, Submit hidden — the
+      listener detects the voter's ballot in the cloud (KB-04 returning-voter fix)
+    result: >-
+      pass (2026-11-27, emulator battery: reload → changeVisible true, submitHidden true, results
+      shown)
+# ---------------- Cross-platform sync ------------------------------------
+  - id: SYNC-04
+    title: Web vote CHANGE reaches app without double-count (web → FS → app)
+    area: sync
+    steps:
+      - Web votes option A → app shows it
+      - Web changes vote to option B (app parked on results screen)
+    expected:
+      - App live-updates: A loses the vote, B gains it; totals UNCHANGED
+      - Room mirror clears the voter's previous rows (attachLiveCloudSync) — no
+        stale A+B pair
+    result: 'pass (2026-11-27, emulator battery): web changed Riverside→Central Park
+      while app sat on results; app showed Central Park 50% leading, 2 votes / 2
+      participants, RSVP (2) — no inflation'
+  - id: SYNC-05
+    title: App vote CHANGE reaches web without double-count (app → FS → web)
+    area: sync
+    steps:
+      - App votes option A (web shows it) → app updates vote to option B
+      - Watch the open web tab — do NOT reload
+    expected: web tallies swap A→B live; total unchanged; single ballot doc in
+      REST for the app's voterId
+    result: 'pass (2026-11-27, emulator battery): app ballot Metro→Highland; web
+      (untouched tab) live-updated to 2 votes — Riverside 50% + Highland 50%,
+      Metro 0%, headcount correct'
+  - id: INFRA-03
+    title: Gradle test-suite flake and stale build-cache trap
+    area: infra
+    detail: >-
+      ux_pollListScreen_sparse uses waitUntil(15_000) for allPolls to emit; under
+      heavy machine load (emulator + brew + parallel builds) the suite failed at
+      15.089s twice with identical code that passes solo and in forced re-runs —
+      a load flake, not a regression (verify with a solo run before debugging
+      code). Separate trap: testDebugUnitTest reports UP-TO-DATE restored from
+      the build cache right after cleanTest — "BUILD SUCCESSFUL in <1s" means
+      tests did NOT run. Genuine runs need --rerun-tasks --no-build-cache.
+    result: informational (flake observed 2026-11-27; suite green when forced)
+
+# =============================================================================
+  - id: INFRA-04
+    title: Local Firestore emulator loop (no deploy needed)
+    area: infra
+    detail: >-
+      Full local e2e without touching prod: firebase emulators:start --only
+      firestore --project livepulse-prod (CLI 15.37 requires Java 21+ on PATH
+      — brew openjdk@21; Gradle keeps JDK 17). The emulator enforces the LOCAL
+      firestore.rules, so rules changes are verifiable before deploy. Wiring:
+      web client auto-connects when served from localhost/127.0.0.1
+      (connectFirestoreEmulator 127.0.0.1:8080, http-only guard — prod over
+      https can never hit it); Android via ./gradlew assembleDebug
+      -PfirestoreEmulator=true → BuildConfig.FIRESTORE_EMULATOR →
+      firestore.useEmulator("10.0.2.2", 8080) (AVD host loopback). Data is
+      in-memory: re-seed the fixture poll after every emulator restart. First
+      start downloads the emulator JAR (~200 MB, slow).
+    result: >-
+      setup verified 2026-11-27 (first fixture battery: see WEB-03/APP-06/SYNC-04/05/WEB-04)
