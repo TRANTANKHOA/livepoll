@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Vendored from TRANTANKHOA/agent-dotfiles skills/spec-driven/cli.py (spec-driven v1,
-# commit f71cffc, 2026-11-28). Re-vendor on upstream format changes; the YAML
+# re-vendored 2026-11-28: interactive renderer — collapsible tree, group views,
+# light/dark themes; commit f71cffc+). Re-vendor on upstream format changes; the YAML
 # subset contract below is stable. CI runs: python3 scripts/validate_specs.py validate
 # and python3 scripts/check_spec_coverage.py
 
@@ -30,6 +31,7 @@ Global: --root DIR (default cwd). The spec file path is <root>/specs/spec.yml.
 import argparse
 import datetime
 import html
+import json
 import pathlib
 import re
 import sys
@@ -384,97 +386,288 @@ def cmd_render(a):
 
     out = pathlib.Path(a.out) if a.out else root / "specs" / "spec.html"
     e = html.escape
+
+    def status_cls(v):
+        k = str(v).lower()
+        if k == "verified":
+            return "st-verified"
+        if k == "implemented":
+            return "st-implemented"
+        if k in ("partial", "blocked-ui"):
+            return "st-partial"
+        if k in ("open-defect", "latent-defect"):
+            return "st-open-defect"
+        return "st-draft"
+
     by_status, by_type = {}, {}
+    payload = []
     for s in doc["specs"]:
-        st = (s.get("attributes") or {}).get("status") or "unset"
+        attrs = {str(k): str(v) for k, v in (s.get("attributes") or {}).items()}
+        st = attrs.get("status") or "unset"
         ty = s.get("type") or "?"
         by_status[st] = by_status.get(st, 0) + 1
         by_type[ty] = by_type.get(ty, 0) + 1
-
-    def card(s, depth):
-        attrs = s.get("attributes") or {}
-        badges = []
-        for k, v in attrs.items():
-            cls = "b-" + k.replace("_", "-")
-            if k == "status":
-                cls = "b-st-" + str(v).lower().replace("_", "-")
-            badges.append(f'<span class="badge {cls}">{e(k)}: {e(str(v))}</span>')
-        badge_html = " ".join(badges)
-        gwt_html = ""
-        for label, field in (("Given", "given"), ("When", "when"), ("Then", "then")):
-            vals = gwt(s.get(field), field, s["id"])
-            lis = "".join(f"<li>{e(v)}</li>" for v in vals)
-            gwt_html += f'<div class="gwt g-{field}"><h4>{label}</h4><ul>{lis}</ul></div>'
-        tests = s.get("tests") or []
-        tests_html = ("".join(f"<li><code>{e(str(t))}</code></li>" for t in tests)
-                      or '<li class="none">(no tests — draft)</li>')
-        parent = s.get("parent")
-        parent_chip = (f'<span class="parent-chip">↳ child of '
-                       f'<a href="#{e(parent)}">{e(parent)}</a></span>' if parent else "")
-        depth_cls = f" d{min(depth, 4)}" if depth else ""  # capped: no narrow columns
-        child_cls = " child" if depth else ""
-        return (f'<section class="spec{child_cls}{depth_cls}" id="{e(s["id"])}">'
-                f'<h3>{e(s["id"])} — {e(s["title"])}</h3>'
-                f'<p class="meta"><span class="badge b-type">{e(s["type"])}</span>'
-                f'<span class="badge b-aspect">{e(s["aspect"])}</span>{badge_html}'
-                f'{parent_chip}</p>'
-                f'{gwt_html}<p class="tests">Tests:</p><ul class="tests">{tests_html}</ul></section>')
-
-    idx = children_index(doc["specs"])
-
-    def rec(parent, depth):
-        out = []
-        for s in idx.get(parent, ()):
-            out.append(card(s, depth))
-            out.append(rec(s["id"], depth + 1))
-        return "".join(out)
-
-    body = rec(None, 0)
-    stats = " · ".join(f"{e(k)}: {v}" for k, v in sorted(by_status.items()))
+        payload.append({
+            "id": s["id"], "title": s.get("title") or "",
+            "type": ty, "aspect": s.get("aspect") or "?",
+            "parent": s.get("parent"), "attrs": attrs,
+            "given": gwt(s.get("given"), "given", s["id"]),
+            "when": gwt(s.get("when"), "when", s["id"]),
+            "then": gwt(s.get("then"), "then", s["id"]),
+            "tests": [str(t) for t in (s.get("tests") or [])],
+        })
+    pills = " ".join(
+        f'<button class="pill {status_cls(k)}" data-status="{e(k)}">{e(k)}: {v}</button>'
+        for k, v in sorted(by_status.items()))
     types = " · ".join(f"{e(k)}: {v}" for k, v in sorted(by_type.items()))
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    out.write_text(f"""<!DOCTYPE html>
+    body_json = json.dumps(payload).replace("</", "<\\/")
+    html_out = (TEMPLATE
+                .replace("__PROJECT__", e(doc["project"]))
+                .replace("__NSPECS__", str(len(doc["specs"])))
+                .replace("__PILLS__", pills)
+                .replace("__TYPES__", types)
+                .replace("__NOW__", now)
+                .replace("__PAYLOAD__", body_json))
+    out.write_text(html_out)
+    print(f"rendered {len(doc['specs'])} specs -> {out}")
+    return 0
+
+
+TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{e(doc['project'])} — Specs</title>
+<title>__PROJECT__ — Specs</title>
 <style>
-  html {{ background: #f7fafc; }}
-  body {{ font-family: system-ui, sans-serif; max-width: 980px; margin: 0 auto; padding: 24px; color: #1a202c; }}
-  h1 {{ font-size: 1.6rem; }}
-  .summary {{ color: #4a5568; margin-bottom: 24px; }}
-  .summary a {{ color: #2b6cb0; }}
-  .spec {{ border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 14px 0; background: #fff; }}
-  .spec.child {{ border-left: 4px solid #90cdf4; }}
-  .d1 {{ margin-left: 16px; }} .d2 {{ margin-left: 32px; }}
-  .d3 {{ margin-left: 48px; }} .d4 {{ margin-left: 60px; }}
-  .spec h3 {{ margin: 0 0 6px; font-size: 1.02rem; }}
-  .badge {{ display: inline-block; background: #edf2f7; border-radius: 4px; padding: 1px 8px; margin-right: 6px; font-size: 0.78rem; }}
-  .b-type {{ background: #e6fffa; }} .b-aspect {{ background: #ebf8ff; }}
-  .b-st-verified {{ background: #c6f6d5; color: #22543d; }}
-  .b-st-implemented {{ background: #bee3f8; color: #2a4365; }}
-  .b-st-draft {{ background: #e2e8f0; color: #4a5568; }}
-  .parent-chip {{ font-size: 0.78rem; color: #4a5568; background: #edf2f7; border-radius: 4px; padding: 1px 8px; white-space: nowrap; }}
-  .parent-chip a {{ color: #2b6cb0; text-decoration: none; }}
-  .gwt {{ margin: 8px 0; }} .gwt h4 {{ margin: 0; font-size: 0.8rem; text-transform: uppercase; color: #718096; }}
-  .gwt ul {{ margin: 4px 0 4px 18px; padding: 0; }} .g-given h4 {{ color: #3182ce; }}
-  .g-when h4 {{ color: #d69e2e; }} .g-then h4 {{ color: #38a169; }}
-  .tests {{ margin: 4px 0 0; }} .tests ul {{ margin: 4px 0 0 18px; }}
-  code {{ background: #f7fafc; overflow-wrap: anywhere; }}
-  .none {{ color: #a0aec0; }}
+  :root { --bg:#f7fafc; --card:#ffffff; --text:#1a202c; --muted:#4a5568; --faint:#718096;
+    --border:#e2e8f0; --accent:#2b6cb0;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 14px rgba(0,0,0,.05);
+    --ok-bg:#c6f6d5; --ok-tx:#22543d; --impl-bg:#bee3f8; --impl-tx:#2a4365;
+    --warn-bg:#feebc8; --warn-tx:#744210; --bad-bg:#fed7d7; --bad-tx:#742a2a;
+    --gray-bg:#e2e8f0; --gray-tx:#4a5568;
+    --c-given:#3182ce; --c-when:#d69e2e; --c-then:#38a169; }
+  html[data-theme="dark"] { --bg:#0f172a; --card:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --faint:#64748b;
+    --border:#334155; --accent:#63b3ed;
+    --shadow:0 1px 3px rgba(0,0,0,.5),0 6px 18px rgba(0,0,0,.35);
+    --ok-bg:rgba(72,187,120,.16); --ok-tx:#68d391; --impl-bg:rgba(99,179,237,.16); --impl-tx:#90cdf4;
+    --warn-bg:rgba(237,137,54,.16); --warn-tx:#f6ad55; --bad-bg:rgba(245,101,101,.16); --bad-tx:#fc8181;
+    --gray-bg:rgba(160,174,192,.14); --gray-tx:#a0aec0;
+    --c-given:#63b3ed; --c-when:#f6ad55; --c-then:#68d391; }
+  html { background: var(--bg); }
+  body { font-family: system-ui, sans-serif; max-width: 1060px; margin: 0 auto;
+    padding: 24px 24px 110px; color: var(--text); }
+  header h1 { font-size: 1.7rem; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .summary { color: var(--muted); margin: 10px 0 24px; }
+  .summary a { color: var(--accent); }
+  .summary code { background: var(--gray-bg); color: var(--gray-tx); border-radius: 5px; padding: 1px 7px; }
+  .pill { border: 0; border-radius: 999px; padding: 2px 10px; margin: 2px 4px 2px 0;
+    font-size: 0.78rem; cursor: pointer; font-family: inherit; }
+  .pill:hover { filter: brightness(1.06); }
+  .st-verified { background: var(--ok-bg); color: var(--ok-tx); }
+  .st-implemented { background: var(--impl-bg); color: var(--impl-tx); }
+  .st-partial { background: var(--warn-bg); color: var(--warn-tx); }
+  .st-open-defect { background: var(--bad-bg); color: var(--bad-tx); }
+  .st-draft { background: var(--gray-bg); color: var(--gray-tx); }
+  .spec { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; margin: 12px 0; box-shadow: var(--shadow);
+    transition: transform .12s, box-shadow .12s, border-color .2s; }
+  .spec:hover { transform: translateY(-1px); }
+  .spec.child { border-left: 4px solid var(--accent); }
+  .children { margin-left: 12px; padding-left: 8px; border-left: 2px solid var(--border); }
+  .children:empty { display: none; }
+  .spec.collapsed > .children { display: none; }
+  .spec.collapsed { opacity: 0.82; }
+  .spec-head { display: flex; align-items: baseline; gap: 8px; }
+  .spec-head h3 { flex: 1; margin: 0; font-size: 1.02rem; }
+  .chev { border: 0; background: transparent; color: var(--faint); cursor: pointer;
+    font-size: 0.9rem; padding: 0 2px; line-height: 1; }
+  .chev:hover { color: var(--accent); }
+  .anchor { color: inherit; text-decoration: none; }
+  .anchor:hover { color: var(--accent); }
+  .meta { margin: 6px 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+  .badge { display: inline-block; background: var(--gray-bg); color: var(--gray-tx);
+    border-radius: 5px; padding: 1px 8px; font-size: 0.74rem; }
+  .b-type { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .b-aspect { background: transparent; border: 1px dashed var(--border); color: var(--muted); }
+  .badge.b-st-verified { background: var(--ok-bg); color: var(--ok-tx); }
+  .badge.b-st-implemented { background: var(--impl-bg); color: var(--impl-tx); }
+  .badge.b-st-partial, .badge.b-st-blocked-ui { background: var(--warn-bg); color: var(--warn-tx); }
+  .badge.b-st-open-defect, .badge.b-st-latent-defect { background: var(--bad-bg); color: var(--bad-tx); }
+  .badge.b-st-draft, .badge.b-st-documented, .badge.b-st-informational,
+  .badge.b-st-conditional, .badge.b-st-unset { background: var(--gray-bg); color: var(--gray-tx); }
+  .parent-chip, .kids-chip { font-size: 0.74rem; background: var(--gray-bg); color: var(--gray-tx);
+    border-radius: 5px; padding: 1px 8px; white-space: nowrap; }
+  .parent-chip a { color: var(--accent); text-decoration: none; }
+  .gwt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 720px) { .gwt-grid { grid-template-columns: 1fr; } }
+  .gwt { border-left: 3px solid; border-radius: 0 6px 6px 0; padding: 2px 0 2px 9px; }
+  .col-g { border-color: var(--c-given); } .col-a { border-color: var(--c-when); } .col-t { border-color: var(--c-then); }
+  .gwt h4 { margin: 0 0 3px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .col-g h4 { color: var(--c-given); } .col-a h4 { color: var(--c-when); } .col-t h4 { color: var(--c-then); }
+  .gwt ul { margin: 0; padding-left: 15px; }
+  .gwt li { font-size: 0.86rem; margin: 2px 0; }
+  .tests { margin-top: 10px; }
+  .tests h4 { margin: 0 0 4px; font-size: 0.7rem; text-transform: uppercase; color: var(--faint); letter-spacing: 0.06em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chips code { background: var(--gray-bg); color: var(--gray-tx); border-radius: 5px;
+    padding: 2px 7px; font-size: 0.74rem; overflow-wrap: anywhere; }
+  .none { color: var(--faint); font-size: 0.8rem; }
+  .group h2 { font-size: 1.1rem; margin: 26px 0 2px; }
+  .count { display: inline-block; background: var(--gray-bg); color: var(--gray-tx);
+    border-radius: 999px; padding: 0 9px; font-size: 0.75rem; margin-left: 7px; }
+  #ctrl { position: fixed; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 8px; box-shadow: var(--shadow); z-index: 50; }
+  .seg { display: flex; gap: 2px; background: var(--bg); border-radius: 8px; padding: 2px; }
+  .seg button { border: 0; background: transparent; padding: 3px 9px; font-size: 0.75rem;
+    border-radius: 6px; color: var(--muted); cursor: pointer; font-family: inherit; }
+  .seg button.on { background: var(--card); color: var(--text); box-shadow: var(--shadow); font-weight: 600; }
+  .seg button:hover, .row2 button:hover { color: var(--text); }
+  .row2 { display: flex; gap: 2px; }
+  .row2 button { flex: 1; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    border-radius: 6px; padding: 4px 0; font-size: 0.9rem; }
+  .row2 button.off { opacity: 0.3; cursor: default; }
 </style>
 </head>
 <body>
-<h1>{e(doc['project'])} — Specs</h1>
-<p class="summary">{len(doc['specs'])} specs · {stats}<br>types: {types}<br>
-generated {now} · validate OK · <a href="spec.yml"><code>specs/spec.yml</code></a></p>
-{body}
+<header>
+<h1>__PROJECT__ — Specs</h1>
+<p class="summary">__NSPECS__ specs · <span id="statpills">__PILLS__</span><br>types: __TYPES__<br>
+generated __NOW__ · validate OK · <a href="spec.yml"><code>specs/spec.yml</code></a></p>
+</header>
+<main id="content"></main>
+<div id="ctrl">
+  <div class="seg" id="views">
+    <button data-v="tree" class="on">Tree</button>
+    <button data-v="type">Type</button>
+    <button data-v="aspect">Aspect</button>
+    <button data-v="status">Status</button>
+  </div>
+  <div class="row2">
+    <button id="exp" title="Expand all">⤢</button>
+    <button id="col" title="Collapse all">⤡</button>
+    <button id="theme" title="Theme">◐</button>
+  </div>
+</div>
+<script>
+const SPECS = __PAYLOAD__;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const kidsOf = {};
+SPECS.forEach(s => { const p = s.parent || null; (kidsOf[p] = kidsOf[p] || []).push(s); });
+const stCls = v => {
+  const k = String(v).toLowerCase();
+  if (k === 'verified') return 'b-st-verified';
+  if (k === 'implemented') return 'b-st-implemented';
+  if (k === 'partial' || k === 'blocked-ui') return 'b-st-partial';
+  if (k === 'open-defect' || k === 'latent-defect') return 'b-st-open-defect';
+  return 'b-st-draft';
+};
+function cardEl(s) {
+  const kids = kidsOf[s.id] || [];
+  const el = document.createElement('section');
+  el.className = 'spec' + (s.parent ? ' child' : '');
+  el.id = s.id;
+  el.dataset.type = s.type;
+  el.dataset.aspect = s.aspect;
+  const st = (s.attrs && s.attrs.status) || 'unset';
+  el.dataset.status = st;
+  const badges = Object.entries(s.attrs || {}).map(([k, v]) => {
+    const cls = k === 'status' ? stCls(v) : 'b-' + k.replace(/_/g, '-');
+    return '<span class="badge ' + cls + '">' + esc(k) + ': ' + esc(v) + '</span>';
+  }).join('');
+  const chip = s.parent
+    ? '<span class="parent-chip">↳ child of <a href="#' + esc(s.parent) + '">' + esc(s.parent) + '</a></span>'
+    : '';
+  const kidsChip = kids.length
+    ? '<span class="kids-chip">' + kids.length + (kids.length === 1 ? ' child' : ' children') + '</span>'
+    : '';
+  const g = (lbl, key, cls) => '<div class="gwt col-' + cls + '"><h4>' + lbl + '</h4><ul>' +
+    s[key].map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>';
+  const tests = s.tests.length
+    ? '<div class="tests"><h4>Tests</h4><div class="chips">' + s.tests.map(t => '<code>' + esc(t) + '</code>').join('') + '</div></div>'
+    : '<div class="tests"><h4>Tests</h4><span class="none">no tests — draft</span></div>';
+  el.innerHTML =
+    '<div class="spec-head">' +
+    (kids.length ? '<button class="chev" title="Collapse children">▾</button>' : '') +
+    '<h3><a class="anchor" href="#' + esc(s.id) + '">' + esc(s.id) + '</a> — ' + esc(s.title) + '</h3>' +
+    '</div>' +
+    '<p class="meta"><span class="badge b-type">' + esc(s.type) + '</span>' +
+    '<span class="badge b-aspect">' + esc(s.aspect) + '</span>' + badges + chip + kidsChip + '</p>' +
+    '<div class="gwt-grid">' + g('Given', 'given', 'g') + g('When', 'when', 'a') + g('Then', 'then', 't') + '</div>' +
+    tests;
+  if (kids.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'children';
+    el.appendChild(wrap);
+    const btn = el.querySelector('.chev');
+    const set = c => {
+      el.classList.toggle('collapsed', c);
+      btn.textContent = c ? '▸' : '▾';
+      btn.title = c ? 'Expand children' : 'Collapse children';
+    };
+    btn.addEventListener('click', () => set(!el.classList.contains('collapsed')));
+    el._set = set;
+  }
+  return el;
+}
+const pool = {};
+SPECS.forEach(s => pool[s.id] = cardEl(s));
+const content = document.getElementById('content');
+function build(parent, container) {
+  (kidsOf[parent] || []).forEach(s => {
+    const el = pool[s.id];
+    container.appendChild(el);
+    build(s.id, el.querySelector('.children'));
+  });
+}
+function setView(v) {
+  document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  document.getElementById('exp').classList.toggle('off', v !== 'tree');
+  document.getElementById('col').classList.toggle('off', v !== 'tree');
+  content.innerHTML = '';
+  if (v === 'tree') { build(null, content); return; }
+  const buckets = {};
+  SPECS.forEach(s => {
+    const k = v === 'type' ? s.type : v === 'aspect' ? s.aspect : ((s.attrs && s.attrs.status) || 'unset');
+    (buckets[k] = buckets[k] || []).push(pool[s.id]);
+  });
+  Object.keys(buckets).sort().forEach(k => {
+    const g = document.createElement('div');
+    g.className = 'group';
+    g.innerHTML = '<h2>' + esc(v) + ': ' + esc(k) + '<span class="count">' + buckets[k].length + '</span></h2>';
+    const box = document.createElement('div');
+    buckets[k].forEach(el => box.appendChild(el));
+    g.appendChild(box);
+    content.appendChild(g);
+  });
+}
+document.querySelectorAll('#views button').forEach(b => b.addEventListener('click', () => setView(b.dataset.v)));
+document.getElementById('exp').addEventListener('click', () => Object.values(pool).forEach(el => el._set && el._set(false)));
+document.getElementById('col').addEventListener('click', () => Object.values(pool).forEach(el => el._set && el._set(true)));
+const themeBtn = document.getElementById('theme');
+const THEMES = ['auto', 'light', 'dark'];
+function setTheme(t) {
+  const eff = t === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
+  document.documentElement.dataset.theme = eff;
+  themeBtn.textContent = eff === 'dark' ? '☀️' : '🌙';
+  themeBtn.title = 'Theme: ' + t + (t === 'auto' ? ' (now ' + eff + ')' : '');
+  try { localStorage.setItem('spec-theme', t); } catch (e) {}
+}
+themeBtn.addEventListener('click', () => {
+  let cur = 'auto';
+  try { cur = localStorage.getItem('spec-theme') || 'auto'; } catch (e) {}
+  setTheme(THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length]);
+});
+let savedTheme = 'auto';
+try { savedTheme = localStorage.getItem('spec-theme') || 'auto'; } catch (e) {}
+setTheme(savedTheme);
+setView('tree');
+document.querySelectorAll('.pill[data-status]').forEach(p => p.addEventListener('click', () => setView('status')));
+</script>
 </body>
-</html>
-""")
-    print(f"rendered {len(doc['specs'])} specs -> {out}")
-    return 0
+</html>"""
 
 
 def main():
