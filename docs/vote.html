@@ -291,6 +291,7 @@ function openPoll(pollId, code) {
     if (!snapDoc.exists()) return;
     poll = snapDoc.data();
     poll.id = snapDoc.id;
+    show("pollView");
     renderPollShell();
     renderResults();
   }, err => {

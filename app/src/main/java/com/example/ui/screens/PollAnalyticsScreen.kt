@@ -99,6 +99,12 @@ fun PollAnalyticsScreen(
     val context = LocalContext.current
     val pollDetails by viewModel.getPollDetails(pollId).collectAsState(initial = null)
 
+    // Live cloud sync: without this, votes cast on the web (or other devices)
+    // never appear while the organizer watches the results screen.
+    LaunchedEffect(pollId) {
+        viewModel.attachPollCloudListener(pollId)
+    }
+
     var selectedTab by remember { mutableIntStateOf(0) }
     var showShareDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
