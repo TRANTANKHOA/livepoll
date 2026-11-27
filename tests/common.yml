@@ -45,6 +45,36 @@ known_bugs:
     fix: Added show("pollView") in the openPoll onSnapshot callback (docs/vote.html).
     status: FIXED and committed (609cd72, 2026-11-26) — deploy to Firebase Hosting PENDING;
       prod join-by-code stays broken until firebase deploy runs (WEB-01 guards this).
+  - id: KB-09
+    severity: critical (vote integrity — closed polls accept votes)
+    summary: Rules accepted votes on CLOSED polls via direct API writes
+    detail: >-
+      Found by SEC-01 (2026-11-28, batch-5): the votes rule checked pollId match
+      and ballot schema but never isClosed — a REST ballot write to closed poll
+      A5MY5M was ACCEPTED ("Sneaky Sally"). UIs hide the vote form on closed
+      polls; the rules are the only real enforcement.
+    fix: >-
+      firestore.rules votes create/update now additionally requires
+      get(.../polls/$(pollId)).data.isClosed == false. Verified: sneaky write
+      PERMISSION_DENIED; legit vote on a fresh open poll ACCEPTED.
+    status: FIXED and verified 2026-11-28 (local emulator; deploy pending with KB-01)
+  - id: KB-10
+    severity: critical (anyone can close/vandalize any open guest poll; closed guest polls are unreopenable)
+    summary: Poll-update rule lets ANYONE update ANY open poll; closed guest polls unreopenable
+    detail: >-
+      Found by SEC-02 (2026-11-28, batch-5): allow update grants non-creators
+      every update on open polls (!resource.data.isClosed) — an anonymous
+      REST masked-update closed poll KXHFC7. Design reality: guest polls store
+      no creatorId and guests are unauthenticated, so "the organizer" cannot be
+      identified server-side. Secondary facet: once cloud-closed, a guest poll
+      can NEVER be re-opened (non-creator update requires !isClosed) — the
+      app's Re-open sync would be silently denied.
+    fix: 'none yet — needs a design decision: (a) accept the risk (guest polls
+      are disposable; deadlines close them naturally), (b) creator secret
+      generated at publish, shared in the share-code payload, required for
+      poll-doc updates, or (c) authenticated creators (Google sign-in) owning
+      poll docs. (b)/(c) change both clients and the share flow.'
+    status: OPEN — decision needed; documented, not silently patched
   - id: KB-07
     severity: critical (app-killing) / high (data divergence)
     summary: >-

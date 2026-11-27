@@ -1,0 +1,71 @@
+# =============================================================================
+# LivePulse E2E — Batch 5 — Rules-Integrity Security Hunt
+# ============================================================================
+# First batch to attack the BACKEND directly: Firestore security rules probed
+# via unauthenticated REST writes, bypassing every client UI. The UI-level
+# batteries (batches 1-4) could never find these — both probes CONFIRMED
+# critical holes within minutes. Fixture polls live in the local Firestore
+# emulator. Shared context lives in tests/common.yml.
+
+version: 1
+suite: livepulse-e2e-batch-05
+
+tests:
+  # ---------------- Direct-API rules probes ---------------------------------
+  - id: SEC-01
+    title: Unauthenticated vote on a CLOSED poll via direct REST write
+    area: security
+    steps:
+      - 'PATCH $rest_base_local/polls/<closed-uuid>/votes/sneaky_voter with a
+        valid ballot body (pollId, voterId, voterName, selections) — no auth'
+      - Inspect response; then list the poll''s votes via REST
+    expected:
+      - PERMISSION_DENIED — closed polls must not accept votes regardless of
+        what any client UI shows
+    result: >-
+      FAIL first run (2026-11-28, closed poll A5MY5M): write ACCEPTED — "Sneaky
+      Sally" ballot landed on a closed poll. Root cause: the votes rule checked
+      pollId match and ballot schema but NEVER isClosed. FIXED same day: votes
+      create/update now additionally requires
+      get(...polls/$(pollId)).data.isClosed == false. Re-run: PERMISSION_DENIED
+      (evaluation error at the isClosed check). Regression check: legit vote on
+      a fresh OPEN poll accepted. KB-09.
+    bug_ref: KB-09
+  - id: SEC-02
+    title: Anonymous visitor closes someone else''s open poll via masked update
+    area: security
+    steps:
+      - 'PATCH $rest_base_local/polls/<open-uuid>?updateMask=isClosed with
+        {"fields":{"isClosed":{"booleanValue":true}}} — no auth'
+      - Read the poll doc — isClosed flipped?
+    expected: >-
+      Ideally PERMISSION_DENIED for non-creators. NOTE the design reality:
+      guest polls have no authenticated creator and no creatorId stored, so
+      "the organizer" is unidentifiable server-side. Any fix needs a design
+      decision (creator secret in share payload, or accept open-poll
+      vandalism risk for disposable guest polls).
+    result: >-
+      CONFIRMED (2026-11-28, open poll KXHFC7): masked update ACCEPTED — an
+      anonymous visitor closed the poll. Secondary discovery: with the current
+      rule, a CLOUD-CLOSED guest poll can never be re-opened by anyone
+      (non-creator update needs !isClosed, which is false for closed polls;
+      the app''s Re-open sync would be silently denied). KB-10 OPEN — needs the
+      user''s design call; NOT silently patched because every non-breaking fix
+      changes the guest flow.
+    bug_ref: KB-10
+
+  # ---------------- Client-side sanity after rules change -------------------
+  - id: SEC-03
+    title: App ballot writes unaffected by the KB-09 rules fix
+    area: security
+    steps:
+      - Create a fresh open poll (template quick-create) — app ballot writes
+        use the identical schema as the probes
+      - 'REST: legit vote on the open poll (expected ACCEPTED); sneaky vote on
+        a closed poll (expected DENIED)'
+    expected: open-poll writes (app or REST) keep working; closed-poll writes
+      denied for every path
+    result: >-
+      pass (2026-11-28): fresh fixture 7QZYR9 created; legit REST vote ACCEPTED;
+      closed-poll vote DENIED. App write path unchanged since batch-04 (same
+      schema; the app cannot even attempt closed-poll votes — its vote UI hides).
