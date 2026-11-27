@@ -31,9 +31,12 @@ service cloud.firestore {
         // Anyone can view poll results / live tallies
         allow read: if true;
         
-        // Voting allowed if poll is open
+        // Voting allowed if poll is open — either schema:
+        // legacy per-option docs (optionId string) or per-voter ballot docs
+        // (KB-04: one doc per voter with a selections array)
         allow create, update: if request.resource.data.pollId == pollId
-                              && request.resource.data.optionId is string;
+                              && (request.resource.data.optionId is string
+                                  || request.resource.data.selections is list);
                               
         // Voter or poll creator can delete vote
         allow delete: if isAuthenticated() && (request.auth.uid == resource.data.voterId);

@@ -1,10 +1,13 @@
 package com.example.data.remote
 
 import android.util.Log
+import com.example.BuildConfig
 import com.example.data.local.entity.PollEntity
 import com.example.data.local.entity.PollOptionEntity
 import com.example.data.local.entity.VoteEntity
+import com.example.util.SecurityDefenseHelper
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -16,10 +19,13 @@ class FirestoreService {
 
     private val tag = "FirestoreService"
 
+    // Set once before first use of the instance; useEmulator must not be called twice.
+    @Volatile private var emulatorConfigured = false
+
     private val db: FirebaseFirestore?
         get() = try {
             if (FirebaseApp.getApps(FirebaseApp.getInstance().applicationContext).isNotEmpty()) {
-                FirebaseFirestore.getInstance()
+                FirebaseFirestore.getInstance().also { configureEmulatorIfNeeded(it) }
             } else {
                 null
             }
@@ -27,6 +33,17 @@ class FirestoreService {
             Log.w(tag, "Firebase not initialized yet or config missing: ${e.message}")
             null
         }
+
+    private fun configureEmulatorIfNeeded(firestore: FirebaseFirestore) {
+        if (!BuildConfig.FIRESTORE_EMULATOR || emulatorConfigured) return
+        synchronized(this) {
+            if (emulatorConfigured) return
+            // 10.0.2.2 is the host loopback as seen from the Android emulator.
+            firestore.useEmulator("10.0.2.2", 8080)
+            emulatorConfigured = true
+            Log.d(tag, "Firestore pointed at local emulator 10.0.2.2:8080")
+        }
+    }
 
     fun isCloudAvailable(): Boolean {
         return db != null
@@ -173,35 +190,101 @@ class FirestoreService {
     /**
      * Records a vote into Firestore collection `polls/{pollId}/votes`.
      */
-    suspend fun recordVoteToCloud(vote: VoteEntity): Boolean {
+    /**
+     * Publishes the voter's ballot as a single per-voter document
+     * (votes/{voterId}) holding a `selections` array. Overwriting replaces the
+     * previous selection, so changed votes never leave stale docs behind (KB-04).
+     * All votes in [votes] must come from the same castVotes call: same poll and voter.
+     */
+    suspend fun publishVoterBallot(votes: List<VoteEntity>): Boolean {
+        val first = votes.firstOrNull() ?: return false
         val firestore = db ?: return false
         return try {
-            val voteData = hashMapOf(
-                "id" to vote.id,
-                "pollId" to vote.pollId,
-                "optionId" to vote.optionId,
-                "voterId" to vote.voterId,
-                "voterName" to vote.voterName,
-                "timestamp" to vote.timestamp,
-                "rsvpStatus" to vote.rsvpStatus,
-                "plusGuests" to vote.plusGuests,
-                "ratingValue" to (vote.ratingValue ?: 0),
-                "feedbackComment" to (vote.feedbackComment ?: "")
+            val ballot = hashMapOf<String, Any?>(
+                "pollId" to first.pollId,
+                "voterId" to first.voterId,
+                "voterName" to first.voterName,
+                "timestamp" to System.currentTimeMillis(),
+                "rsvpStatus" to first.rsvpStatus,
+                "plusGuests" to first.plusGuests,
+                "ratingValue" to (first.ratingValue ?: 0),
+                "feedbackComment" to (first.feedbackComment ?: ""),
+                "selections" to votes.map { mapOf("optionId" to it.optionId) }
             )
 
             firestore.collection("polls")
-                .document(vote.pollId)
+                .document(first.pollId)
                 .collection("votes")
-                .document(vote.id)
-                .set(voteData, SetOptions.merge())
+                .document(first.voterId)
+                .set(ballot)
                 .await()
 
-            Log.d(tag, "Successfully uploaded vote ${vote.id} to Cloud Firestore")
+            Log.d(tag, "Successfully uploaded ballot ${first.voterId} (${votes.size} selections) to Cloud Firestore")
             true
         } catch (e: Exception) {
-            Log.e(tag, "Error recording vote to Cloud Firestore: ${e.message}", e)
+            Log.e(tag, "Error publishing ballot to Cloud Firestore: ${e.message}", e)
             false
         }
+    }
+
+    /**
+     * Maps vote documents to VoteEntities. Two schemas coexist (KB-04 migration):
+     * - ballot docs (votes/{voterId} with a `selections` list) — expanded so each
+     *   selected option becomes one vote;
+     * - legacy per-option docs (votes/{voterId}_{optionId}) — counted only when the
+     *   voter has no ballot doc; a ballot supersedes their stale legacy votes.
+     */
+    private fun mapVoteDocuments(pollId: String, documents: List<DocumentSnapshot>): List<VoteEntity> {
+        val ballotVoters = documents
+            .filter { it.get("selections") is List<*> }
+            .mapNotNull { it.getString("voterId") }
+            .toSet()
+
+        val votes = mutableListOf<VoteEntity>()
+        for (doc in documents) {
+            val voterId = doc.getString("voterId") ?: continue
+            val voterName = doc.getString("voterName") ?: "Voter"
+            val timestamp = doc.getLong("timestamp") ?: System.currentTimeMillis()
+            val rsvpStatus = doc.getString("rsvpStatus") ?: "GOING"
+            val plusGuests = doc.getLong("plusGuests")?.toInt() ?: 0
+            val ratingValue = doc.getLong("ratingValue")?.toInt()?.takeIf { it > 0 }
+            val feedbackComment = doc.getString("feedbackComment").takeIf { !it.isNullOrBlank() }
+
+            val selections = doc.get("selections")
+            if (selections is List<*>) {
+                for (selection in selections) {
+                    val optionId = (selection as? Map<*, *>)?.get("optionId") as? String ?: continue
+                    votes += VoteEntity(
+                        id = SecurityDefenseHelper.createIdempotentVoteKey(pollId, voterId, optionId),
+                        pollId = pollId,
+                        optionId = optionId,
+                        voterId = voterId,
+                        voterName = voterName,
+                        timestamp = timestamp,
+                        rsvpStatus = rsvpStatus,
+                        plusGuests = plusGuests,
+                        ratingValue = ratingValue,
+                        feedbackComment = feedbackComment
+                    )
+                }
+            } else {
+                val optionId = doc.getString("optionId") ?: continue
+                if (voterId in ballotVoters) continue
+                votes += VoteEntity(
+                    id = doc.getString("id") ?: doc.id,
+                    pollId = pollId,
+                    optionId = optionId,
+                    voterId = voterId,
+                    voterName = voterName,
+                    timestamp = timestamp,
+                    rsvpStatus = rsvpStatus,
+                    plusGuests = plusGuests,
+                    ratingValue = ratingValue,
+                    feedbackComment = feedbackComment
+                )
+            }
+        }
+        return votes
     }
 
     /**
@@ -216,30 +299,7 @@ class FirestoreService {
                 .get()
                 .await()
 
-            snapshot.documents.mapNotNull { doc ->
-                val id = doc.getString("id") ?: doc.id
-                val optionId = doc.getString("optionId") ?: return@mapNotNull null
-                val voterId = doc.getString("voterId") ?: return@mapNotNull null
-                val voterName = doc.getString("voterName") ?: "Voter"
-                val timestamp = doc.getLong("timestamp") ?: System.currentTimeMillis()
-                val rsvpStatus = doc.getString("rsvpStatus") ?: "GOING"
-                val plusGuests = doc.getLong("plusGuests")?.toInt() ?: 0
-                val ratingValue = doc.getLong("ratingValue")?.toInt()?.takeIf { it > 0 }
-                val feedbackComment = doc.getString("feedbackComment").takeIf { !it.isNullOrBlank() }
-
-                VoteEntity(
-                    id = id,
-                    pollId = pollId,
-                    optionId = optionId,
-                    voterId = voterId,
-                    voterName = voterName,
-                    timestamp = timestamp,
-                    rsvpStatus = rsvpStatus,
-                    plusGuests = plusGuests,
-                    ratingValue = ratingValue,
-                    feedbackComment = feedbackComment
-                )
-            }
+            snapshot.documents.let { mapVoteDocuments(pollId, it) }
         } catch (e: Exception) {
             Log.e(tag, "Error fetching cloud votes: ${e.message}", e)
             emptyList()
@@ -264,31 +324,7 @@ class FirestoreService {
                         return@addSnapshotListener
                     }
                     if (snapshot != null) {
-                        val votes = snapshot.documents.mapNotNull { doc ->
-                            val id = doc.getString("id") ?: doc.id
-                            val optionId = doc.getString("optionId") ?: return@mapNotNull null
-                            val voterId = doc.getString("voterId") ?: return@mapNotNull null
-                            val voterName = doc.getString("voterName") ?: "Voter"
-                            val timestamp = doc.getLong("timestamp") ?: System.currentTimeMillis()
-                            val rsvpStatus = doc.getString("rsvpStatus") ?: "GOING"
-                            val plusGuests = doc.getLong("plusGuests")?.toInt() ?: 0
-                            val ratingValue = doc.getLong("ratingValue")?.toInt()?.takeIf { it > 0 }
-                            val feedbackComment = doc.getString("feedbackComment").takeIf { !it.isNullOrBlank() }
-
-                            VoteEntity(
-                                id = id,
-                                pollId = pollId,
-                                optionId = optionId,
-                                voterId = voterId,
-                                voterName = voterName,
-                                timestamp = timestamp,
-                                rsvpStatus = rsvpStatus,
-                                plusGuests = plusGuests,
-                                ratingValue = ratingValue,
-                                feedbackComment = feedbackComment
-                            )
-                        }
-                        onVotesUpdated(votes)
+                        onVotesUpdated(mapVoteDocuments(pollId, snapshot.documents))
                     }
                 }
         } catch (e: Exception) {

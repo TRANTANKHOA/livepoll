@@ -27,6 +27,11 @@ android {
     //   ./gradlew assembleDebug -PdemoData=true
     // Normal debug and release builds start with a clean, signed-out state.
     buildConfigField("boolean", "ENABLE_DEMO_DATA", "${project.findProperty("demoData") == "true"}")
+
+    // Point Firestore at the local emulator suite (opt-in for e2e testing):
+    //   ./gradlew assembleDebug -PfirestoreEmulator=true
+    // Requires the emulator reachable at 10.0.2.2:8080 (host loopback from the AVD).
+    buildConfigField("boolean", "FIRESTORE_EMULATOR", "${project.findProperty("firestoreEmulator") == "true"}")
   }
 
   signingConfigs {

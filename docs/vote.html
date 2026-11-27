@@ -209,7 +209,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDocs, onSnapshot, query, where, limit,
+  getFirestore, connectFirestoreEmulator, collection, doc, getDocs, onSnapshot, query, where, limit,
   setDoc, updateDoc, arrayUnion, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -223,6 +223,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+// Local development loop: when served from loopback (python3 -m http.server in
+// docs/), talk to the local Firestore emulator instead of production. Deployed
+// copies serve over https from *.web.app and can never enter this branch.
+if (location.protocol === "http:" && ["localhost", "127.0.0.1"].includes(location.hostname)) {
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+}
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
@@ -300,7 +306,13 @@ function openPoll(pollId, code) {
     show("joinView");
   });
   unsubVotes = onSnapshot(collection(pollRef, "votes"), snap => {
-    votes = snap.docs.map(d => d.data());
+    votes = expandVotes(snap.docs.map(d => d.data()));
+    // Returning voter: their previous ballot is in the cloud — show "Change my
+    // vote" instead of a Submit that would hide their existing vote (KB-04).
+    if (!hasVoted && votes.some(v => v.voterId === voterId)) {
+      hasVoted = true;
+      renderPollShell();
+    }
     renderResults();
     if (hasVoted) renderResultsView();
   });
@@ -376,6 +388,23 @@ async function suggestOption() {
 }
 
 // ---- results ----
+// Ballot schema (KB-04): votes/{voterId} holds one doc per voter with a
+// `selections` array; each entry expands to a single vote. Legacy per-option
+// docs (votes/{voterId}_{optionId}) still count, but a voter's ballot doc
+// supersedes their stale legacy votes.
+function expandVotes(docs) {
+  const ballots = new Set(docs.filter(d => Array.isArray(d.selections)).map(d => d.voterId));
+  const flat = [];
+  docs.forEach(d => {
+    if (Array.isArray(d.selections)) {
+      d.selections.forEach(s => { if (s && s.optionId) flat.push({ ...d, optionId: s.optionId }); });
+    } else if (d.optionId && !ballots.has(d.voterId)) {
+      flat.push(d);
+    }
+  });
+  return flat;
+}
+
 function renderResults() {
   const opts = (poll?.options || []).slice().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
   const total = votes.length;
@@ -456,13 +485,13 @@ $("submitBtn").addEventListener("click", async () => {
   try {
     const now = Date.now();
     const includeRsvp = !$("rsvpBlock").classList.contains("hidden");
-    for (const optionId of selected) {
-      await setDoc(doc(db, "polls", poll.id, "votes", `${voterId}_${optionId}`), {
-        id: `${voterId}_${optionId}`, pollId: poll.id, optionId,
-        voterId, voterName: name, timestamp: now,
-        ...(includeRsvp ? { rsvpStatus: rsvp, plusGuests: guests } : {})
-      });
-    }
+    // One ballot doc per voter (keyed by voterId): overwriting replaces any
+    // previous selection instead of accumulating stale per-option docs (KB-04).
+    await setDoc(doc(db, "polls", poll.id, "votes", voterId), {
+      pollId: poll.id, voterId, voterName: name, timestamp: now,
+      ...(includeRsvp ? { rsvpStatus: rsvp, plusGuests: guests } : {}),
+      selections: [...selected].map(optionId => ({ optionId }))
+    });
     hasVoted = true;
     selected.clear();
     renderPollShell();

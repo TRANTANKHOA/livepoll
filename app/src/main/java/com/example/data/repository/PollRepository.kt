@@ -93,11 +93,16 @@ class PollRepository(
 
     /**
      * Attaches live cloud snapshot sync to keep votes updated in real-time across devices.
+     * Cloud state is mirrored: each voter present in the snapshot has their previous
+     * Room rows cleared first, so a changed ballot replaces (not adds to) earlier votes.
      */
     fun attachLiveCloudSync(pollId: String, scope: CoroutineScope): ListenerRegistration? {
         return firestoreService.attachLiveVotesListener(pollId) { cloudVotes ->
             scope.launch(Dispatchers.IO) {
                 if (cloudVotes.isNotEmpty()) {
+                    cloudVotes.map { it.voterId }.distinct().forEach { voterId ->
+                        voteDao.clearUserVotesForPoll(pollId, voterId)
+                    }
                     voteDao.insertVotes(cloudVotes)
                 }
             }
@@ -160,10 +165,9 @@ class PollRepository(
         }
         voteDao.insertVotes(newVotes)
 
-        // Sync votes to Cloud Firestore
-        for (vote in newVotes) {
-            firestoreService.recordVoteToCloud(vote)
-        }
+        // Sync the ballot to Cloud Firestore as one per-voter doc — overwriting
+        // replaces any previous selection (KB-04: no stale per-option docs).
+        firestoreService.publishVoterBallot(newVotes)
     }
 
     suspend fun addOptionToPoll(option: PollOptionEntity) {
