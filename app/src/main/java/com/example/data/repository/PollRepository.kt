@@ -176,6 +176,8 @@ class PollRepository(
 
     suspend fun togglePollStatus(pollId: String, isClosed: Boolean) {
         pollDao.setPollClosed(pollId, isClosed)
+        // Sync manual close/re-open to the cloud so web + other devices see it (KB-06)
+        firestoreService.publishPollStatusToCloud(pollId, isClosed)
         val poll = pollDao.getPollByIdSync(pollId)
         if (poll != null && isClosed) {
             val notif = NotificationEntity(

@@ -191,6 +191,32 @@ class FirestoreService {
      * Records a vote into Firestore collection `polls/{pollId}/votes`.
      */
     /**
+     * Syncs a poll's open/closed state to the cloud doc (KB-06): other devices
+     * and the web client learn about manual close/re-open via onSnapshot.
+     * Uses merge so only isClosed/cloudSyncedAt change.
+     */
+    suspend fun publishPollStatusToCloud(pollId: String, isClosed: Boolean): Boolean {
+        val firestore = db ?: return false
+        return try {
+            firestore.collection("polls")
+                .document(pollId)
+                .set(
+                    hashMapOf(
+                        "isClosed" to isClosed,
+                        "cloudSyncedAt" to FieldValue.serverTimestamp()
+                    ),
+                    SetOptions.merge()
+                )
+                .await()
+            Log.d(tag, "Synced poll $pollId status to cloud (isClosed=$isClosed)")
+            true
+        } catch (e: Exception) {
+            Log.e(tag, "Error syncing poll status to cloud: ${e.message}", e)
+            false
+        }
+    }
+
+    /**
      * Publishes the voter's ballot as a single per-voter document
      * (votes/{voterId}) holding a `selections` array. Overwriting replaces the
      * previous selection, so changed votes never leave stale docs behind (KB-04).

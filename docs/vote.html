@@ -427,7 +427,15 @@ function renderResults() {
       <div class="bar"><div style="width:${pct}%"></div></div>${vs}
     </div>`;
   }).join("");
-  const going = votes.filter(v => v.rsvpStatus === "GOING").reduce((s, v) => s + 1 + (v.plusGuests || 0), 0);
+  // Headcount counts VOTERS, not expanded selections: a multi-selection ballot
+  // must count its owner once (KB-05). First occurrence wins — every expanded
+  // vote of one voter carries the same rsvpStatus/plusGuests.
+  const seen = new Set();
+  const going = votes.filter(v => {
+    if (seen.has(v.voterId)) return false;
+    seen.add(v.voterId);
+    return v.rsvpStatus === "GOING";
+  }).reduce((s, v) => s + 1 + (v.plusGuests || 0), 0);
   $("quorumLine").textContent = (poll?.targetHeadcount > 0)
     ? `Headcount: ${going} going (+1s included) · target ${poll.targetHeadcount}` : "";
 }
