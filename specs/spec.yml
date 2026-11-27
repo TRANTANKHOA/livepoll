@@ -1,6 +1,7 @@
 version: 1
 project: "LivePulse"
 specs:
+  # ---------------- Ballot replacement family (KB-04/05) ---------------------
   - id: SPEC-001
     title: Vote change replaces the ballot
     type: behavior
@@ -9,7 +10,7 @@ specs:
       status: verified
       priority: p1
       bug_ref: KB-04
-      verified_scope: "web client on local Firestore-emulator loop"
+      verified_scope: "web + app on local Firestore-emulator loop"
     given: |
       A poll is open and the voter has already submitted a ballot
     when: |
@@ -30,7 +31,6 @@ specs:
       status: verified
       priority: p1
       bug_ref: KB-05
-      verified_scope: "web client on local Firestore-emulator loop"
     parent: SPEC-001
     given: |
       The voter's ballot contains one or more selections and an RSVP status
@@ -40,12 +40,81 @@ specs:
       Headcount counts the voter once, plus-guests included, regardless of how many options they selected
     tests:
       - tests/batch-02-ballot-battery.yml#WEB-04
+  - id: SPEC-005
+    title: Vote change from the app replaces the ballot
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p1
+    parent: SPEC-001
+    given: |
+      A poll is open on the Android app and the guest voter already cast a ballot
+    when: |
+      The voter taps Cast/Update Vote, picks a different option, and submits
+    then:
+      - Exactly ONE votes/{voterId} ballot doc exists in Firestore — no stale per-option docs
+      - The total vote count is unchanged by this voter's swap
+    tests:
+      - tests/batch-02-ballot-battery.yml#APP-06
+  - id: SPEC-006
+    title: Returning voter sees Change my vote after reload
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p2
+    parent: SPEC-001
+    given: |
+      The voter submitted a ballot in this browser and reloads the page
+    when: |
+      The web client loads with the same localStorage
+    then:
+      - Results view renders with "Change my vote" visible and Submit hidden
+      - The cloud ballot is detected by the live listener, not re-asked
+    tests:
+      - tests/batch-02-ballot-battery.yml#WEB-05
+  - id: SPEC-007
+    title: Web ballot change propagates to the app without double-count
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p1
+    parent: SPEC-001
+    given: |
+      A web voter's ballot is already mirrored in the app's Room database
+    when: |
+      The web voter changes their selection while the app sits on the results screen
+    then:
+      - The app live-updates: old option loses the vote, new option gains it, totals unchanged
+      - The Room mirror clears the voter's previous rows before inserting — no stale A+B pair
+    tests:
+      - tests/batch-02-ballot-battery.yml#SYNC-04
+  - id: SPEC-008
+    title: App ballot change propagates to the web without double-count
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p1
+    parent: SPEC-001
+    given: |
+      An app voter's ballot is already rendered on the open web tab
+    when: |
+      The app voter changes their selection, with the web tab untouched
+    then:
+      - Web tallies the swap live; total unchanged
+      - REST shows a single ballot doc for the app voter's id
+    tests:
+      - tests/batch-02-ballot-battery.yml#SYNC-05
+  # ---------------- Poll lifecycle -------------------------------------------
   - id: SPEC-003
     title: Manual poll close syncs live to all clients
     type: behavior
     aspect: sync
     attributes:
-      status: implemented
+      status: verified
       priority: p2
       bug_ref: KB-06
     given: |
@@ -59,11 +128,11 @@ specs:
     tests:
       - tests/batch-02-ballot-battery.yml#APP-08
   - id: SPEC-004
-    title: Join poll by six-character code
+    title: Join poll by six-character code (app)
     type: feature
     aspect: entry
     attributes:
-      status: implemented
+      status: verified
       priority: p2
     given: |
       The app is installed and the poll exists on another device
@@ -73,3 +142,321 @@ specs:
       The poll opens on the results or voting screen, found cloud-first so cross-device polls resolve
     tests:
       - tests/batch-02-ballot-battery.yml#APP-07
+  - id: SPEC-009
+    title: Join by code renders the poll (web)
+    type: feature
+    aspect: entry
+    attributes:
+      status: verified
+      priority: p1
+      bug_ref: KB-01
+      prod_status: "KNOWN-FAIL until KB-01 deploy"
+    given: |
+      A live poll exists and the voter opened vote.html
+    when: |
+      The voter enters the six-character code and opens the poll
+    then:
+      - Within seconds the poll view is visible: icon, code, deadline badge, title, options, live results, headcount
+      - Never an eternal spinner — spinner plus empty body is a KB-01 regression
+    tests:
+      - tests/batch-01-core-session.yml#WEB-01
+  - id: SPEC-010
+    title: Web vote submission with name and RSVP
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      An open multi-select poll is rendered on the web client
+    when: |
+      The voter picks options, fills their name, sets RSVP to Going, and submits
+    then:
+      - The view switches to results with the chosen option leading at the voter's share
+      - Headcount line reflects the going count with plus-guests
+      - The Change-my-vote button appears; REST shows the ballot with voterName and GOING status
+    tests:
+      - tests/batch-01-core-session.yml#WEB-02
+  # ---------------- App session ----------------------------------------------
+  - id: SPEC-011
+    title: Cold launch and process health
+    type: quality
+    aspect: app-session
+    attributes:
+      status: verified
+      priority: p2
+      baseline: "cold start 2148 ms, PSS ~130 MB (emulator)"
+    given: |
+      The AVD is booted and the app is launched via am start
+    when: |
+      The process starts and MainActivity reaches top-resumed
+    then:
+      - The process is alive with no AndroidRuntime FATAL for our pid
+      - Firebase initializes for [DEFAULT] from our pid's logcat
+    tests:
+      - tests/batch-01-core-session.yml#APP-01
+  - id: SPEC-012
+    title: Create poll from template with cloud publish
+    type: feature
+    aspect: app-session
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      The app is on the home screen
+    when: |
+      The creator picks a template, accepts the pre-filled form, and creates the poll
+    then:
+      - The share dialog renders with a six-character join code
+      - Logcat confirms "Successfully published poll <uuid> (<CODE>)" and REST finds the poll doc
+      - A non-rendering share dialog must be investigated via logcat/Room before re-tapping (duplicate-poll gotcha)
+    tests:
+      - tests/batch-01-core-session.yml#APP-02
+  - id: SPEC-013
+    title: Create blank poll with validation
+    type: feature
+    aspect: app-session
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      The creator chose Blank Custom Poll
+    when: |
+      The form is submitted incomplete, then completed with a title and two options
+    then:
+      - Incomplete submission is rejected with "Please provide at least 2 voting options"
+      - A complete submission produces the share dialog with a new code
+    tests:
+      - tests/batch-01-core-session.yml#APP-03
+  - id: SPEC-014
+    title: Cast vote as guest in the app
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      An open poll's results screen in guest mode
+    when: |
+      The voter taps Cast Vote, picks an option, and submits
+    then:
+      - Results update with the option's count, TOP badge, and percentage
+      - Logcat confirms the ballot upload
+    tests:
+      - tests/batch-01-core-session.yml#APP-04
+  - id: SPEC-015
+    title: Results and analytics screen rendering
+    type: behavior
+    aspect: app-session
+    attributes:
+      status: verified
+      priority: p2
+    given: |
+      A poll with votes is opened from the home list
+    when: |
+      The results screen renders
+    then:
+      - Charts / RSVP / Notes tabs show vote distribution with percentages
+      - Headcount summary appears when a target headcount is set; deadline badge counts down or shows Expired
+      - Expired polls file under the home Closed tab
+    tests:
+      - tests/batch-01-core-session.yml#APP-05
+  # ---------------- Write paths (options, RSVP, deletion) ---------------------
+  - id: SPEC-016
+    title: Suggested option from the app reaches the cloud
+    type: behavior
+    aspect: options
+    attributes:
+      status: implemented
+      priority: p2
+      bug_ref: KB-07
+      verification: "code-verified (arrayUnion added); UI-path e2e blocked by input traps — needs manual pass"
+    given: |
+      A poll's voting screen with the Suggest Option dialog
+    when: |
+      The voter submits a new option text
+    then:
+      - The option appears in the app's list (Room insert)
+      - The cloud poll doc's options array grows by one
+    tests:
+      - tests/batch-03-write-paths.yml#APP-09
+  - id: SPEC-017
+    title: Suggested option from the web reaches the cloud and renders
+    type: behavior
+    aspect: options
+    attributes:
+      status: verified
+      priority: p2
+      bug_ref: KB-07
+    given: |
+      An allowCustomOptions poll rendered on the web client
+    when: |
+      The voter suggests another option with text
+    then:
+      - The web renders the new option immediately via the poll-doc listener
+      - The cloud options array grows by one with the suggester recorded
+    tests:
+      - tests/batch-03-write-paths.yml#WEB-06
+  - id: SPEC-018
+    title: Vote on a web-suggested option renders coherently in the app
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p1
+      bug_ref: KB-07
+    parent: SPEC-017
+    given: |
+      A web-suggested option exists in the cloud poll doc, unknown to the app's Room cache
+    when: |
+      A web voter votes on it while the app watches the results screen
+    then:
+      - The app reconciles the unknown option before inserting the vote — no foreign-key crash
+      - The vote is tallied under the new option, or at minimum counted in totals, never silently dropped
+    tests:
+      - tests/batch-03-write-paths.yml#SYNC-06
+  - id: SPEC-019
+    title: RSVP change to Maybe drops the voter from going headcount
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p2
+      note: "candidate defect: change flow re-opens with no options pre-selected — voter must re-pick from memory"
+    given: |
+      A voter voted as GOING and the headcount includes them
+    when: |
+      They change their ballot's RSVP status to Maybe and resubmit
+    then:
+      - Headcount drops accordingly while the total vote count is unchanged
+      - The app's RSVP tab reflects the same voter set live
+    tests:
+      - tests/batch-03-write-paths.yml#WEB-07
+  - id: SPEC-020
+    title: Deleting a poll must not orphan the cloud doc
+    type: constraint
+    aspect: lifecycle
+    attributes:
+      status: latent-defect
+      priority: p2
+      detail: "deletePoll clears Room only; no cloud delete exists, rules require authenticated creator, creatorId never written"
+    given: |
+      A poll exists in Room and in Cloud Firestore
+    when: |
+      A deletion path removes the local poll
+    then:
+      - The cloud doc must be tombstoned or deleted per the chosen design — never orphaned for joiners
+      - Today no UI path reaches deletePoll; wiring it as-is would orphan the cloud doc permanently
+    tests:
+      - tests/batch-03-write-paths.yml#APP-10
+  # ---------------- Cross-platform sync --------------------------------------
+  - id: SPEC-021
+    title: Web vote appears in the app live
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      The app is parked on the poll's results screen
+    when: |
+      A web voter submits a ballot
+    then:
+      - The distribution live-updates with the web voter's option and correct share
+      - The RSVP counter increments without leaving the results screen
+    tests:
+      - tests/batch-01-core-session.yml#SYNC-01
+  - id: SPEC-022
+    title: App vote appears on the web live
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      The web tab is open on the results with a live listener
+    when: |
+      An app voter casts a ballot
+    then: |
+      Web results update within seconds — total incremented, percentages re-ranked — with no reload
+    tests:
+      - tests/batch-01-core-session.yml#SYNC-02
+  - id: SPEC-023
+    title: Cloud state verifiable via REST
+    type: constraint
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p3
+    given: |
+      Clients have published polls and votes to Firestore
+    when: |
+      Inspecting the REST API (list polls, list votes, runQuery by code)
+    then: |
+      Poll and vote docs are present with the fields the clients wrote
+    tests:
+      - tests/batch-01-core-session.yml#SYNC-03
+  # ---------------- Infrastructure constraints -------------------------------
+  - id: SPEC-024
+    title: Emulator DNS health gates network tests
+    type: constraint
+    aspect: infra
+    attributes:
+      status: conditional
+      priority: p3
+      note: "DNS dies after ~2 days AVD uptime; restart with -dns-server 8.8.8.8 (data persists)"
+    given: |
+      An AVD running longer than ~2 days
+    when: |
+      Resolving firestore.googleapis.com from the emulator
+    then: |
+      Resolution must succeed for cloud tests to run; unknown-host means restart the AVD with the DNS flag first
+    tests:
+      - tests/batch-01-core-session.yml#INFRA-01
+  - id: SPEC-025
+    title: Cloud sync assertions come from logcat, not the UI
+    type: constraint
+    aspect: infra
+    attributes:
+      status: informational
+      priority: p3
+    given: |
+      The app is local-first — Room writes succeed even when Firestore is unreachable
+    when: |
+      Any create or vote is asserted as "synced to cloud"
+    then: |
+      The UI must never be the evidence; FirestoreService logcat lines are the only cloud-landing confirmation
+    tests:
+      - tests/batch-01-core-session.yml#INFRA-02
+  - id: SPEC-026
+    title: Gradle runs are forced past cache and load flakes
+    type: constraint
+    aspect: infra
+    attributes:
+      status: informational
+      priority: p3
+    given: |
+      A Gradle test run on a loaded machine
+    when: |
+      Evaluating a test-suite failure or a suspiciously fast pass
+    then:
+      - A sub-15s waitUntil failure under load is a flake: re-run solo before debugging code
+      - A sub-second BUILD SUCCESSFUL after cleanTest means the build cache restored UP-TO-DATE — genuine runs need --rerun-tasks --no-build-cache
+    tests:
+      - tests/batch-02-ballot-battery.yml#INFRA-03
+  - id: SPEC-027
+    title: Local Firestore emulator loop replaces deploys for e2e
+    type: constraint
+    aspect: infra
+    attributes:
+      status: verified
+      priority: p2
+      note: "CLI needs Java 21+; Gradle keeps JDK 17; emulator data is in-memory — reseed fixtures after restart"
+    given: |
+      The Firestore emulator runs with the project's local rules
+    when: |
+      Web (localhost auto-connect) and Android (-PfirestoreEmulator=true) clients run against it
+    then: |
+      Full e2e verification happens locally without touching prod; rules changes are verifiable pre-deploy
+    tests:
+      - tests/batch-02-ballot-battery.yml#INFRA-04
