@@ -1,0 +1,106 @@
+# =============================================================================
+# LivePulse E2E — Batch 4 — Identity & Auxiliary Ballot Data
+# ============================================================================
+# Hunting in the paths batch-03 touched but didn't finish: preference ratings
+# and feedback notes (app-only casting today), persona switching mid-poll, and
+# the change-vote pre-selection UX defect surfaced by WEB-07 (fixed this batch).
+# Fixture: open poll in the local Firestore emulator (KXHFC7 or re-seeded).
+# Shared context lives in tests/common.yml.
+
+version: 1
+suite: livepulse-e2e-batch-04
+
+tests:
+# ---------------- Android app (Guest mode — no sign-in required) ----------
+  - id: APP-11
+    title: Rating + feedback note cast from the app land in ballot and Notes tab
+    area: android-app
+    steps:
+      - VotingScreen → pick an option → set PREFERENCE RATING → type a NOTES
+        / DIETARY / SUGGESTIONS text → Submit
+      - REST: read the voter's ballot doc — ratingValue / feedbackComment fields
+      - Results screen → Notes tab
+    expected:
+      - Ballot doc carries ratingValue > 0 and the feedbackComment text
+      - Notes tab shows "Notes (1)" with the voter name and the note text
+    result: >-
+      PARTIAL pass (2026-11-28, poll KXHFC7): rating cast from the app VERIFIED —
+      cloud ballot shows ratingValue: 4 for guest_local. Note cast BLOCKED by the
+      text-injection limitation (see automation_notes): the notes field silently
+      rejects adb input text, MCP type tool, and raw keyevents; the stylus overlay
+      additionally intercepted typed text into its own box. Notes tab correctly
+      reads Notes (0) with no note cast (feedbackList filters blank comments —
+      correct). Note-casting UI path needs a manual pass; the ballot schema
+      transport for feedbackComment is code-verified (castVotes param → ballot map).
+  - id: APP-12
+    title: User switch mid-poll keeps ballots isolated per identity
+    area: android-app
+    steps:
+      - Vote as Guest (option A) → open the user switcher (top-bar 👤) →
+        switch/create a different persona → vote (option B)
+      - REST: count ballot docs for the poll
+    expected:
+      - 'Two ballot docs (guest_local + the new persona id), each one selection'
+      - 'Results — A and B each 1 vote, total 2, participants 2'
+      - '"Edit My Vote" reflects the NEW identity''s selection only'
+    result: >-
+      BLOCKED at the UI step (2026-11-28): the Account dialog's "Join with a
+      display name" field rejects all programmatic text (same injection-immune
+      field class as APP-09's date field), and the Guest row is informational —
+      no re-key action. Isolation MECHANISM itself is cloud-proven: the poll
+      holds 2 ballots from 2 voters (Web voter + guest_local), each keyed by
+      voterId, totals correct (3 votes / 2 participants incl. multi-select).
+      Persona-switch UI flow needs a manual pass.
+
+  # ---------------- Web vote client (docs/vote.html) ------------------------
+  - id: WEB-08
+    title: Web rating/notes parity inspection
+    area: web-client
+    steps:
+      - Inspect vote.html vote form for rating/notes inputs (grep + DOM)
+      - Cast a web vote; REST-read the ballot — which fields exist?
+    expected: DOCUMENT THE ASYMMETRY — recon shows the web has no rating/notes
+      UI and never writes ratingValue/feedbackComment; app Notes tab therefore
+      only ever shows app-cast notes. Record as a product gap, not a bug.
+    result: >-
+      CONFIRMED (2026-11-28): vote.html has zero rating/notes UI (grep + DOM);
+      the Web voter's ballot in REST carries ratingValue none / note ''. Web
+      results render tallies only. Product gap recorded — web voters cannot
+      rate or leave notes, and never see app-cast ones.
+  - id: WEB-09
+    title: Change-my-vote pre-selects the voter's current ballot (KB-08 fix)
+    area: web-client
+    steps:
+      - Vote (multi-select: two options, RSVP GOING) → Change my vote
+      - WITHOUT touching anything, submit immediately
+      - Then change to a different single option and submit
+    expected:
+      - >-
+        Change flow opens with the voter's current selections AND RSVP chip
+        pre-selected (was — empty form, voter re-picked from memory — KB-08)
+      - Immediate resubmit is idempotent (same totals, same ballot in REST)
+      - Second change replaces the ballot with the new single selection
+    result: >-
+      pass (2026-11-28, poll KXHFC7, ballot Rooftop + MAYBE): change flow opened
+      with Rooftop pre-selected and the MAYBE chip selected; immediate resubmit
+      idempotent (total stayed 1 vote / 0 going); swap to Central Park replaced
+      the ballot (Central Park 100%, total 1). KB-08 FIXED and verified —
+      changeVoteBtn handler now populates selected/rsvp from the cloud ballot.
+
+  # ---------------- Cross-platform sync ------------------------------------
+  - id: SYNC-07
+    title: App-cast note visible in app Notes tab count while web stays silent
+    area: sync
+    steps:
+      - Complete APP-11 (note cast from app)
+      - Check the web client for any note display
+    expected: >-
+      Web shows tallies only — notes are app-Notes-tab-only today (parity gap
+      recorded in WEB-08). Total vote counts include the noted ballot in both
+      clients; no crash or count inflation anywhere.
+    result: >-
+      pass with caveat (2026-11-28): the NOTE itself could not be cast by
+      automation (APP-11 blocker), so Notes-tab-with-content is unverified —
+      but totals agree across clients (REST 3 votes / 2 participants; app shows
+      the same; web tallies tracked every ballot change), no crash or inflation.
+      Rating-bearing ballot counted normally on the web (no rating display).

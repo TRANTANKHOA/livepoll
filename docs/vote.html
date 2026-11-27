@@ -457,6 +457,18 @@ $("resultsBtn").addEventListener("click", () => {
 });
 $("changeVoteBtn").addEventListener("click", () => {
   hasVoted = false;
+  // Pre-select the voter's current ballot (KB-08): without this the form
+  // opened empty and multi-selection voters had to re-pick everything
+  // from memory. Selected options and the RSVP chip mirror the cloud ballot.
+  const mine = votes.filter(v => v.voterId === voterId);
+  selected = new Set(mine.map(v => v.optionId));
+  const myBallot = mine[0];
+  if (myBallot?.rsvpStatus) {
+    rsvp = myBallot.rsvpStatus;
+    document.querySelectorAll(".rsvp-chip").forEach(c =>
+      c.classList.toggle("selected", c.dataset.rsvp === rsvp));
+  }
+  renderOptions();
   $("voteCard").classList.remove("hidden");
   $("changeVoteBtn").classList.add("hidden");
   $("submitBtn").classList.remove("hidden");

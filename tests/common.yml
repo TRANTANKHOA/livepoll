@@ -66,19 +66,27 @@ known_bugs:
 # =============================================================================
 automation_notes:
   stylus_overlay: >-
-    Android 16 emulator pops a system "Try out your stylus" handwriting overlay
-    over the LOWER HALF of text-entry dialogs — it eats taps aimed at buttons
-    underneath (Cancel looked broken) and reroutes typed text into its own input
-    box, making app fields look broken. Symptom: typed text "lands" somewhere but
-    the target EditText stays empty, or taps on visible buttons do nothing.
-    Dismiss it first (tap its Cancel / Next), then re-dump and interact.
-  date_field_injection_immune: >-
-    The Suggest dialog's "Date & Kickoff / Start Time" field rejects ALL
-    programmatic input even with clean focus and no overlay: adb input text, the
-    MCP type tool, and raw keyevents (13 44 41 = "6pm") all leave it empty while
-    sibling text fields accept the same injections. Cannot complete that dialog
-    programmatically — validation blocks submit ("Please enter the date/time
-    slot"). Manual pass required for APP-09-style flows.
+    Android 16 emulator pops Gboard's "Try out your stylus" handwriting overlay
+    over the LOWER HALF of text-entry dialogs. It eats taps aimed at buttons
+    underneath and reroutes typed text into its own input box (which commits via
+    its Next button, polluting the field with garbage). Button centers on the
+    Pixel 8 AVD: Cancel (500,1867), Next (716,1867), Reset (183,1867) — a tap at
+    (567,1867) is DEAD SPACE between Cancel and Next (cost an hour of "broken
+    dialog" debugging). It re-pops on new text focus; dismiss then act fast. It
+    does NOT appear in uiautomator dumps of the app window — verify with a
+    screenshot, not the dump.
+  injection_immune_fields: >-
+    SOME Compose text fields silently reject ALL programmatic text — adb input
+    text, the MCP type tool, AND raw keyevents — while sibling fields accept the
+    same injections in the same dialog. Confirmed immune (2026-11-28): the
+    Suggest dialog's Date & Kickoff field, the VotingScreen notes field, the
+    Account dialog's display-name field. Confirmed working: Suggest title +
+    address, poll title, option fields. Pattern is NOT purely overlay coverage
+    (immune fields reject text even after overlay dismissal with clean focus);
+    suspected custom Compose input handling. Symptom: dump shows focused="true"
+    with text staying empty after typed:true. Workaround: none found — these
+    flows need a manual pass; verify what is verifiable via REST/logcat (e.g.
+    rating buttons ARE tappable and their values reach the ballot).
   ime_covering_fields: >-
     The soft keyboard covers the bottom ~800 px. Taps/swipes aimed at covered
     fields land ON THE KEYS — a swipe starting on the keyboard TYPES into the
