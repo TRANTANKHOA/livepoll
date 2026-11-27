@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LivePulse — Specs</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 980px; margin: 0 auto; padding: 24px; color: #1a202c; }
+  h1 { font-size: 1.6rem; }
+  .summary { color: #4a5568; margin-bottom: 24px; }
+  .spec { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 14px 0; background: #fff; }
+  .spec h3 { margin: 0 0 6px; font-size: 1.02rem; }
+  .badge { display: inline-block; background: #edf2f7; border-radius: 4px; padding: 1px 8px; margin-right: 6px; font-size: 0.78rem; }
+  .b-type { background: #e6fffa; } .b-aspect { background: #ebf8ff; } .b-status { background: #feebc8; }
+  .gwt { margin: 8px 0; } .gwt h4 { margin: 0; font-size: 0.8rem; text-transform: uppercase; color: #718096; }
+  .gwt ul { margin: 4px 0 4px 18px; padding: 0; } .g-given h4 { color: #3182ce; }
+  .g-when h4 { color: #d69e2e; } .g-then h4 { color: #38a169; }
+  .tests { margin: 4px 0 0; } .tests ul { margin: 4px 0 0 18px; } code { background: #f7fafc; }
+  .none { color: #a0aec0; }
+</style>
+</head>
+<body>
+<h1>LivePulse — Specs</h1>
+<p class="summary">4 specs · implemented: 2 · verified: 2<br>types: behavior: 3 · feature: 1<br>
+generated 2026-11-28 07:51 · validate OK · <code>specs/spec.yml</code></p>
+<section class="spec" style="margin-left:0px"><h3>SPEC-001 — Vote change replaces the ballot</h3><p class="meta"><span class="badge b-type">behavior</span><span class="badge b-aspect">voting</span><span class="badge b-status">status: verified</span> <span class="badge b-priority">priority: p1</span> <span class="badge b-bug-ref">bug_ref: KB-04</span> <span class="badge b-verified-scope">verified_scope: web client on local Firestore-emulator loop</span></p><div class="gwt g-given"><h4>Given</h4><ul><li>A poll is open and the voter has already submitted a ballot</li></ul></div><div class="gwt g-when"><h4>When</h4><ul><li>The voter changes their selection and submits again</li></ul></div><div class="gwt g-then"><h4>Then</h4><ul><li>Exactly one votes/{voterId} ballot doc exists in Firestore</li><li>The total vote count is unchanged by the swap</li><li>The voter&#x27;s legacy per-option docs, if any, are superseded</li></ul></div><p class="tests">Tests:</p><ul class="tests"><li><code>tests/batch-01-core-session.yml#WEB-03</code></li><li><code>tests/batch-02-ballot-battery.yml#WEB-04</code></li><li><code>tests/batch-02-ballot-battery.yml#APP-06</code></li></ul></section><section class="spec" style="margin-left:28px"><h3>SPEC-002 — Headcount counts distinct voters</h3><p class="meta"><span class="badge b-type">behavior</span><span class="badge b-aspect">voting</span><span class="badge b-status">status: verified</span> <span class="badge b-priority">priority: p1</span> <span class="badge b-bug-ref">bug_ref: KB-05</span> <span class="badge b-verified-scope">verified_scope: web client on local Firestore-emulator loop</span></p><div class="gwt g-given"><h4>Given</h4><ul><li>The voter&#x27;s ballot contains one or more selections and an RSVP status</li></ul></div><div class="gwt g-when"><h4>When</h4><ul><li>Results and headcount are rendered on the web client</li></ul></div><div class="gwt g-then"><h4>Then</h4><ul><li>Headcount counts the voter once, plus-guests included, regardless of how many options they selected</li></ul></div><p class="tests">Tests:</p><ul class="tests"><li><code>tests/batch-02-ballot-battery.yml#WEB-04</code></li></ul></section><section class="spec" style="margin-left:0px"><h3>SPEC-003 — Manual poll close syncs live to all clients</h3><p class="meta"><span class="badge b-type">behavior</span><span class="badge b-aspect">sync</span><span class="badge b-status">status: implemented</span> <span class="badge b-priority">priority: p2</span> <span class="badge b-bug-ref">bug_ref: KB-06</span></p><div class="gwt g-given"><h4>Given</h4><ul><li>A poll is open and at least one web client is watching the results</li></ul></div><div class="gwt g-when"><h4>When</h4><ul><li>The creator taps Close Voting Now on the app</li></ul></div><div class="gwt g-then"><h4>Then</h4><ul><li>The poll doc gains isClosed=true via merge write</li><li>Web clients see the Closed badge and lose the vote card without a reload</li><li>Other devices learn the close through the same snapshot listener</li></ul></div><p class="tests">Tests:</p><ul class="tests"><li><code>tests/batch-02-ballot-battery.yml#APP-08</code></li></ul></section><section class="spec" style="margin-left:0px"><h3>SPEC-004 — Join poll by six-character code</h3><p class="meta"><span class="badge b-type">feature</span><span class="badge b-aspect">entry</span><span class="badge b-status">status: implemented</span> <span class="badge b-priority">priority: p2</span></p><div class="gwt g-given"><h4>Given</h4><ul><li>The app is installed and the poll exists on another device</li></ul></div><div class="gwt g-when"><h4>When</h4><ul><li>The user enters the poll&#x27;s six-character code via the home Join button</li></ul></div><div class="gwt g-then"><h4>Then</h4><ul><li>The poll opens on the results or voting screen, found cloud-first so cross-device polls resolve</li></ul></div><p class="tests">Tests:</p><ul class="tests"><li><code>tests/batch-02-ballot-battery.yml#APP-07</code></li></ul></section>
+</body>
+</html>

@@ -1,0 +1,75 @@
+version: 1
+project: "LivePulse"
+specs:
+  - id: SPEC-001
+    title: Vote change replaces the ballot
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p1
+      bug_ref: KB-04
+      verified_scope: "web client on local Firestore-emulator loop"
+    given: |
+      A poll is open and the voter has already submitted a ballot
+    when: |
+      The voter changes their selection and submits again
+    then:
+      - Exactly one votes/{voterId} ballot doc exists in Firestore
+      - The total vote count is unchanged by the swap
+      - The voter's legacy per-option docs, if any, are superseded
+    tests:
+      - tests/batch-01-core-session.yml#WEB-03
+      - tests/batch-02-ballot-battery.yml#WEB-04
+      - tests/batch-02-ballot-battery.yml#APP-06
+  - id: SPEC-002
+    title: Headcount counts distinct voters
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p1
+      bug_ref: KB-05
+      verified_scope: "web client on local Firestore-emulator loop"
+    parent: SPEC-001
+    given: |
+      The voter's ballot contains one or more selections and an RSVP status
+    when: |
+      Results and headcount are rendered on the web client
+    then: |
+      Headcount counts the voter once, plus-guests included, regardless of how many options they selected
+    tests:
+      - tests/batch-02-ballot-battery.yml#WEB-04
+  - id: SPEC-003
+    title: Manual poll close syncs live to all clients
+    type: behavior
+    aspect: sync
+    attributes:
+      status: implemented
+      priority: p2
+      bug_ref: KB-06
+    given: |
+      A poll is open and at least one web client is watching the results
+    when: |
+      The creator taps Close Voting Now on the app
+    then:
+      - The poll doc gains isClosed=true via merge write
+      - Web clients see the Closed badge and lose the vote card without a reload
+      - Other devices learn the close through the same snapshot listener
+    tests:
+      - tests/batch-02-ballot-battery.yml#APP-08
+  - id: SPEC-004
+    title: Join poll by six-character code
+    type: feature
+    aspect: entry
+    attributes:
+      status: implemented
+      priority: p2
+    given: |
+      The app is installed and the poll exists on another device
+    when: |
+      The user enters the poll's six-character code via the home Join button
+    then: |
+      The poll opens on the results or voting screen, found cloud-first so cross-device polls resolve
+    tests:
+      - tests/batch-02-ballot-battery.yml#APP-07
