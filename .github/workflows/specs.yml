@@ -1,0 +1,54 @@
+name: Spec Gate
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'specs/**'
+      - 'tests/**'
+      - 'scripts/validate_specs.py'
+      - 'scripts/check_spec_coverage.py'
+      - '.github/workflows/specs.yml'
+  pull_request:
+    paths:
+      - 'specs/**'
+      - 'tests/**'
+      - 'scripts/validate_specs.py'
+      - 'scripts/check_spec_coverage.py'
+      - '.github/workflows/specs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spec_gate:
+    name: Validate specs & coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate specs/spec.yml (schema, hierarchy, test links)
+        run: python3 scripts/validate_specs.py --root . validate
+
+      - name: Every regression test must be spec-linked
+        run: python3 scripts/check_spec_coverage.py
+
+      - name: Rendered spec.html must be fresh
+        run: |
+          python3 scripts/validate_specs.py --root . render --out /tmp/spec-fresh.html
+          python3 - <<'EOF'
+          import pathlib, re, sys
+          norm = lambda t: re.sub(r"generated [\d-]+ [\d:]+", "generated X", t)
+          fresh = norm(pathlib.Path("/tmp/spec-fresh.html").read_text())
+          committed = norm(pathlib.Path("specs/spec.html").read_text())
+          if fresh != committed:
+              print("::error::specs/spec.html is stale — re-run: python3 scripts/validate_specs.py render")
+              sys.exit(1)
+          print("spec.html matches a fresh render")
+          EOF

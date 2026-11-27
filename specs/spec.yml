@@ -460,3 +460,140 @@ specs:
       Full e2e verification happens locally without touching prod; rules changes are verifiable pre-deploy
     tests:
       - tests/batch-02-ballot-battery.yml#INFRA-04
+  # ---------------- Identity, rating/notes, security (batch-04/05) -----------
+  - id: SPEC-028
+    title: Rating and feedback note cast from the app land in ballot and Notes tab
+    type: behavior
+    aspect: voting
+    attributes:
+      status: partial
+      priority: p2
+      verification: "rating VERIFIED (ratingValue 4 in cloud ballot); note cast blocked by text-injection traps — schema transport code-verified, needs manual UI pass"
+    given: |
+      A poll's voting screen with rating and notes fields
+    when: |
+      The voter picks an option, sets a preference rating, types a note, and submits
+    then:
+      - The ballot doc carries ratingValue and feedbackComment
+      - The Notes tab counts the note with voter name and text (blank notes filtered)
+    tests:
+      - tests/batch-04-identity-extras.yml#APP-11
+  - id: SPEC-029
+    title: User switch mid-poll keeps ballots isolated per identity
+    type: behavior
+    aspect: identity
+    attributes:
+      status: blocked-ui
+      priority: p2
+      verification: "isolation mechanism cloud-proven (2 ballots / 2 voters, per-voterId keys); persona-switch UI flow needs a manual pass — display-name field rejects all programmatic input"
+    given: |
+      A voter has cast a ballot as one identity on a poll
+    when: |
+      They switch to a different persona and cast another ballot
+    then:
+      - Two ballot docs exist, one per voterId, each with its own selection
+      - Results show both votes; Edit My Vote reflects only the new identity's selection
+    tests:
+      - tests/batch-04-identity-extras.yml#APP-12
+  - id: SPEC-030
+    title: Web rating and notes asymmetry is a documented product gap
+    type: constraint
+    aspect: web
+    attributes:
+      status: documented
+      priority: p3
+      detail: "web vote form has no rating/notes UI; web ballots carry neither field; app Notes tab only ever shows app-cast notes"
+    given: |
+      The web vote client and the app's Notes tab
+    when: |
+      Comparing rating/notes capability across clients
+    then: |
+      The asymmetry is recorded as a product gap, not silently assumed away — web voters cannot rate, leave notes, or see app-cast ones
+    tests:
+      - tests/batch-04-identity-extras.yml#WEB-08
+  - id: SPEC-031
+    title: Change-my-vote pre-selects the voter's current ballot
+    type: behavior
+    aspect: voting
+    attributes:
+      status: verified
+      priority: p1
+      bug_ref: KB-08
+    given: |
+      A returning voter opens the change flow with a cloud ballot present
+    when: |
+      The change-my-vote form renders
+    then:
+      - Current selections and RSVP chip are pre-selected from the cloud ballot
+      - Immediate resubmit is idempotent; a real change replaces the ballot
+    tests:
+      - tests/batch-04-identity-extras.yml#WEB-09
+  - id: SPEC-032
+    title: App-cast note stays app-side while totals stay coherent on the web
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p3
+      caveat: "note content itself unverified by automation (APP-11 blocker); totals parity verified"
+    parent: SPEC-028
+    given: |
+      A ballot with a note cast from the app
+    when: |
+      Both clients render the poll
+    then:
+      - Web shows tallies only — notes are app-Notes-tab-only (parity gap, SPEC-030)
+      - Totals agree across clients with no crash or inflation
+    tests:
+      - tests/batch-04-identity-extras.yml#SYNC-07
+  - id: SPEC-033
+    title: Closed polls deny unauthenticated votes at the rules layer
+    type: security
+    aspect: security
+    attributes:
+      status: verified
+      priority: p0
+      bug_ref: KB-09
+      note: "FIXED 2026-11-28 — votes create/update now requires get(poll).data.isClosed == false"
+    given: |
+      A closed poll and a direct REST write attempt with no auth
+    when: |
+      A ballot is patched onto the closed poll's votes collection
+    then: |
+      PERMISSION_DENIED — closed polls accept no votes regardless of what any client UI shows
+    tests:
+      - tests/batch-05-security.yml#SEC-01
+  - id: SPEC-034
+    title: Anonymous visitors cannot close or re-open other people's polls
+    type: security
+    aspect: security
+    attributes:
+      status: open-defect
+      priority: p0
+      bug_ref: KB-10
+      detail: "masked isClosed update accepted from anonymous writer; fix needs a design call (creator secret in share payload vs accepting guest-poll risk); cloud-closed guest polls can currently never be re-opened"
+    given: |
+      A guest poll with no authenticated creator and no creatorId stored
+    when: |
+      An anonymous writer sends a masked isClosed update via REST
+    then:
+      - DESIRED: PERMISSION_DENIED for non-creators — currently ACCEPTED (KB-10 open)
+      - Any fix must keep the guest flow non-breaking and preserve a re-open path
+    tests:
+      - tests/batch-05-security.yml#SEC-02
+  - id: SPEC-035
+    title: Legit ballot writes survive the closed-poll rules hardening
+    type: security
+    aspect: security
+    attributes:
+      status: verified
+      priority: p1
+      note: "regression guard for the KB-09 rules change"
+    given: |
+      The KB-09 rules fix requiring isClosed == false for vote writes
+    when: |
+      Legit votes land on an open poll from the app or REST
+    then: |
+      Open-poll writes are accepted on every path; closed-poll writes stay denied (the app's vote UI hides entirely on closed polls)
+    tests:
+      - tests/batch-05-security.yml#SEC-03
