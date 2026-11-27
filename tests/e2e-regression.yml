@@ -125,7 +125,9 @@ tests:
     expected:
       - Exactly ONE votes/{voterId} ballot doc in Firestore — no stale per-option docs
       - Total vote count unchanged for this voter's swap (KB-04 regression guard)
-    result: not_yet_run (needs rules deploy for ballot writes)
+    result: 'pass (2026-11-27, emulator battery, poll A5MY5M): app changed Metro→Highland;
+      "uploaded ballot guest_local (1 selections)"; emulator held exactly 2 ballot
+      docs (one per voter), total stayed 2 votes / 2 participants'
 
   - id: APP-07
     title: Join poll by code in the app (home "Join" button)
@@ -134,7 +136,9 @@ tests:
       - Home → "Join" (top-right) → enter the poll's 6-char code
     expected: lands on the poll (results or voting screen); cloud-first lookup
       finds polls created on other devices (repository checks Firestore before Room)
-    result: not_yet_run   # never exercised in any session so far
+    result: 'pass (2026-11-27, emulator battery): after adb pm clear (empty Room) +
+      fresh join by code A5MY5M, poll rendered with all 4 options, and cloud ballots
+      arrived too (3 votes / 2 participants, RSVP 2) — cloud-first lookup confirmed'
 
   - id: APP-08
     title: Close Voting Now → web reflects Closed live
@@ -144,8 +148,12 @@ tests:
       - Watch the open web tab — do NOT reload
     expected:
       - App marks poll closed (badge "Closed", voting controls hidden)
-      - Web live-updates to "Closed" badge and hides the vote card via onSnapshot
-    result: not_yet_run
+      - Cloud isClosed flips; web live-updates to "Closed" badge and hides the
+        vote card via onSnapshot — no reload
+    result: 'pass (2026-11-27, emulator battery): Close tap → "Synced poll … status to
+      cloud (isClosed=true)"; web (untouched tab) showed badge "Closed", vote card
+      hidden, results preserved. NOTE first run pre-fix left Room/cloud divergent
+      (local closed, cloud open) — fixed same day (KB-06)'
 
   # ---------------- Web vote client (docs/vote.html) ------------------------
   - id: WEB-01
@@ -184,10 +192,9 @@ tests:
     expected:
       - Old vote doc REPLACED — same voterId contributes exactly one vote
       - Results re-render without inflating the total
-    result: 'FAIL (2026-11-27, poll FANZ82) — changed Highland→Riverside; total went
-      1→2 votes; BOTH docs remain in Firestore (voterId 081b9d9d…_f0454b8e… stale +
-      081b9d9d…_45c0dee8… new). Double-count confirmed. Re-run pending: per-voter
-      ballot fix implemented 2026-11-27 (KB-04), verification blocked on rules deploy.'
+    result: 'FAIL (2026-11-27, poll FANZ82 — original finding); PASS on re-run same
+      day (emulator battery, poll A5MY5M, ballot fix live): changed Highland→Riverside,
+      total stayed 1 vote, exactly one ballot doc remained.'
     bug_ref: KB-04
 
   - id: WEB-04
@@ -199,7 +206,9 @@ tests:
     expected:
       - First submission tallies both selections
       - After the swap exactly one selection counts — the whole ballot is replaced
-    result: not_yet_run (needs rules deploy for ballot writes)
+    result: 'pass (2026-11-27, emulator battery): two selections tallied; later swap to
+      a single selection replaced the ballot. Found KB-05 along the way — headcount
+      over-counted multi-selection voters (fixed same day, verified via reload).'
 
   - id: WEB-05
     title: Returning voter after page reload sees "Change my vote"
@@ -208,7 +217,9 @@ tests:
       - Vote in a session → hard-reload the page (same browser, same localStorage)
     expected: results view with "Change my vote" visible, Submit hidden — the
       listener detects the voter's ballot in the cloud (KB-04 returning-voter fix)
-    result: not_yet_run (read-only; verifiable pre-deploy on legacy docs)
+    result: >-
+      pass (2026-11-27, emulator battery: reload → changeVisible true, submitHidden true, results
+      shown)
 
   # ---------------- Cross-platform sync ------------------------------------
   - id: SYNC-01
@@ -252,7 +263,9 @@ tests:
       - App live-updates: A loses the vote, B gains it; totals UNCHANGED
       - Room mirror clears the voter's previous rows (attachLiveCloudSync) — no
         stale A+B pair
-    result: not_yet_run (needs rules deploy for ballot writes)
+    result: 'pass (2026-11-27, emulator battery): web changed Riverside→Central Park
+      while app sat on results; app showed Central Park 50% leading, 2 votes / 2
+      participants, RSVP (2) — no inflation'
 
   - id: SYNC-05
     title: App vote CHANGE reaches web without double-count (app → FS → web)
@@ -262,7 +275,9 @@ tests:
       - Watch the open web tab — do NOT reload
     expected: web tallies swap A→B live; total unchanged; single ballot doc in
       REST for the app's voterId
-    result: not_yet_run (needs rules deploy for ballot writes)
+    result: 'pass (2026-11-27, emulator battery): app ballot Metro→Highland; web
+      (untouched tab) live-updated to 2 votes — Riverside 50% + Highland 50%,
+      Metro 0%, headcount correct'
 
   # ---------------- Environment / infrastructure ---------------------------
   - id: INFRA-01
@@ -302,7 +317,8 @@ tests:
       firestore.useEmulator("10.0.2.2", 8080) (AVD host loopback). Data is
       in-memory: re-seed the fixture poll after every emulator restart. First
       start downloads the emulator JAR (~200 MB, slow).
-    result: setup verified 2026-11-27 (first fixture battery: see WEB-03/APP-06/SYNC-04/05/WEB-04)
+    result: >-
+      setup verified 2026-11-27 (first fixture battery: see WEB-03/APP-06/SYNC-04/05/WEB-04)
   - id: INFRA-03
     title: Gradle test-suite flake and stale build-cache trap
     area: infra
@@ -328,32 +344,6 @@ known_bugs:
     fix: Added show("pollView") in the openPoll onSnapshot callback (docs/vote.html).
     status: FIXED and committed (609cd72, 2026-11-26) — deploy to Firebase Hosting PENDING;
       prod join-by-code stays broken until firebase deploy runs (WEB-01 guards this).
-  - id: KB-04
-    severity: high (vote integrity — totals inflate on every vote change, both clients)
-    summary: Changing a vote leaves the old vote doc in Firestore — votes double-count
-    detail: >-
-      WEB-03 evidence (2026-11-27, poll FANZ82): after changing Highland→Riverside the
-      total showed 2 votes for 1 voter; both docs persisted
-      (081b9d9d…_f0454b8e… and 081b9d9d…_45c0dee8…). Web client never deletes the
-      previous selection (vote.html changeVoteBtn only resets hasVoted). Android is
-      correct LOCALLY (castVotes clears via voteDao.clearUserVotesForPoll) but its
-      recordVoteToCloud only set()s new docs — old cloud docs are never deleted, so
-      results-only devices/web see stale + new votes. Complication: firestore.rules
-      allow delete requires isAuthenticated(), which web voters are not — a web-side
-      fix alone is impossible without a rules change.
-    fix: >-
-      chosen: (a) per-voter ballot doc. One doc per voter (votes/{voterId})
-      with a selections array — overwriting replaces the previous selection.
-      Both clients write ballots; both read paths expand ballots AND keep counting
-      legacy per-option docs, but a voter's ballot supersedes their legacy docs.
-      Android listener also mirrors cloud state into Room (clears the voter's
-      previous rows before insert). Web gains returning-voter detection. Rules
-      accept either schema. Unit suite green (forced --rerun-tasks run).
-    status: FIX IMPLEMENTED 2026-11-27 — not yet deployed/verified; ballot writes
-      require the updated firestore.rules live (firebase deploy), then re-run
-      WEB-03, APP-06, SYNC-04, SYNC-05. Legacy evidence docs in poll FANZ82
-      remain polluted (2 legacy docs for voter 081b9d9d…) — acceptable test data.
-
 # =============================================================================
 # Hard-won automation lessons (adb + uiautomator against this Compose app)
 # =============================================================================
