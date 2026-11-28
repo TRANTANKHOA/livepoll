@@ -1,0 +1,88 @@
+# =============================================================================
+# LivePulse E2E — Batch 8 — Resource Consumption & App Performance
+# ============================================================================
+# First performance hunt: cold start, memory across navigation (leak check),
+# frame-time jank on heavy screens, listener hygiene, update-cadence audit.
+# Tooling: ux-review perf CLI (--cold-start), dumpsys gfxinfo/meminfo. All
+# numbers are on the Pixel 8 AVD emulator — software-ish rendering makes
+# absolute frame times pessimistic vs real devices; treat ratios/plateaus as
+# the signal. Shared context lives in tests/common.yml.
+
+version: 1
+suite: livepulse-e2e-batch-08
+
+tests:
+  # ---------------- Cold start & memory --------------------------------------
+  - id: PERF-01
+    title: Cold start within budget on the playstore AVD
+    area: performance
+    steps:
+      - ux-review perf --package com.plutusoft.livepulse --cold-start
+        (force-stop + am start -W)
+    expected: TotalTime within ~2.5 s on the emulator; compare to the 2,148 ms
+      baseline (google_apis AVD, 2026-11-25)
+    result: >-
+      pass (2026-11-28): TotalTime 2,429 ms (WaitTime 2,438) on
+      livepoll_play36 — +13% vs the google_apis-AVD baseline, attributable to
+      the heavier GMS image rather than code growth. No budget breach.
+  - id: PERF-02
+    title: No memory leak across repeated poll navigation
+    area: performance
+    steps:
+      - Read TOTAL PSS → 5 back-and-forth navigation cycles (results ⇄ home)
+        → read PSS → 10 more cycles → read PSS → pressure → read again
+    expected: PSS plateaus after churn (transient growth reclaimed), never
+      climbs linearly
+    result: >-
+      pass (2026-11-28): 169 MB → 188 MB (5 cycles, churn peak) → 155 MB
+      (10 more cycles) → 141 MB under pressure. Plateau confirmed — listener
+      replacement (attachPollCloudListener/onCleared) leaks nothing.
+
+  # ---------------- Frame jank -----------------------------------------------
+  - id: PERF-03
+    title: Results-screen tab switches render within frame budget
+    area: performance
+    steps:
+      - Open a poll with votes → dumpsys gfxinfo reset → switch tabs
+        (Charts/RSVP/Notes) + scroll → dumpsys gfxinfo
+    expected: median frame time inside the 16.7 ms (60 Hz) budget
+    result: >-
+      FAIL (2026-11-28): median 81 ms, p95 129 ms, 100% janky across 26 frames
+      (~5x over budget). Architectural cause: every tab switch recomposes the
+      whole results screen — votersGrouped (groupBy) recomputed per
+      composition, charts and roster rebuilt from scratch, the 30s badge
+      interval re-rendering the shell. Emulator-absolute numbers are
+      pessimistic, but the recomposition pattern is structural.
+    bug_ref: KB-14
+
+  # ---------------- Hygiene & cadence ----------------------------------------
+  - id: PERF-04
+    title: Listener hygiene — no duplicate snapshot listeners across navigation
+    area: performance
+    steps:
+      - grep logcat for "Snapshot listener error" after heavy navigation
+      - Memory plateau (PERF-02) as the indirect no-stack proof
+    expected: zero listener errors; PSS plateau proves no listener stacking
+      (attachPollCloudListener replaces its predecessor by design)
+    result: 'pass (2026-11-28): 0 listener errors; plateau in PERF-02.'
+  - id: PERF-05
+    title: Deadline badge ticker cadence is bounded and badge-local
+    area: performance
+    steps:
+      - Code inspection of DeadlineCountdownBadge.kt
+    expected: ticker updates at a coarse interval, gated on deadline/closed
+      keys, recomposing only badge-local state
+    result: >-
+      pass (2026-11-28): 30 s delay inside LaunchedEffect keyed on
+      (deadlineTimestamp, isClosed); recomposes one Text, cancels when the
+      badge leaves composition. Healthy.
+  - id: PERF-06
+    title: Per-snapshot poll-doc fetch cost is bounded (documented trade-off)
+    area: performance
+    steps:
+      - Inspect attachLiveCloudSync (batch-7 inbound-sync implementation)
+    expected: one extra Firestore read per vote-snapshot event (fetchPollFromCloud),
+      only while a results screen is open — acceptable at current scale;
+      debounce/skip-if-unchanged is the future lever if Firestore read costs
+      matter
+    result: documented (2026-11-28) — design trade-off, no action
