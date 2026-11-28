@@ -38,7 +38,12 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.plutusoft.livepulse.R
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -193,19 +198,14 @@ fun PollListScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Box(
+                            Image(
+                                painter = painterResource(R.drawable.ic_poll_logo),
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size(34.dp)
-                                    .clip(MaterialTheme.shapes.small)
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(PrimaryLight, SecondaryLight)
-                                        )
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "⚡", fontSize = 18.sp)
-                            }
+                                    .clip(MaterialTheme.shapes.small),
+                                contentScale = ContentScale.Crop
+                            )
                             Text(
                                 text = "LivePulse",
                                 fontWeight = FontWeight.ExtraBold,
@@ -246,6 +246,10 @@ fun PollListScreen(
                             color = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier
                                 .padding(horizontal = 4.dp)
+                                .semantics {
+                                    contentDescription =
+                                        "Account: ${currentUser.name}. Double-tap to switch."
+                                }
                                 .testTag("user_switcher_pill")
                         ) {
                             Row(
@@ -289,22 +293,6 @@ fun PollListScreen(
                                         if (!showSearchInput) {
                                             viewModel.searchQuery.value = ""
                                         }
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Ready Templates") },
-                                    leadingIcon = { Icon(Icons.Default.RocketLaunch, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        showTemplatesSheet = true
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Join with Code") },
-                                    leadingIcon = { Icon(Icons.Default.QrCode, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        showJoinDialog = true
                                     }
                                 )
                                 DropdownMenuItem(

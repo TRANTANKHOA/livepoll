@@ -58,7 +58,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -97,24 +100,58 @@ fun CreatePollScreen(
     val currentVoterName = viewModel.currentVoterName.value
     val allGroups by viewModel.allGroups.collectAsState()
 
-    var title by remember { mutableStateOf(initialTemplate?.title ?: "") }
-    var category by remember { mutableStateOf(initialTemplate?.category ?: "DECISION") }
-    var categoryIcon by remember { mutableStateOf(initialTemplate?.categoryIcon ?: "🎯") }
-    var description by remember { mutableStateOf(initialTemplate?.description ?: "") }
-    var creatorName by remember { mutableStateOf(currentVoterName) }
+    var title by rememberSaveable { mutableStateOf(initialTemplate?.title ?: "") }
+    var category by rememberSaveable { mutableStateOf(initialTemplate?.category ?: "DECISION") }
+    var categoryIcon by rememberSaveable { mutableStateOf(initialTemplate?.categoryIcon ?: "🎯") }
+    var description by rememberSaveable { mutableStateOf(initialTemplate?.description ?: "") }
+    var creatorName by rememberSaveable { mutableStateOf(currentVoterName) }
 
-    var selectedGroupId by remember { mutableStateOf(initialTemplate?.defaultGroupId) }
-    var selectedGroupName by remember { mutableStateOf(initialTemplate?.defaultGroupName) }
-    var groupDropdownExpanded by remember { mutableStateOf(false) }
+    var selectedGroupId by rememberSaveable { mutableStateOf(initialTemplate?.defaultGroupId) }
+    var selectedGroupName by rememberSaveable { mutableStateOf(initialTemplate?.defaultGroupName) }
+    var groupDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 
-    var allowMultiple by remember { mutableStateOf(initialTemplate?.allowMultipleChoices ?: false) }
-    var allowCustom by remember { mutableStateOf(initialTemplate?.allowCustomOptions ?: true) }
-    var isAnonymous by remember { mutableStateOf(initialTemplate?.isAnonymous ?: false) }
-    var deadlineHours by remember { mutableStateOf(initialTemplate?.defaultDeadlineHours ?: 6) }
-    var targetHeadcountText by remember { mutableStateOf(initialTemplate?.defaultTargetHeadcount?.toString() ?: "") }
-    var generalLocation by remember { mutableStateOf("") }
+    var allowMultiple by rememberSaveable { mutableStateOf(initialTemplate?.allowMultipleChoices ?: false) }
+    var allowCustom by rememberSaveable { mutableStateOf(initialTemplate?.allowCustomOptions ?: true) }
+    var isAnonymous by rememberSaveable { mutableStateOf(initialTemplate?.isAnonymous ?: false) }
+    var deadlineHours by rememberSaveable { mutableStateOf(initialTemplate?.defaultDeadlineHours ?: 6) }
+    var targetHeadcountText by rememberSaveable { mutableStateOf(initialTemplate?.defaultTargetHeadcount?.toString() ?: "") }
+    var generalLocation by rememberSaveable { mutableStateOf("") }
 
-    val optionsList = remember {
+    // Whole form survives rotation and process death — the organizer's typed
+    // setup is the most expensive thing to lose on this screen.
+    val optionsList = rememberSaveable(
+        saver = listSaver(
+            save = { options ->
+                options.map { opt ->
+                    listOf(
+                        opt.id,
+                        opt.text,
+                        opt.venueAddress,
+                        opt.dateTimeSlot,
+                        opt.duration,
+                        opt.subtitle,
+                        opt.priceRating,
+                        opt.showAttributes.toString()
+                    )
+                }
+            },
+            restore = { saved ->
+                val restored = saved.map { fields ->
+                    EditableOption(
+                        id = fields[0],
+                        text = fields[1],
+                        venueAddress = fields[2],
+                        dateTimeSlot = fields[3],
+                        duration = fields[4],
+                        subtitle = fields[5],
+                        priceRating = fields[6],
+                        showAttributes = fields[7].toBoolean()
+                    )
+                }
+                (restored.ifEmpty { listOf(EditableOption(), EditableOption()) }).toMutableStateList()
+            }
+        )
+    ) {
         mutableStateListOf<EditableOption>().apply {
             if (initialTemplate != null) {
                 initialTemplate.defaultOptions.forEach { opt ->
@@ -137,7 +174,7 @@ fun CreatePollScreen(
         }
     }
 
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
     val categoryPresets = listOf(
         Triple("DECISION", "🎯", "Quick Vote"),

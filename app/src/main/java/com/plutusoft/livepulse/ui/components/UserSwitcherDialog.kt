@@ -70,7 +70,7 @@ fun UserSwitcherDialog(
                         fontSize = 17.sp
                     )
                     Text(
-                        text = "Google Sign-In or join as a guest",
+                        text = "Voting as ${currentUser.name} — switch or upgrade below",
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.primary
                     )

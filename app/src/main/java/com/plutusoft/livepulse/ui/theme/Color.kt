@@ -2,7 +2,7 @@ package com.plutusoft.livepulse.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Modern Light & Vibrant Palette (Electric Indigo, Sky Cyan, Soft Coral, Crisp Surfaces)
+// Modern Light & Vibrant Palette (Electric Indigo, Sky Cyan, Soft Coral, Warm Stone Surfaces)
 val PrimaryLight = Color(0xFF4F46E5)              // Vibrant Indigo 600
 val OnPrimaryLight = Color(0xFFFFFFFF)
 val PrimaryContainerLight = Color(0xFFEEF2FF)     // Indigo 50
@@ -35,39 +35,39 @@ val OnTertiaryDark = Color(0xFF431407)
 val TertiaryContainerDark = Color(0xFF9A3412)
 val OnTertiaryContainerDark = Color(0xFFFFEDD5)
 
-// Crisp Light Background & Material 3 Surface Hierarchy
-val BackgroundLight = Color(0xFFF8FAFC)           // Slate 50
-val OnBackgroundLight = Color(0xFF0F172A)          // Slate 900
-val SurfaceLight = Color(0xFFFFFFFF)              // Pure White
-val OnSurfaceLight = Color(0xFF0F172A)             // Slate 900
-val SurfaceVariantLight = Color(0xFFF1F5F9)       // Slate 100
-val OnSurfaceVariantLight = Color(0xFF475569)      // Slate 600
-val OutlineLight = Color(0xFF94A3B8)              // Slate 400 - prominent boundary
-val OutlineVariantLight = Color(0xFFCBD5E1)       // Slate 300 - clear crisp border
+// Warm Stone Background & Material 3 Surface Hierarchy (friendly neutrals, cool brand colors)
+val BackgroundLight = Color(0xFFFAF9F7)           // Stone 50
+val OnBackgroundLight = Color(0xFF1C1917)          // Stone 900
+val SurfaceLight = Color(0xFFFEFDFB)              // Warm White
+val OnSurfaceLight = Color(0xFF1C1917)             // Stone 900
+val SurfaceVariantLight = Color(0xFFF5F4F0)       // Stone 100
+val OnSurfaceVariantLight = Color(0xFF57534E)      // Stone 600
+val OutlineLight = Color(0xFFA8A29E)              // Stone 400 - prominent boundary
+val OutlineVariantLight = Color(0xFFD6D3D1)       // Stone 300 - clear crisp border
 
 // Material 3 Surface Containers (Light)
-val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
-val SurfaceContainerLowLight = Color(0xFFF8FAFC)
-val SurfaceContainerLight = Color(0xFFF1F5F9)
-val SurfaceContainerHighLight = Color(0xFFE2E8F0)
-val SurfaceContainerHighestLight = Color(0xFFCBD5E1)
+val SurfaceContainerLowestLight = Color(0xFFFEFDFB)
+val SurfaceContainerLowLight = Color(0xFFFAF9F7)
+val SurfaceContainerLight = Color(0xFFF5F4F0)
+val SurfaceContainerHighLight = Color(0xFFE7E5E4)
+val SurfaceContainerHighestLight = Color(0xFFD6D3D1)
 
-// Dark fallback scheme
-val BackgroundDark = Color(0xFF0F172A)
-val SurfaceDark = Color(0xFF1E293B)
-val OnBackgroundDark = Color(0xFFF8FAFC)
-val OnSurfaceDark = Color(0xFFF8FAFC)
-val SurfaceVariantDark = Color(0xFF334155)
-val OnSurfaceVariantDark = Color(0xFF94A3B8)
-val OutlineDark = Color(0xFF475569)
-val OutlineVariantDark = Color(0xFF475569)
+// Dark fallback scheme (warm stone)
+val BackgroundDark = Color(0xFF0C0A09)
+val SurfaceDark = Color(0xFF292524)
+val OnBackgroundDark = Color(0xFFFAF9F7)
+val OnSurfaceDark = Color(0xFFFAF9F7)
+val SurfaceVariantDark = Color(0xFF44403C)
+val OnSurfaceVariantDark = Color(0xFFA8A29E)
+val OutlineDark = Color(0xFF57534E)
+val OutlineVariantDark = Color(0xFF57534E)
 
 // Material 3 Surface Containers (Dark)
-val SurfaceContainerLowestDark = Color(0xFF0F172A)
-val SurfaceContainerLowDark = Color(0xFF1E293B)
-val SurfaceContainerDark = Color(0xFF334155)
-val SurfaceContainerHighDark = Color(0xFF475569)
-val SurfaceContainerHighestDark = Color(0xFF64748B)
+val SurfaceContainerLowestDark = Color(0xFF0C0A09)
+val SurfaceContainerLowDark = Color(0xFF292524)
+val SurfaceContainerDark = Color(0xFF44403C)
+val SurfaceContainerHighDark = Color(0xFF57534E)
+val SurfaceContainerHighestDark = Color(0xFF78716C)
 
 // Error Tokens
 val ErrorLight = Color(0xFFDC2626)

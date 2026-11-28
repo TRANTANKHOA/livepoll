@@ -152,6 +152,12 @@ fun NotificationsScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    TextButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier.testTag("notification_settings_empty_state_button")
+                    ) {
+                        Text("Open notification settings")
+                    }
                 }
             }
         } else {
