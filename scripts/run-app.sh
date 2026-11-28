@@ -12,7 +12,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 PACKAGE_NAME="com.aistudio.livepulse.xqmtw"
-MAIN_ACTIVITY="com.example.MainActivity"
+MAIN_ACTIVITY="com.plutusoft.livepulse.MainActivity"
 
 echo -e "${CYAN}${BOLD}⚡ Installing & Running LivePulse on Android Target...${NC}\n"
 

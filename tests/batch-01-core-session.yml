@@ -16,7 +16,7 @@ tests:
     area: android-app
     steps:
       - Boot AVD (command above). If "System UI isn't responding" ANR appears, tap **Wait** (never "Close app").
-      - adb shell am start -n com.plutusoft.livepulse/com.example.MainActivity
+      - adb shell am start -n com.plutusoft.livepulse/com.plutusoft.livepulse.MainActivity
       - adb shell pidof com.plutusoft.livepulse
       - adb logcat -d -s FirebaseApp:V AndroidRuntime:E
     expected:

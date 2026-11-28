@@ -21,7 +21,7 @@ environment:
       google_apis image dead-ends account-add in a WebView (err 50135).
     launch: emulator -avd livepoll_play36 -no-snapshot-load -dns-server 8.8.8.8
     app_package: com.plutusoft.livepulse
-    launch_component: com.plutusoft.livepulse/com.example.MainActivity   # namespace com.example != applicationId
+    launch_component: com.plutusoft.livepulse/com.plutusoft.livepulse.MainActivity   # namespace == applicationId after brand-hygiene rename
   web:
     local: cd docs && python3 -m http.server 8901   # then http://127.0.0.1:8901/vote.html
     prod: https://livepulse-prod.web.app/vote.html
@@ -45,19 +45,6 @@ known_bugs:
     fix: Added show("pollView") in the openPoll onSnapshot callback (docs/vote.html).
     status: FIXED and committed (609cd72, 2026-11-26) — deploy to Firebase Hosting PENDING;
       prod join-by-code stays broken until firebase deploy runs (WEB-01 guards this).
-  - id: KB-09
-    severity: critical (vote integrity — closed polls accept votes)
-    summary: Rules accepted votes on CLOSED polls via direct API writes
-    detail: >-
-      Found by SEC-01 (2026-11-28, batch-5): the votes rule checked pollId match
-      and ballot schema but never isClosed — a REST ballot write to closed poll
-      A5MY5M was ACCEPTED ("Sneaky Sally"). UIs hide the vote form on closed
-      polls; the rules are the only real enforcement.
-    fix: >-
-      firestore.rules votes create/update now additionally requires
-      get(.../polls/$(pollId)).data.isClosed == false. Verified: sneaky write
-      PERMISSION_DENIED; legit vote on a fresh open poll ACCEPTED.
-    status: FIXED and verified 2026-11-28 (local emulator; deploy pending with KB-01)
   - id: KB-10
     severity: critical (anyone can close/vandalize any open guest poll; closed guest polls are unreopenable)
     summary: Poll-update rule lets ANYONE update ANY open poll; closed guest polls unreopenable
@@ -75,22 +62,6 @@ known_bugs:
       poll-doc updates, or (c) authenticated creators (Google sign-in) owning
       poll docs. (b)/(c) change both clients and the share flow.'
     status: OPEN — decision needed; documented, not silently patched
-  - id: KB-07
-    severity: critical (app-killing) / high (data divergence)
-    summary: >-
-      Two coupled defects around suggested options: (a) app-side addOptionToPoll was
-      Room-only — suggested options never reached the cloud poll doc; (b) a cloud
-      vote referencing a web-suggested optionId CRASHED every Android client watching
-      the poll (SQLiteConstraintException FK violation in the unguarded
-      attachLiveCloudSync coroutine) — found by SYNC-06, 2026-11-28.
-    fix: >-
-      publishOptionToCloud (arrayUnion) added to addOptionToPoll;
-      attachLiveCloudSync reconciles unknown optionIds (fetchPollOptionsFromCloud +
-      upsert) before insertVotes and guards the whole sync in try/catch.
-    verification: SYNC-06 re-run PASS on emulator (app showed the web-suggested
-      option 100% / RSVP 1, no crash); APP-09's own UI pass blocked by automation
-      traps (see its entry) — needs manual pass.
-    status: FIXED and verified via SYNC-06 re-run 2026-11-28 — commit pending
 # =============================================================================
 # Hard-won automation lessons (adb + uiautomator against this Compose app)
 # =============================================================================
@@ -140,7 +111,7 @@ automation_notes:
     android-emulator MCP build_and_run / start_emulator time out at a 30 s
     harness cap but KEEP WORKING in the background — verify with adb devices /
     pgrep qemu instead of retrying. launch_app uses monkey and errored;
-    use `adb shell am start -n com.plutusoft.livepulse/com.example.MainActivity`.
+    use `adb shell am start -n com.plutusoft.livepulse/com.plutusoft.livepulse.MainActivity`.
     ux-review cli.py: capture is interactive (needs keypresses); dump and perf
     are non-interactive. evaluate() in the browser cannot do dynamic import() —
     inject a <script type=module> into the page for SDK-level probes.

@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-  namespace = "com.example"
+  namespace = "com.plutusoft.livepulse"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {

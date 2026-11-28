@@ -1,0 +1,204 @@
+package com.plutusoft.livepulse
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.plutusoft.livepulse.data.local.AppDatabase
+import com.plutusoft.livepulse.data.local.AuthPreferences
+import com.plutusoft.livepulse.data.local.NotificationPreferences
+import com.plutusoft.livepulse.data.model.PollTemplates
+import com.plutusoft.livepulse.data.repository.PollRepository
+import com.plutusoft.livepulse.ui.screens.CreatePollScreen
+import com.plutusoft.livepulse.ui.screens.NotificationSettingsScreen
+import com.plutusoft.livepulse.ui.screens.NotificationsScreen
+import com.plutusoft.livepulse.ui.screens.PollAnalyticsScreen
+import com.plutusoft.livepulse.ui.screens.PollListScreen
+import com.plutusoft.livepulse.ui.screens.VotingScreen
+import com.plutusoft.livepulse.ui.theme.LivePulseTheme
+import com.plutusoft.livepulse.ui.viewmodel.PollViewModel
+import com.plutusoft.livepulse.ui.viewmodel.PollViewModelFactory
+import com.plutusoft.livepulse.util.NotificationHelper
+
+class MainActivity : ComponentActivity() {
+
+    private val viewModel: PollViewModel by viewModels {
+        val database = AppDatabase.getDatabase(applicationContext)
+        val repository = PollRepository(
+            pollDao = database.pollDao(),
+            pollOptionDao = database.pollOptionDao(),
+            voteDao = database.voteDao(),
+            notificationDao = database.notificationDao(),
+            groupDao = database.groupDao()
+        )
+        val notifPrefs = NotificationPreferences(applicationContext)
+        val authPrefs = AuthPreferences(applicationContext)
+        PollViewModelFactory(repository, notifPrefs, authPrefs)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        NotificationHelper.createNotificationChannels(this)
+        com.plutusoft.livepulse.util.SecurityDefenseHelper.initDeviceAttestation(this)
+
+        val pollIdFromIntent = intent?.getStringExtra("EXTRA_POLL_ID")
+
+        setContent {
+            LivePulseTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    LivePulseApp(
+                        viewModel = viewModel,
+                        initialPollId = pollIdFromIntent
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LivePulseApp(
+    viewModel: PollViewModel,
+    initialPollId: String? = null
+) {
+    val navController = rememberNavController()
+
+    LaunchedEffect(initialPollId) {
+        if (!initialPollId.isNullOrBlank()) {
+            navController.navigate("analytics_poll/$initialPollId")
+        }
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = "poll_list"
+    ) {
+        composable("poll_list") {
+            PollListScreen(
+                viewModel = viewModel,
+                onCreatePollClick = { template ->
+                    if (template != null) {
+                        navController.navigate("create_poll?templateId=${template.id}")
+                    } else {
+                        navController.navigate("create_poll")
+                    }
+                },
+                onVotePollClick = { pollId ->
+                    navController.navigate("vote_poll/$pollId")
+                },
+                onAnalyticsPollClick = { pollId ->
+                    navController.navigate("analytics_poll/$pollId")
+                },
+                onNotificationsClick = {
+                    navController.navigate("notifications")
+                }
+            )
+        }
+
+        composable(
+            route = "create_poll?templateId={templateId}",
+            arguments = listOf(
+                navArgument("templateId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val templateId = backStackEntry.arguments?.getString("templateId")
+            val template = PollTemplates.templates.find { it.id == templateId }
+
+            CreatePollScreen(
+                viewModel = viewModel,
+                initialTemplate = template,
+                onNavigateBack = { navController.popBackStack() },
+                onPollCreated = { newPollId ->
+                    // Land on results with the share-the-code dialog open:
+                    // sharing immediately is the whole growth loop.
+                    navController.navigate("analytics_poll/$newPollId?share=true") {
+                        popUpTo("poll_list")
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "vote_poll/{pollId}",
+            arguments = listOf(
+                navArgument("pollId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val pollId = backStackEntry.arguments?.getString("pollId") ?: ""
+            VotingScreen(
+                pollId = pollId,
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAnalytics = { targetPollId ->
+                    navController.navigate("analytics_poll/$targetPollId") {
+                        popUpTo("poll_list")
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "analytics_poll/{pollId}?share={share}",
+            arguments = listOf(
+                navArgument("pollId") { type = NavType.StringType },
+                navArgument("share") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val pollId = backStackEntry.arguments?.getString("pollId") ?: ""
+            val autoOpenShare = backStackEntry.arguments?.getString("share") == "true"
+            PollAnalyticsScreen(
+                pollId = pollId,
+                viewModel = viewModel,
+                autoOpenShare = autoOpenShare,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToVote = { targetPollId ->
+                    navController.navigate("vote_poll/$targetPollId")
+                }
+            )
+        }
+
+        composable("notifications") {
+            NotificationsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSettings = {
+                    navController.navigate("notification_settings")
+                },
+                onPollClick = { pollId ->
+                    navController.navigate("analytics_poll/$pollId")
+                }
+            )
+        }
+
+        composable("notification_settings") {
+            NotificationSettingsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+    }
+}

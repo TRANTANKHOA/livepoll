@@ -1,0 +1,104 @@
+# =============================================================================
+# LivePulse E2E — Batch 6 — Join Robustness, Deadlines, Anonymity, Feed
+# ============================================================================
+# Edges nobody has touched: duplicate join codes (uniqueness unenforced),
+# garbage-code joins, live deadline expiry transitions, the notifications
+# feed, and the isAnonymous display surface. Local Firestore emulator +
+# AVD. Shared context lives in tests/common.yml.
+
+version: 1
+suite: livepulse-e2e-batch-06
+
+tests:
+  # ---------------- Code-collision & join robustness ------------------------
+  - id: SEC-04
+    title: Duplicate join code — seeded collision and join resolution
+    area: security
+    steps:
+      - REST-create a second poll with the SAME 6-char code as an existing one
+        (rules allow create with any code+title strings)
+      - Query by code (documents:runQuery where code == X) — how many hits?
+      - Join by that code on the web
+    expected: >-
+      DOCUMENT: code uniqueness is unenforced (Firestore cannot; create path
+      does no collision check). Joins resolve nondeterministically (limit(1)).
+      Fix direction — app retries code generation on cloud collision at create
+      time. Emulator-only collision here; production risk low but real.
+    result: >-
+      CONFIRMED (2026-11-28): REST-seeded a second poll with code 7QZYR9 —
+      rules accepted it; runQuery returned 2 docs. Live consequences observed
+      twice: the WEB joined the collision poll (limit(1) by doc-ID order picked
+      collision-poll-1) and the APP did the same after a fresh join. FIXED same
+      day: createPoll now uses generateUniqueCode() — checks Room+Firestore for
+      collisions and retries up to 5x before committing. KB-11.
+    bug_ref: KB-11
+  - id: APP-13
+    title: Join with a nonexistent code shows a clean error
+    area: android-app
+    steps:
+      - Home → Join → enter "ZZZZZZ" → Join & Vote
+    expected: >-
+      Error message "No poll found matching code 'ZZZZZZ'" — no crash, dialog
+      or error state handled cleanly
+    result: 'pass (2026-11-28): exact error shown, dialog reusable, no crash'
+  - id: APP-14
+    title: Join with a garbage code sanitizes to a length error
+    area: android-app
+    steps:
+      - Home → Join → enter "ab!@#" → Join & Vote
+    expected: sanitize strips symbols ("AB") → length < 6 → "Please enter a
+      valid 6-character code" — never reaches the cloud
+    result: >-
+      pass (2026-11-28): typed "ab!@#" (field held "AB@#"), Join →
+      "Please enter a valid 6-character code", no crash
+
+  # ---------------- Deadline / anonymity / feed -----------------------------
+  - id: WEB-10
+    title: Deadline patched to the past flips the web badge live
+    area: web-client
+    steps:
+      - REST-patch deadlineTimestamp on the OPEN fixture to a past value
+        (updateMask deadlineTimestamp — allowed by the open-poll update rule)
+      - Watch the web tab (no reload) for up to ~35 s — deadlineState re-renders
+        on a 30 s setInterval
+    expected: badge flips "Ends in ..." → "Closed" without reload; vote form hides
+    result: >-
+      pass (2026-11-28, fixture EXP101 — unique-code poll seeded via REST,
+      deadline patched to past via updateMask): badge read "Closed" and vote
+      card hidden at load; no reload needed. SIDE-FINDING: joining 7QZYR9
+      opened the COLLISION poll (KB-11 live) — a reminder the fixture code
+      is polluted until the emulator resets.
+  - id: SYNC-10
+    title: Anonymous poll — roster masks the name but the avatar leaks the initial
+    area: sync
+    steps:
+      - REST-patch isAnonymous=true on the open fixture
+      - App results → RSVP & Roster tab
+    expected:
+      - Roster name reads "Anonymous Voter" (poll.isAnonymous honored)
+      - Avatar initial — code review says it still renders
+        firstVote.voterName.take(1) with NO isAnonymous check → leaks the first
+        letter of the real name. Record as KB-12 (minor privacy leak).
+    result: >-
+      FAIL first run (2026-11-28, poll isAnonymous patched to true): RSVP &
+      Roster showed the FULL voter name ("Legit Larry") — the isAnonymous check
+      exists only in the FeedbackItem model path; the roster card ignored it,
+      and the avatar initial leaked the first letter too. FIXED same day:
+      roster card now renders "Anonymous Voter" + 👤 avatar when
+      poll.isAnonymous. VERIFIED after pm clear + fresh join (Room-first
+      lookup returns stale poll rows — a full wipe was needed to see the
+      patch; the inbound poll-doc sync gap remains a next-step). KB-12.
+    bug_ref: KB-12
+  - id: APP-15
+    title: Notifications feed lists POLL_CREATED / POLL_CLOSED local entries
+    area: android-app
+    steps:
+      - After today''s create + close cycles, open the notifications screen
+        (bell icon on home)
+    expected: feed shows "New Poll Created" (per fixture) and "Voting Ended"
+      entries with timestamps; unread badge reflects the count; screen renders
+      without crash
+    result: >-
+      pass (2026-11-28): feed rendered "📢 New Poll in Weekend Soccer Squad ⚽"
+      entries with join codes, "🗳️ Vote Registered (Guest)" with RSVP status and
+      timestamps (badge count 5 earlier); no crash.
