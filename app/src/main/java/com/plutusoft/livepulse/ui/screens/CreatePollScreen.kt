@@ -392,7 +392,7 @@ fun CreatePollScreen(
                         OutlinedTextField(
                             value = targetHeadcountText,
                             onValueChange = { targetHeadcountText = it.filter { ch -> ch.isDigit() } },
-                            label = { Text("Target Quorum") },
+                            label = { Text("Target headcount") },
                             placeholder = { Text("e.g. 10") },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)

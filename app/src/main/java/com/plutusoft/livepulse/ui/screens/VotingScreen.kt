@@ -68,6 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.plutusoft.livepulse.BuildConfig
 import com.plutusoft.livepulse.data.local.entity.PollOptionEntity
 import com.plutusoft.livepulse.ui.components.AddCustomOptionDialog
 import com.plutusoft.livepulse.ui.components.AuthDialog
@@ -188,7 +189,9 @@ fun VotingScreen(
                     }
                 },
                 actions = {
-                    // Profile Switcher Pill
+                    // Profile Switcher Pill — dev-only simulation harness.
+                    // Release builds omit it; identity is visible on the roster.
+                    if (BuildConfig.ENABLE_DEV_TOOLS) {
                     Surface(
                         onClick = { showUserSwitcher = true },
                         shape = MaterialTheme.shapes.large,
@@ -211,6 +214,7 @@ fun VotingScreen(
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
+                    }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -488,7 +492,9 @@ fun VotingScreen(
             }
             }
 
-            // Star Rating (Optional)
+            // Star Rating (Optional) — only meaningful on feedback-style polls;
+            // showing stars on a lunch vote is context-free noise.
+            if (poll.category.uppercase() == "FEEDBACK") {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.large,
@@ -526,6 +532,7 @@ fun VotingScreen(
                         }
                     }
                 }
+            }
             }
 
             // Comments / Suggestions TextField

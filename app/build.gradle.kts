@@ -62,12 +62,16 @@ android {
 
   buildTypes {
     release {
+      buildConfigField("boolean", "ENABLE_DEV_TOOLS", "false")
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
     }
-    debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    debug {
+      buildConfigField("boolean", "ENABLE_DEV_TOOLS", "true")
+      signingConfig = signingConfigs.getByName("debugConfig")
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11

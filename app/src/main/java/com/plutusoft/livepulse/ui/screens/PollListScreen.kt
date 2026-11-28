@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode
@@ -43,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import com.plutusoft.livepulse.BuildConfig
 import com.plutusoft.livepulse.R
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
@@ -52,8 +52,6 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
@@ -139,7 +137,6 @@ fun PollListScreen(
     var showJoinDialog by remember { mutableStateOf(false) }
     var showTemplatesSheet by remember { mutableStateOf(false) }
     var showSearchInput by remember { mutableStateOf(false) }
-    var showOverflowMenu by remember { mutableStateOf(false) }
     var sharingPollDetails by remember { mutableStateOf<PollWithDetails?>(null) }
 
     // Dialogs & Sheets
@@ -239,71 +236,59 @@ fun PollListScreen(
                             }
                         }
 
-                        // Profile / Social SSO Avatar Pill (compact: emoji + provider badge)
-                        Surface(
-                            onClick = { showUserSwitcher = true },
-                            shape = MaterialTheme.shapes.extraLarge,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .semantics {
-                                    contentDescription =
-                                        "Account: ${currentUser.name}. Double-tap to switch."
-                                }
-                                .testTag("user_switcher_pill")
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        // Profile / Social SSO Avatar Pill (compact: emoji + provider badge).
+                        // Dev-only: this is the multi-user consensus simulation harness —
+                        // real users reach identity via the Account button instead.
+                        if (BuildConfig.ENABLE_DEV_TOOLS) {
+                            Surface(
+                                onClick = { showUserSwitcher = true },
+                                shape = MaterialTheme.shapes.extraLarge,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .semantics {
+                                        contentDescription =
+                                            "Account: ${currentUser.name}. Double-tap to switch."
+                                    }
+                                    .testTag("user_switcher_pill")
                             ) {
-                                Text(text = currentUser.avatarEmoji, fontSize = 14.sp)
-                                ProviderBadge(provider = currentUser.provider, size = 14.dp)
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(text = currentUser.avatarEmoji, fontSize = 14.sp)
+                                    ProviderBadge(provider = currentUser.provider, size = 14.dp)
+                                }
                             }
                         }
 
-                        // Overflow Menu (More Actions)
-                        Box {
-                            IconButton(
-                                onClick = { showOverflowMenu = true },
-                                modifier = Modifier.testTag("home_overflow_menu_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More Options"
-                                )
-                            }
+                        // Search toggle — promoted from the overflow menu; search
+                        // is a first-class action, not a buried one.
+                        IconButton(
+                            onClick = {
+                                showSearchInput = !showSearchInput
+                                if (!showSearchInput) {
+                                    viewModel.searchQuery.value = ""
+                                }
+                            },
+                            modifier = Modifier.testTag("home_search_button")
+                        ) {
+                            Icon(
+                                imageVector = if (showSearchInput) Icons.Default.Clear else Icons.Default.Search,
+                                contentDescription = if (showSearchInput) "Hide search" else "Search polls"
+                            )
+                        }
 
-                            DropdownMenu(
-                                expanded = showOverflowMenu,
-                                onDismissRequest = { showOverflowMenu = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(if (showSearchInput) "Hide Search" else "Search Polls") },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = if (showSearchInput) Icons.Default.Clear else Icons.Default.Search,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        showSearchInput = !showSearchInput
-                                        if (!showSearchInput) {
-                                            viewModel.searchQuery.value = ""
-                                        }
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Account (${currentUser.provider.displayName})") },
-                                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        showAuthDialog = true
-                                    }
-                                )
-                            }
+                        // Account: direct entry to sign-in / display-name identity.
+                        IconButton(
+                            onClick = { showAuthDialog = true },
+                            modifier = Modifier.testTag("home_account_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Account (${currentUser.provider.displayName})"
+                            )
                         }
                     },
                     scrollBehavior = scrollBehavior,
