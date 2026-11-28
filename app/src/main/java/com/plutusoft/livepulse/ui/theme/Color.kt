@@ -2,40 +2,40 @@ package com.plutusoft.livepulse.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Modern Light & Vibrant Palette (Electric Indigo, Sky Cyan, Soft Coral, Warm Stone Surfaces)
-val PrimaryLight = Color(0xFF4F46E5)              // Vibrant Indigo 600
+// Earth-Tone Palette (Terracotta, Sage, Honey, Warm Stone Surfaces)
+val PrimaryLight = Color(0xFFC2410C)              // Terracotta 700
 val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFEEF2FF)     // Indigo 50
-val OnPrimaryContainerLight = Color(0xFF3730A3)   // Indigo 800
+val PrimaryContainerLight = Color(0xFFFFEDD5)     // Clay 100
+val OnPrimaryContainerLight = Color(0xFF7C2D12)   // Clay 900
 
-val PrimaryDark = Color(0xFF818CF8)               // Indigo 400
-val OnPrimaryDark = Color(0xFF1E1B4B)
-val PrimaryContainerDark = Color(0xFF312E81)
-val OnPrimaryContainerDark = Color(0xFFE0E7FF)
+val PrimaryDark = Color(0xFFFB923C)               // Terracotta 400
+val OnPrimaryDark = Color(0xFF431407)
+val PrimaryContainerDark = Color(0xFF7C2D12)
+val OnPrimaryContainerDark = Color(0xFFFFEDD5)
 
-// Secondary Tones (Modern Cyan / Sky)
-val SecondaryLight = Color(0xFF0284C7)            // Sky 600
+// Secondary Tones (Sage Green)
+val SecondaryLight = Color(0xFF4A6B4E)            // Sage 700
 val OnSecondaryLight = Color(0xFFFFFFFF)
-val SecondaryContainerLight = Color(0xFFE0F2FE)   // Sky 50
-val OnSecondaryContainerLight = Color(0xFF075985) // Sky 800
+val SecondaryContainerLight = Color(0xFFE4EBE3)   // Sage 100
+val OnSecondaryContainerLight = Color(0xFF14532D) // Green 900
 
-val SecondaryDark = Color(0xFF38BDF8)             // Sky 400
-val OnSecondaryDark = Color(0xFF082F49)
-val SecondaryContainerDark = Color(0xFF0369A1)
-val OnSecondaryContainerDark = Color(0xFFE0F2FE)
+val SecondaryDark = Color(0xFFA3C4A8)             // Sage 400
+val OnSecondaryDark = Color(0xFF0F2415)
+val SecondaryContainerDark = Color(0xFF14532D)
+val OnSecondaryContainerDark = Color(0xFFDCFCE7)
 
-// Tertiary Tones (Vibrant Coral / Warm Sunset)
-val TertiaryLight = Color(0xFFEA580C)             // Orange 600
+// Tertiary Tones (Honey Amber)
+val TertiaryLight = Color(0xFFB45309)             // Honey 700
 val OnTertiaryLight = Color(0xFFFFFFFF)
-val TertiaryContainerLight = Color(0xFFFFEDD5)    // Orange 50
-val OnTertiaryContainerLight = Color(0xFF9A3412)  // Orange 800
+val TertiaryContainerLight = Color(0xFFFEF3C7)    // Honey 100
+val OnTertiaryContainerLight = Color(0xFF78350F)  // Honey 900
 
-val TertiaryDark = Color(0xFFFB923C)              // Orange 400
-val OnTertiaryDark = Color(0xFF431407)
-val TertiaryContainerDark = Color(0xFF9A3412)
-val OnTertiaryContainerDark = Color(0xFFFFEDD5)
+val TertiaryDark = Color(0xFFFBBF24)              // Honey 400
+val OnTertiaryDark = Color(0xFF451A03)
+val TertiaryContainerDark = Color(0xFF78350F)
+val OnTertiaryContainerDark = Color(0xFFFEF3C7)
 
-// Warm Stone Background & Material 3 Surface Hierarchy (friendly neutrals, cool brand colors)
+// Warm Stone Background & Material 3 Surface Hierarchy (friendly neutrals, earth brand colors)
 val BackgroundLight = Color(0xFFFAF9F7)           // Stone 50
 val OnBackgroundLight = Color(0xFF1C1917)          // Stone 900
 val SurfaceLight = Color(0xFFFEFDFB)              // Warm White
@@ -81,22 +81,22 @@ val ErrorContainerDark = Color(0xFF7F1D1D)
 val OnErrorContainerDark = Color(0xFFFEE2E2)
 
 // Category & Status Colors (Bright, friendly, modern)
-val StatusActive = Color(0xFF10B981)              // Emerald 500
+val StatusActive = Color(0xFF4D7C0F)              // Moss 800 — growth on earth
 val StatusMaybe = Color(0xFFF59E0B)               // Amber 500 — RSVP "Maybe"
-val StatusEndingSoon = Color(0xFFEA580C)          // Coral (tertiary) — deadline urgency
-val StatusClosed = Color(0xFF94A3B8)              // Slate 400
+val StatusEndingSoon = Color(0xFFC2410C)          // Terracotta — deadline urgency
+val StatusClosed = Color(0xFFA8A29E)              // Stone 400
 
-val CategorySoccer = Color(0xFF15803D)            // Pitch Green 700 — distinct from StatusActive emerald
-val CategoryDrinks = Color(0xFF0284C7)            // Sky
+val CategorySoccer = Color(0xFF15803D)            // Pitch Green 700 — distinct from moss
+val CategoryDrinks = Color(0xFF0284C7)            // Sky — kept for the six-crayon spread
 val CategoryFood = Color(0xFFF97316)              // Warm Orange
 val CategoryDecision = Color(0xFF8B5CF6)          // Purple
 val CategoryEvent = Color(0xFFEC4899)             // Pink
 val CategoryFeedback = Color(0xFF14B8A6)          // Teal
 
-val GeometricBarFill = Color(0xFFC7D2FE)          // Indigo 200
-val GeometricBarFillDark = Color(0xFF3730A3)
-val GeometricAccent = Color(0xFF4338CA)
-val TopWinnerGold = Color(0xFFD97706)             // Amber 600
+val GeometricBarFill = Color(0xFFFED7AA)          // Clay 200
+val GeometricBarFillDark = Color(0xFF7C2D12)
+val GeometricAccent = Color(0xFF9A3412)           // Clay 800
+val TopWinnerGold = Color(0xFF92400E)             // Bronze 800
 
 /** Maps a poll category to its brand color; unknown categories fall back to Decision purple. */
 fun categoryColor(category: String): Color = when (category.trim().uppercase()) {
