@@ -6,28 +6,57 @@
 <meta name="color-scheme" content="light dark">
 <title>LivePulse — Vote in your browser</title>
 <style>
+  /* Brand typeface: DM Sans (OFL), self-hosted variable font — no CDN dependency.
+     License: fonts/OFL.txt */
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('fonts/DMSans-Variable.ttf') format('truetype-variations');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+  }
   /* Earth-tone tokens — mirrors ui/theme/Color.kt (terracotta/sage/honey on warm stone). */
   :root {
-    --primary: #C2410C; --on-primary: #FFFFFF;
-    --primary-container: #FFEDD5; --on-primary-container: #7C2D12;
-    --bg: #FAF9F7; --surface: #FEFDFB; --surface-var: #F5F4F0;
-    --text: #1C1917; --muted: #57534E; --border: #D6D3D1;
-    --green: #4D7C0F; --green-bg: #EDF3E7; --amber: #B45309; --amber-bg: #FEF3C7;
-    --danger: #B91C1C; --danger-bg: #FEE2E2;
+    --primary: #C2410C;
+    --on-primary: #FFFFFF;
+    --primary-container: #FFEDD5;
+    --on-primary-container: #7C2D12;
+    --bg: #FAF9F7;
+    --surface: #FEFDFB;
+    --surface-var: #F5F4F0;
+    --text: #1C1917;
+    --muted: #57534E;
+    --border: #D6D3D1;
+    --green: #4D7C0F;
+    --green-bg: #E4EBE3;
+    --amber: #B45309;
+    --amber-bg: #FEF3C7;
+    --danger: #DC2626;
+    --danger-bg: #FEE2E2;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --primary: #FB923C; --on-primary: #431407;
-      --primary-container: #7C2D12; --on-primary-container: #FFEDD5;
-      --bg: #0C0A09; --surface: #292524; --surface-var: #44403C;
-      --text: #FAF9F7; --muted: #A8A29E; --border: #57534E;
-      --green: #A3C4A8; --green-bg: #1F2E20; --amber: #FBBF24; --amber-bg: #451A03;
-      --danger: #F87171; --danger-bg: #450A0A;
-    }
+    --primary: #FB923C;
+    --on-primary: #431407;
+    --primary-container: #7C2D12;
+    --on-primary-container: #FFEDD5;
+    --bg: #0C0A09;
+    --surface: #292524;
+    --surface-var: #44403C;
+    --text: #FAF9F7;
+    --muted: #A8A29E;
+    --border: #57534E;
+    --green: #4D7C0F;
+    --green-bg: #14532D;
+    --amber: #FBBF24;
+    --amber-bg: #78350F;
+    --danger: #F87171;
+    --danger-bg: #7F1D1D;
+  }
   }
   * { box-sizing: border-box; margin: 0; }
   body {
-    font-family: -apple-system, 'Roboto', 'Segoe UI', sans-serif;
+    font-family: 'DM Sans', -apple-system, 'Roboto', 'Segoe UI', sans-serif;
     background: var(--bg); color: var(--text); min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
     padding: 24px 16px 48px;
