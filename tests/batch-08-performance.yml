@@ -47,12 +47,20 @@ tests:
         (Charts/RSVP/Notes) + scroll → dumpsys gfxinfo
     expected: median frame time inside the 16.7 ms (60 Hz) budget
     result: >-
-      FAIL (2026-11-28): median 81 ms, p95 129 ms, 100% janky across 26 frames
-      (~5x over budget). Architectural cause: every tab switch recomposes the
-      whole results screen — votersGrouped (groupBy) recomputed per
-      composition, charts and roster rebuilt from scratch, the 30s badge
-      interval re-rendering the shell. Emulator-absolute numbers are
-      pessimistic, but the recomposition pattern is structural.
+      FAIL first run (2026-11-28): median 81 ms, p95 129 ms, 100% janky across
+      26 frames (~5x over budget). PARTIAL FIX same day: PollWithDetails
+      derived values (tallies, winningOption, headcountSummary, feedbackList,
+      userVotes) converted from computed get()s — re-run on every frame — to
+      cached properties computed once per flow emission, sharing one
+      votesByOption/votesByVoter groupBy; roster votersGrouped now
+      remember(details.votes). Re-measured identical protocol: median 81 →
+      61 ms (p95 129 → 121 ms) — the data math is now O(n) per emission, but
+      composing the header + full tab subtree per switch still dominates
+      (65 ms median on identical-content re-switches = pure composition cost;
+      emulator software rendering inflates absolutes). KB-14 stays OPEN for
+      the screen restructure (AnimatedContent / movableContentOf or splitting
+      tab bodies into stable composables); the model-layer caching is a real
+      algorithmic win worth landing independently.
     bug_ref: KB-14
 
   # ---------------- Hygiene & cadence ----------------------------------------

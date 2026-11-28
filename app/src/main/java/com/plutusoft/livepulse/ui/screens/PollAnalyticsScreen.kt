@@ -531,7 +531,10 @@ fun PollAnalyticsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                        val votersGrouped = details.votes.groupBy { it.voterId }
+                        // Grouped once per votes emission, not once per frame (KB-14)
+                        val votersGrouped = remember(details.votes) {
+                            details.votes.groupBy { it.voterId }
+                        }
                         if (votersGrouped.isEmpty()) {
                             Text(
                                 text = "No votes registered yet.",
@@ -820,7 +823,7 @@ private fun WinnerSpotlightCard(
                 }
                 Column {
                     Text(
-                        text = "Leading Consensus Choice",
+                        text = "In the lead",
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 13.sp,
                         color = TopWinnerGold

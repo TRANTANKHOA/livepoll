@@ -772,14 +772,16 @@ specs:
       status: open-defect
       priority: p2
       bug_ref: KB-14
-      fix_direction: "remember the grouped-voters map and sorted options per votes list; avoid whole-screen recomposition on tab switch"
+      fix_direction: "model-layer caching landed (81→61 ms median); remaining cost is per-switch composition of the header + tab subtree — restructure with AnimatedContent / movableContentOf or stable per-tab composables"
     given: |
       A poll with votes is open on the results screen
     when: |
       The user switches between Charts / RSVP / Notes tabs
     then: |
-      DESIRED: median frame time inside the 16.7 ms budget — currently ~81 ms
-      median (structural whole-screen recomposition per switch, KB-14 open)
+      DESIRED: median frame time inside the 16.7 ms budget — measured 81 ms
+      before the PollWithDetails caching fix, 61 ms after (emulator; identical
+      protocol); the remainder is composition cost, KB-14 open for the
+      screen restructure
     tests:
       - tests/batch-08-performance.yml#PERF-03
   - id: SPEC-047
