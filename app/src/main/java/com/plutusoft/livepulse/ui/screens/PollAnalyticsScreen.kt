@@ -37,10 +37,12 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +51,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -110,6 +113,7 @@ fun PollAnalyticsScreen(
     var showShareDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
     var autoShareConsumed by remember { mutableStateOf(false) }
+    var showCloseConfirm by remember { mutableStateOf(false) }
 
     val details = pollDetails
 
@@ -125,6 +129,40 @@ fun PollAnalyticsScreen(
         SharePollDialog(
             pollDetails = details,
             onDismiss = { showShareDialog = false }
+        )
+    }
+
+    if (showCloseConfirm && details != null) {
+        val closingPoll = details.poll
+        AlertDialog(
+            onDismissRequest = { showCloseConfirm = false },
+            icon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            title = { Text("Close voting for everyone?") },
+            text = {
+                Text(
+                    "This closes \"${closingPoll.title}\" on every device — " +
+                        "no one can vote or change their vote afterwards."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showCloseConfirm = false
+                        viewModel.togglePollStatus(closingPoll.id, true, context, closingPoll.title)
+                    }
+                ) {
+                    Text(
+                        "Close Voting",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCloseConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 
@@ -654,8 +692,11 @@ fun PollAnalyticsScreen(
                         // Close / Re-open Poll Toggle Button
                         OutlinedButton(
                             onClick = {
-                                val nextStatus = !poll.isClosed
-                                viewModel.togglePollStatus(poll.id, nextStatus, context, poll.title)
+                                if (!poll.isClosed) {
+                                    showCloseConfirm = true
+                                } else {
+                                    viewModel.togglePollStatus(poll.id, false, context, poll.title)
+                                }
                             },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("toggle_poll_closed_button"),
                             shape = RoundedCornerShape(14.dp)
@@ -685,7 +726,7 @@ fun PollAnalyticsScreen(
                         Text(if (details.hasUserVoted) "Edit My Vote" else "Cast Vote", fontWeight = FontWeight.Bold)
                     }
 
-                    Button(
+                    FilledTonalButton(
                         onClick = { showShareDialog = true },
                         modifier = Modifier.weight(1f).heightIn(min = 50.dp).testTag("analytics_share_cta_button"),
                         shape = MaterialTheme.shapes.large
@@ -715,7 +756,7 @@ private fun WinnerSpotlightCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = winnerBorder

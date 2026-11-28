@@ -1,0 +1,72 @@
+# =============================================================================
+# LivePulse E2E — Batch 7 — Poisoned-Ballot Integrity & Inbound Poll Sync
+# ============================================================================
+# Hunted the last unprobed rules gap: ballots referencing optionIds that do
+# not exist in the poll (rules validate pollId + shape, not membership —
+# Firestore rules cannot iterate a list of maps). One poisoned ballot caused
+# TWO manifestations; all three fix layers verified same session. Shared
+# context lives in tests/common.yml.
+
+version: 1
+suite: livepulse-e2e-batch-07
+
+tests:
+  # ---------------- Poisoned-ballot integrity -------------------------------
+  - id: SEC-05
+    title: Direct-API ballot with a bogus optionId is accepted by the rules
+    area: security
+    steps:
+      - 'PATCH $rest_base_local/polls/<uuid>/votes/poison_voter with a ballot
+        whose selections reference optionId "bogus-nonexistent-option-id"'
+      - Check acceptance, then observe both clients
+    expected: >-
+      DOCUMENT: rules validate pollId and ballot shape but CANNOT validate
+      optionId membership (no list iteration in security rules) — the write
+      is accepted; client-side filtering is the correctness layer
+    result: >-
+      CONFIRMED (2026-11-28, collision-poll-1): write ACCEPTED. Two live
+      manifestations: (1) WEB — total inflated ("3 votes" for 2 real ballots;
+      the unknown selection counted in votes.length but matched no option row);
+      (2) APP — vote sync PERMANENTLY STALLED: the unknown optionId tripped the
+      votes FK inside sync on every snapshot (caught-and-refiring), so even a
+      legit ballot written after the poison never rendered ("0 votes from 0
+      participants" with Innocent Ivy's ballot in the cloud). KB-13.
+    bug_ref: KB-13
+  - id: SEC-06
+    title: Sync survives a poisoned ballot; poison is filtered everywhere
+    area: security
+    steps:
+      - With the KB-13 fixes deployed (app filter + web counted totals +
+        rules selections size cap), re-observe the poisoned poll
+      - Write a legit ballot AFTER the poison; check app roster, web total
+    expected:
+      - App roster lists the legit voters; the poisoned ballot is dropped
+        (logcat "Dropped ... referencing unknown options") and counted nowhere
+      - Web total counts only ballots whose selections match real options
+      - The app keeps receiving later votes (no permanent stall)
+    result: >-
+      pass (2026-11-28): app roster showed Innocent Ivy + Legit Larry (poison
+      filtered, "2 votes from 2 participants"); a post-poison legit vote
+      delivered live; web (cache-busted) total "3 votes" with poison excluded
+      (was 4). Rules now cap selections at 50 entries; per-entry membership
+      remains client-enforced (rules cannot iterate).
+    bug_ref: KB-13
+
+  # ---------------- Inbound poll-doc sync -----------------------------------
+  - id: SYNC-11
+    title: Poll-doc edits from other clients reach the app live (no wipe)
+    area: sync
+    steps:
+      - App parked on the poll's RSVP & Roster tab
+      - REST-patch isAnonymous=false → REST-write a vote (snapshot trigger)
+      - REST-patch isAnonymous=true → REST-write another vote
+    expected:
+      - The app's poll row updates on every snapshot (fetchPollFromCloud →
+        updatePoll — plain row UPDATE, never REPLACE which would cascade-delete)
+      - Roster flips raw-name ↔ "Anonymous Voter" live, without pm clear or
+        rejoin (the staleness that forced a wipe during KB-12 verification)
+    result: >-
+      pass (2026-11-28, collision-poll-1): with isAnonymous=false the roster
+      showed raw names; after the flip + trigger vote the ENTIRE roster flipped
+      to "Anonymous Voter" (3 votes from 3 participants) — no wipe, no rejoin.
+      Also un-blocks WEB-08/APP-11-12 flows that previously needed wipes.

@@ -223,6 +223,44 @@ class FirestoreService {
     }
 
     /**
+     * Fetches the current poll doc as a PollEntity (inbound poll-doc sync):
+     * the app otherwise never learns cloud-side poll changes (isClosed,
+     * isAnonymous, deadline, title edits from other clients) — its Room row
+     * goes stale forever. Caller updates Room via PollDao.updatePoll (a plain
+     * row UPDATE — never REPLACE, which would cascade-delete votes/options).
+     */
+    suspend fun fetchPollFromCloud(pollId: String): PollEntity? {
+        val firestore = db ?: return null
+        return try {
+            val doc = firestore.collection("polls").document(pollId).get().await()
+            if (!doc.exists()) return null
+            val deadlineTimestamp = doc.getLong("deadlineTimestamp")?.takeIf { it > 0L }
+            PollEntity(
+                id = pollId,
+                code = (doc.getString("code") ?: "").trim().uppercase(),
+                title = doc.getString("title") ?: "Untitled Poll",
+                description = doc.getString("description") ?: "",
+                category = doc.getString("category") ?: "GENERAL",
+                categoryIcon = doc.getString("categoryIcon") ?: "📊",
+                creatorName = doc.getString("creatorName") ?: "Organizer",
+                createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis(),
+                deadlineTimestamp = deadlineTimestamp,
+                allowMultipleChoices = doc.getBoolean("allowMultipleChoices") ?: false,
+                allowCustomOptions = doc.getBoolean("allowCustomOptions") ?: true,
+                isAnonymous = doc.getBoolean("isAnonymous") ?: false,
+                isClosed = doc.getBoolean("isClosed") ?: false,
+                targetHeadcount = doc.getLong("targetHeadcount")?.toInt()?.takeIf { it > 0 },
+                location = doc.getString("location").takeIf { !it.isNullOrBlank() },
+                groupId = doc.getString("groupId").takeIf { !it.isNullOrBlank() },
+                groupName = doc.getString("groupName").takeIf { !it.isNullOrBlank() }
+            )
+        } catch (e: Exception) {
+            Log.e(tag, "Error fetching poll from cloud: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
      * Fetches the cloud poll doc's current options (KB-07): the live-votes
      * listener reconciles unknown optionIds against this before writing votes,
      * so web-suggested options reach Room instead of tripping the FK constraint.

@@ -697,3 +697,38 @@ specs:
       - The screen renders without crash
     tests:
       - tests/batch-06-edges.yml#APP-15
+  - id: SPEC-042
+    title: A poisoned ballot cannot stall app vote sync or inflate web counts
+    type: security
+    aspect: security
+    attributes:
+      status: verified
+      priority: p1
+      bug_ref: KB-13
+      note: "rules cap selections at 50; full optionId membership needs the optionIds-flattening schema change (documented, not implemented)"
+    given: |
+      A ballot in Firestore references an optionId that does not exist in the poll's options
+    when: |
+      The app's live vote sync processes the snapshot and any client renders results
+    then:
+      - The app drops the unknown selection (logged) and continues syncing later votes
+      - Web totals and headcount count only ballots whose selections match real options
+    tests:
+      - tests/batch-07-poison.yml#SEC-05
+      - tests/batch-07-poison.yml#SEC-06
+  - id: SPEC-043
+    title: Poll-doc edits from other clients reach the app live
+    type: behavior
+    aspect: sync
+    attributes:
+      status: verified
+      priority: p1
+    given: |
+      The app has a poll open with its live vote sync attached
+    when: |
+      Another client edits the poll doc (isClosed, isAnonymous, deadline, title)
+    then:
+      - The app's Room poll row refreshes on the next vote-snapshot event via a plain row UPDATE
+      - UI surfaces (roster anonymity, badges) reflect the change without a wipe or rejoin
+    tests:
+      - tests/batch-07-poison.yml#SYNC-11

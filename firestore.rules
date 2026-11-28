@@ -35,11 +35,15 @@ service cloud.firestore {
         // the vote form on closed polls, but without this check the rules still
         // accepted votes on closed polls via direct API writes) — either schema:
         // legacy per-option docs (optionId string) or per-voter ballot docs
-        // (KB-04: one doc per voter with a selections array)
+        // (KB-04: one doc per voter with a selections array, capped in size).
+        // NOTE: per-entry optionId membership in the poll's options cannot be
+        // expressed in rules (no list iteration); clients filter unknown
+        // optionIds on read (KB-13).
         allow create, update: if request.resource.data.pollId == pollId
-                              && (request.resource.data.optionId is string
-                                  || request.resource.data.selections is list)
-                              && get(/databases/$(database)/documents/polls/$(pollId)).data.isClosed == false;
+                              && get(/databases/$(database)/documents/polls/$(pollId)).data.isClosed == false
+                              && ((request.resource.data.optionId is string)
+                                  || (request.resource.data.selections is list
+                                      && request.resource.data.selections.size() <= 50));
                               
         // Voter or poll creator can delete vote
         allow delete: if isAuthenticated() && (request.auth.uid == resource.data.voterId);

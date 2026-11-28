@@ -407,12 +407,18 @@ function expandVotes(docs) {
 
 function renderResults() {
   const opts = (poll?.options || []).slice().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
-  const total = votes.length;
+  // KB-13: ballots referencing unknown optionIds (poisoned via direct API
+  // writes — the rules cannot validate membership) are excluded from every
+  // count; the tally loop already skipped them, but the total and headcount
+  // silently inflated.
+  const validIds = new Set(opts.map(o => o.id));
+  const counted = votes.filter(v => validIds.has(v.optionId));
+  const total = counted.length;
   $("totalVotes").textContent = `${total} vote${total === 1 ? "" : "s"}`;
   const tally = {};
   const votersByOpt = {};
   opts.forEach(o => { tally[o.id] = 0; votersByOpt[o.id] = new Set(); });
-  votes.forEach(v => {
+  counted.forEach(v => {
     if (tally[v.optionId] !== undefined) { tally[v.optionId]++; votersByOpt[v.optionId].add(v.voterId); }
   });
   const leader = opts.filter(o => tally[o.id] > 0).sort((a, b) => tally[b.id] - tally[a.id])[0];
@@ -431,7 +437,7 @@ function renderResults() {
   // must count its owner once (KB-05). First occurrence wins — every expanded
   // vote of one voter carries the same rsvpStatus/plusGuests.
   const seen = new Set();
-  const going = votes.filter(v => {
+  const going = counted.filter(v => {
     if (seen.has(v.voterId)) return false;
     seen.add(v.voterId);
     return v.rsvpStatus === "GOING";

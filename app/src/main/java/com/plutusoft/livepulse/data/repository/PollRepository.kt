@@ -102,24 +102,46 @@ class PollRepository(
     fun attachLiveCloudSync(pollId: String, scope: CoroutineScope): ListenerRegistration? {
         return firestoreService.attachLiveVotesListener(pollId) { cloudVotes ->
             scope.launch(Dispatchers.IO) {
-                if (cloudVotes.isNotEmpty()) {
-                    try {
-                        val knownOptionIds = pollOptionDao.getOptionsForPollList(pollId).map { it.id }.toSet()
-                        val missing = cloudVotes.map { it.optionId }.distinct().filter { it !in knownOptionIds }
-                        if (missing.isNotEmpty()) {
-                            val cloudOptions = firestoreService.fetchPollOptionsFromCloud(pollId)
-                            val upserts = cloudOptions.filter { it.id in missing.toSet() }
-                            if (upserts.isNotEmpty()) pollOptionDao.insertOptions(upserts)
+                try {
+                    val knownOptionIds = pollOptionDao.getOptionsForPollList(pollId).map { it.id }.toSet()
+                    val missing = cloudVotes.map { it.optionId }.distinct().filter { it !in knownOptionIds }
+                    var reconciledIds = knownOptionIds
+                    if (missing.isNotEmpty()) {
+                        val cloudOptions = firestoreService.fetchPollOptionsFromCloud(pollId)
+                        val upserts = cloudOptions.filter { it.id in missing.toSet() }
+                        if (upserts.isNotEmpty()) {
+                            pollOptionDao.insertOptions(upserts)
+                            reconciledIds = knownOptionIds + upserts.map { it.id }
                         }
-                        cloudVotes.map { it.voterId }.distinct().forEach { voterId ->
-                            voteDao.clearUserVotesForPoll(pollId, voterId)
-                        }
-                        voteDao.insertVotes(cloudVotes)
-                    } catch (e: Exception) {
-                        // A malformed cloud vote must never take the app down; the
-                        // next snapshot re-triggers reconciliation (KB-07 hardening)
-                        android.util.Log.e("PollRepository", "Cloud vote sync failed: ${e.message}", e)
                     }
+
+                    // KB-13: ballots referencing options that are STILL unknown
+                    // after reconciliation are dropped — a poisoned ballot must
+                    // not wedge vote sync via the FK constraint, nor be counted
+                    val deliverable = cloudVotes.filter { it.optionId in reconciledIds }
+                    val dropped = cloudVotes.size - deliverable.size
+                    if (dropped > 0) {
+                        android.util.Log.w("PollRepository",
+                            "Dropped $dropped ballot selection(s) referencing unknown options (KB-13)")
+                    }
+
+                    cloudVotes.map { it.voterId }.distinct().forEach { voterId ->
+                        voteDao.clearUserVotesForPoll(pollId, voterId)
+                    }
+                    if (deliverable.isNotEmpty()) {
+                        voteDao.insertVotes(deliverable)
+                    }
+
+                    // Inbound poll-doc sync: isClosed/isAnonymous/deadline/title
+                    // edits from other clients reach this device. updatePoll is
+                    // a plain row UPDATE — REPLACE would cascade-delete rows.
+                    firestoreService.fetchPollFromCloud(pollId)?.let { freshPoll ->
+                        pollDao.updatePoll(freshPoll)
+                    }
+                } catch (e: Exception) {
+                    // A malformed cloud vote must never take the app down; the
+                    // next snapshot re-triggers reconciliation (KB-07 hardening)
+                    android.util.Log.e("PollRepository", "Cloud vote sync failed: ${e.message}", e)
                 }
             }
         }
