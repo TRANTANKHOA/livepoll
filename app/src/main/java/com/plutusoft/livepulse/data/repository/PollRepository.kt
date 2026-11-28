@@ -129,7 +129,12 @@ class PollRepository(
                         voteDao.clearUserVotesForPoll(pollId, voterId)
                     }
                     if (deliverable.isNotEmpty()) {
-                        voteDao.insertVotes(deliverable)
+                        // Cloud-derived rows are synced by definition — marking
+                        // them here also clears the pending state of OUR ballot
+                        // the moment its echo arrives from a listener snapshot.
+                        voteDao.insertVotes(deliverable.map {
+                            it.copy(cloudSyncedAt = System.currentTimeMillis())
+                        })
                     }
 
                     // Inbound poll-doc sync: isClosed/isAnonymous/deadline/title
@@ -205,7 +210,31 @@ class PollRepository(
 
         // Sync the ballot to Cloud Firestore as one per-voter doc — overwriting
         // replaces any previous selection (KB-04: no stale per-option docs).
-        firestoreService.publishVoterBallot(newVotes)
+        // A failed publish is no longer silent: the rows stay cloudSyncedAt=null
+        // and retryPendingBallotSync() re-publishes them once we're back online.
+        val published = firestoreService.publishVoterBallot(newVotes)
+        if (published) {
+            voteDao.markVotesSynced(pollId, voterId, System.currentTimeMillis())
+        }
+    }
+
+    /**
+     * Re-publishes locally-saved ballots that never reached the cloud (offline
+     * cast, or process death between insert and publish). Cheap no-op when
+     * nothing is pending; called at VM init and whenever a poll cloud listener
+     * attaches. Last-writer-wins: republishing clobbers any newer remote edit
+     * of this voter's ballot — the local user acted last on this device.
+     */
+    suspend fun retryPendingBallotSync() {
+        voteDao.getUnsyncedVotes()
+            .groupBy { it.pollId to it.voterId }
+            .forEach { (pollVoter, votes) ->
+                val (pollId, voterId) = pollVoter
+                val published = firestoreService.publishVoterBallot(votes)
+                if (published) {
+                    voteDao.markVotesSynced(pollId, voterId, System.currentTimeMillis())
+                }
+            }
     }
 
     suspend fun addOptionToPoll(option: PollOptionEntity) {

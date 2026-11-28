@@ -37,5 +37,9 @@ data class VoteEntity(
     val rsvpStatus: String = "GOING", // "GOING", "MAYBE", "CANT_GO"
     val plusGuests: Int = 0, // e.g. +1, +2
     val ratingValue: Int? = null, // e.g. 1..5 stars
-    val feedbackComment: String? = null
+    val feedbackComment: String? = null,
+    // When the locally-saved vote reached the cloud ballot doc. Null = saved
+    // on this device only (offline cast or publish failed) — surfaced by the
+    // "Saved on this device" chip. Rows mirrored FROM the cloud are born synced.
+    val cloudSyncedAt: Long? = null
 )

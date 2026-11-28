@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.LocationOn
@@ -49,6 +50,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -254,6 +256,37 @@ fun PollAnalyticsScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
+            // Offline transparency: a ballot saved on this device but not yet
+            // published to the cloud is invisible to other voters — say so.
+            if (details.hasUserVoted && details.userVotes.any { it.cloudSyncedAt == null }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("offline_sync_chip"),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "Your vote is saved on this device — it will sync when you're back online",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+
             // Tabs Row: 1. Visual Charts, 2. RSVP & Roster, 3. Feedback / Notes
             PrimaryTabRow(
                 selectedTabIndex = selectedTab,

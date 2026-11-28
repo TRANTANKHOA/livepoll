@@ -35,4 +35,10 @@ interface VoteDao {
 
     @Query("DELETE FROM votes WHERE id = :voteId")
     suspend fun deleteVote(voteId: String)
+
+    @Query("UPDATE votes SET cloudSyncedAt = :syncedAt WHERE pollId = :pollId AND voterId = :voterId")
+    suspend fun markVotesSynced(pollId: String, voterId: String, syncedAt: Long)
+
+    @Query("SELECT * FROM votes WHERE cloudSyncedAt IS NULL")
+    suspend fun getUnsyncedVotes(): List<VoteEntity>
 }

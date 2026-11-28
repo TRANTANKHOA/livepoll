@@ -140,4 +140,50 @@ class RoomDatabaseUnitTest {
         val unreadAfter = notificationDao.getUnreadCount().first()
         assertEquals(0, unreadAfter)
     }
+
+    @Test
+    fun testCloudSyncedAtMarkingAndUnsyncedQuery() = runBlocking {
+        pollDao.insertPoll(
+            PollEntity(
+                id = "poll_sync",
+                code = "SYNC01",
+                title = "Sync State Test",
+                description = "cloudSyncedAt marking",
+                category = "DECISION",
+                categoryIcon = "🎯",
+                creatorName = "Tester",
+                createdAt = System.currentTimeMillis()
+            )
+        )
+        optionDao.insertOptions(listOf(PollOptionEntity(id = "opt_s1", pollId = "poll_sync", text = "Yes")))
+
+        // An offline-cast ballot (cloudSyncedAt null) and an already-synced one.
+        val offlineVote = VoteEntity(
+            id = "v_sync_off",
+            pollId = "poll_sync",
+            optionId = "opt_s1",
+            voterId = "user_off",
+            voterName = "Offline Ollie"
+        )
+        val syncedVote = VoteEntity(
+            id = "v_sync_on",
+            pollId = "poll_sync",
+            optionId = "opt_s1",
+            voterId = "user_on",
+            voterName = "Synced Sue",
+            cloudSyncedAt = System.currentTimeMillis()
+        )
+        voteDao.insertVotes(listOf(offlineVote, syncedVote))
+
+        val unsynced = voteDao.getUnsyncedVotes()
+        assertEquals(1, unsynced.size)
+        assertEquals("user_off", unsynced.first().voterId)
+        assertNull(unsynced.first().cloudSyncedAt)
+
+        voteDao.markVotesSynced("poll_sync", "user_off", 12345L)
+
+        assertTrue(voteDao.getUnsyncedVotes().isEmpty())
+        val markedList = voteDao.getVotesForUserList("poll_sync", "user_off")
+        assertTrue(markedList.size == 1 && markedList[0].cloudSyncedAt == 12345L)
+    }
 }

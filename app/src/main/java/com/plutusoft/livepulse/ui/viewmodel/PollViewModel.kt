@@ -34,6 +34,11 @@ class PollViewModel(
         viewModelScope.launch {
             repository.ensureSeeded()
         }
+        // Ballots saved offline (or lost to a crash between insert and publish)
+        // get a retry pass at startup; the live listener mirrors the echo back.
+        viewModelScope.launch {
+            repository.retryPendingBallotSync()
+        }
     }
 
     val currentUser = MutableStateFlow(authPreferences.getCurrentUser())
@@ -57,6 +62,8 @@ class PollViewModel(
     fun attachPollCloudListener(pollId: String) {
         activeCloudListener?.remove()
         activeCloudListener = repository.attachLiveCloudSync(pollId, viewModelScope)
+        // Screen entry is also a reconnect opportunity: retry anything pending.
+        viewModelScope.launch { repository.retryPendingBallotSync() }
     }
 
     override fun onCleared() {
